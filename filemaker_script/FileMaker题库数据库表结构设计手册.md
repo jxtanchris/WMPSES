@@ -25,7 +25,7 @@ erDiagram
         number PassScore "合格分 (30)"
         number DurationMinutes "限时分钟 (30)"
         text Status "已启用/变式预留/已停用"
-        container BackgroundImage "装置全景底图(可选)"
+        container ExamPicture "打热点用的装置全景底图"
     }
 
     WMPSES_设备热点 {
@@ -113,7 +113,7 @@ erDiagram
 | `Status` | 文本 | 值列表：`已启用`, `变式预留`, `已停用` | 状态控制 |
 | `Version` | 文本 | 默认 `"1.0.0"` | 题包版本号 |
 | `UpdatedAt` | 文本 / 时间戳 | 修改日期自动输入 | 更新日期 |
-| `BackgroundImage` | 容器 | — | （可选）全景图备份存储 |
+| `ExamPicture` | 容器 | — | 存储用于打热点的装置全景底图 |
 | `c_ActualScoreSum` | 计算（数字） | `Sum ( WMPSES_习题库_按试卷::Score )` | 实时核对各题分值之和是否等于 50 分 |
 | `c_FullBankJSON` | 计算（文本） | 见第四节公式 3 | 实时聚合整套题库 JSON 供 WebViewer 加载 |
 
@@ -292,6 +292,17 @@ Let ( [
 ### 公式 3：`WMPSES_试卷场景::c_FullBankJSON`
 ```text
 Let ( [
+  fn = Lower ( GetContainerAttribute ( ExamPicture ; "filename" ) ) ;
+  mime = Case (
+    PatternCount ( fn ; ".png" ) > 0 ; "image/png" ;
+    PatternCount ( fn ; ".webp" ) > 0 ; "image/webp" ;
+    "image/jpeg"
+  ) ;
+  picDataUri = If (
+    not IsEmpty ( ExamPicture ) ;
+    "data:" & mime & ";base64," & Base64EncodeRFC ( 4648 ; ExamPicture ) ;
+    ""
+  ) ;
   meta = JSONSetElement ( "{}" ;
     ["id" ; pk_ExamID ; JSONString] ;
     ["title" ; Title ; JSONString] ;
@@ -301,7 +312,8 @@ Let ( [
     ["passScore" ; GetAsNumber ( PassScore ) ; JSONNumber] ;
     ["durationMinutes" ; GetAsNumber ( DurationMinutes ) ; JSONNumber] ;
     ["version" ; Version ; JSONString] ;
-    ["updatedAt" ; GetAsText ( UpdatedAt ) ; JSONString]
+    ["updatedAt" ; GetAsText ( UpdatedAt ) ; JSONString] ;
+    ["examPicture" ; picDataUri ; JSONString]
   ) ;
   cnt = Count ( WMPSES_设备热点::pk_HotspotID ) ;
   hsArr = While (
@@ -326,28 +338,38 @@ Let ( [
 
 ## 五、3 分钟快速建表操作指南（导入种子 CSV）
 
-在您新建的 FileMaker 数据库（例如 `WMPSES_Exam.fmp12`）中，无需手动一个个敲字段名，直接利用 `filemaker_script/seed_data/` 下的 6 个 CSV 文件即可一键生成全部题库与《设计方案》规范表结构：
+在您新建的 FileMaker 数据库（例如 `WMPSES_Exam.fmp12`）中，无需手动一个个敲字段名，直接利用 `filemaker_script/seed_data/` 下的 9 个 CSV 文件即可一键生成全部题库、《设计方案》规范、人员日志与专业仪表模板库表结构：
 
 1. **导入表 1**：在 FileMaker Pro 菜单点击 `文件 -> 导入记录 -> 文件...`，选择 `seed_data/1_WMPSES_试卷场景.csv`：
    - 将“目标”下拉框选为 **新建表（`WMPSES_试卷场景`）**；
-   - 勾选 **“不要导入第一条记录（使用作字段名称）”**，完成导入（导入 3 条试卷场景记录）。
-2. **导入表 2**：导入 `seed_data/2_WMPSES_设备热点.csv`，目标选 **新建表（`WMPSES_设备热点`）**（导入 8 个热点）。
+   - 勾选 **“不要导入第一条记录（使用作字段名称）”**，完成导入（导入 3 条试卷场景记录；注意 `ExamPicture` 容器字段需在“管理数据库”中将其字段类型由文本改为 `容器`，并放置到布局中用于存储或导出工业底图）。
+2. **导入表 2**：导入 `seed_data/2_WMPSES_设备热点.csv`，目标选 **新建表（`WMPSES_设备热点`）**（导入 8 个热点，含 `WidgetParamsJSON` 仪表参数列）。
 3. **导入表 3**：导入 `seed_data/3_WMPSES_习题库.csv`，目标选 **新建表（`WMPSES_习题库`）**（导入 15 道题目）。
 4. **导入表 6**：导入 `seed_data/4_WMPSES_否定项规则.csv`，目标选 **新建表（`WMPSES_否定项规则`）**（导入 N1 / N2-A / N2-B / N3 规则）。
 5. **导入表 7**：导入 `seed_data/5_WMPSES_验收规范与确认单.csv`，目标选 **新建表（`WMPSES_验收规范与确认单`）**（导入 6 方面 24 个标准核查项）。
 6. **导入表 8**：导入 `seed_data/6_WMPSES_工况资料与引用标准.csv`，目标选 **新建表（`WMPSES_工况资料与引用标准`）**（导入 4 份工况台账与 14 部引用国标）。
-7. **手动补充表 4 & 表 5**：在“管理数据库”中新建 `WMPSES_考试记录` 和 `WMPSES_作答明细` 两张表，并按第三节建立关系连接。
-8. **配置计算字段与布局**：在表 1/2/3 中添加第四节的计算字段（或直接使用本目录提供的关系型循环脚本），在考试布局中放置名称为 `wv_exam` 的 WebViewer 即可！
+7. **导入表 9**：导入 `seed_data/7_WMPSES_用户人员.csv`，目标选 **新建表（`WMPSES_用户人员`）**（导入 8 条统一人员档案，含 `Password` SHA-256 密文列）。
+8. **导入表 10**：导入 `seed_data/8_WMPSES_题库变更日志.csv`，目标选 **新建表（`WMPSES_题库变更日志`）**（导入 2 条初始题库变更审计日志）。
+9. **导入表 11**：导入 `seed_data/9_WMPSES_工况卡片模板.csv`，目标选 **新建表（`WMPSES_工况卡片模板`）**（导入 9 套内置专业仪表模板定义）。
+10. **手动补充表 4 & 表 5**：在“管理数据库”中新建 `WMPSES_考试记录`（在表 4 字段清单基础上补充外键 `"fk_UserID"`，用于关联 `WMPSES_用户人员::pk_UserID`）和 `WMPSES_作答明细` 两张表，并按第三节及第六节建立关系连接。
+11. **配置计算字段与布局**：在表 1/2/3 中添加第四节的计算字段（或直接使用本目录提供的关系型循环脚本），在考试布局中放置名称为 `wv_exam` 的 WebViewer 即可！
 
 ---
 
-## 六、扩展表：表 6~8（《设计方案》规范与表驱动否定项规则）
+## 六、扩展表：表 6~11（《设计方案》规范、否定项规则、人员管理、审计日志与专业仪表模板库）
 
-为与本地 SQLite 8 表结构保持 1:1 对齐，将《设计方案（设备验收1.1.1）》中的核心规则与资料拆分至以下三张表（均通过 `fk_ExamID` 关联 `WMPSES_试卷场景::pk_ExamID`）：
+为与本地 SQLite 11 表结构保持 1:1 对齐，在表 1~5 基础上扩展以下六张表（并在表 2 `WMPSES_设备热点` 增加 `WidgetParamsJSON`、在表 4 `WMPSES_考试记录` 增加外键 `fk_UserID`）：
 
-- **表 6：`WMPSES_否定项规则`**（共 11 列）：
+- **表 6：`WMPSES_否定项规则`**（共 11 列，通过 `fk_ExamID` 关联 `WMPSES_试卷场景::pk_ExamID`）：
   - `pk_RuleID`（主键，如 `N1`、`N2-A`、`N2-B`、`N3`）、`fk_ExamID`、`SortOrder`、`RuleCode`、`RuleName`、`ConditionType`（`OVERTIME` / `CONCLUSION_WRONG` / `MAJOR_MISS_COUNT` / `QUESTION_WRONG`）、`ThresholdValue`（如漏判 `3` 项）、`TargetRef`、`PenaltyAction`（`ZERO_SCORE` / `WARN_ONLY`）、`IsEnabled`（`1`/`0`）、`AlertMessage`。
-- **表 7：`WMPSES_验收规范与确认单`**（共 11 列）：
+- **表 7：`WMPSES_验收规范与确认单`**（共 11 列，通过 `fk_ExamID` 关联 `WMPSES_试卷场景::pk_ExamID`）：
   - `pk_CheckItemID`（`CHK-01`~`CHK-24`）、`fk_ExamID`、`fk_HotspotID`、`ItemNo`、`AspectName`、`CheckItemName`、`InteractionWay`、`StandardBasis`、`SceneStatus`、`StandardConclusion`、`RelatedDefectCode`。
-- **表 8：`WMPSES_工况资料与引用标准`**（共 9 列）：
+- **表 8：`WMPSES_工况资料与引用标准`**（共 9 列，通过 `fk_ExamID` 关联 `WMPSES_试卷场景::pk_ExamID`）：
   - `pk_DocID`、`fk_ExamID`、`DocCategory`（`工况台账` / `引用标准`）、`SortOrder`、`DocCode`、`DocTitle`、`DeptOrCategory`、`ContentSummary`、`RelatedHotspotCode`。
+- **表 9：`WMPSES_用户人员`**（共 13 列，单表统一人员架构，通过 `RoleType` 区分人员角色）：
+  - `pk_UserID`（主键，如 `USR-EX-001` / `USR-TC-001`）、`UserCode`（工号/准考证号）、`FullName`（姓名）、`RoleType`（`考生` / `命题教师` / `审题专家` / `考评员` / `监考员` / `系统管理员`）、`Password`（登录密码密文，采用与 FileMaker `Lower(HexEncode(CryptDigest(明文; "SHA256")))` 兼容的 64 位小写 SHA-256 哈希，统一初始预设密码 `123456` 对应密文 `8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92`）、`Department`（单位/部门）、`SkillLevel`（职业技能等级）、`Specialty`（专业方向）、`CertificateNo`（考评员/资格证号）、`BatchNo`（考试批次）、`Phone`（联系电话）、`Status`（状态，如 `正常`）、`CreatedAt`（建档时间）。
+  - 关联关系：`WMPSES_用户人员::pk_UserID` `1:N` 关联 `WMPSES_考试记录::fk_UserID`（记录考生交卷归属）及 `WMPSES_题库变更日志::fk_UserID`（记录题库编辑责任人）。
+- **表 10：`WMPSES_题库变更日志`**（共 11 列，记录教师编辑/命题/审题/底图与规则修改留痕，通过 `fk_ExamID` 关联 `WMPSES_试卷场景::pk_ExamID`、通过 `fk_UserID` 关联 `WMPSES_用户人员::pk_UserID`）：
+  - `pk_LogID`（主键，如 `LOG-INIT-001`）、`fk_ExamID`（试卷场景ID）、`fk_UserID`（操作人ID）、`OperatorName`（操作人姓名）、`ActionType`（变更类型，如 `初始化建库` / `拖拽热点坐标` / `新增热点与默认题` / `编辑习题或热点` / `变更否定项规则` / `上传或更新工业底图` / `清除自定义底图` / `重置出厂数据`）、`VersionAfter`（变更后版本号）、`HotspotCount`（热点数量快照）、`QuestionCount`（习题数量快照）、`TotalScore`（总分快照）、`ChangeSummary`（变更摘要说明）、`ChangedAt`（变更时间）。
+- **表 11：`WMPSES_工况卡片模板`**（共 14 列，存储热点「顶部工况可视化卡片」下拉选择源，含 9 套系统内置模板及教师在前端构建器自定义组合的新模板）：
+  - `pk_TemplateID`（主键，如 `TPL-01`~`TPL-09`）、`TemplateCode`（唯一编码，对应 `WMPSES_设备热点::WidgetType`）、`TemplateName`（下拉框显示名称）、`IsBuiltin`（`1`=系统内置不可删除，`0`=自定义模板）、`LeftPanelType`（左面板 SVG 部件类型，如 `gauge_dial` / `pipe_valve_flow` / `sight_glass` / `dcs_interlock` / `flange_bolts` / `cert_nameplate` / `gas_cems_alarm` / `custom_image_card`）、`LeftPanelTitle`（左面板标题）、`LeftPanelCode`（左面板位号）、`RightPanelType`（右面板 SVG 部件类型）、`RightPanelTitle`（右面板标题）、`RightPanelCode`（右面板位号）、`ParamSchemaJSON`（可调参数滑块/选项 JSON 定义）、`CustomImageBase64`（可选局部特写图片 Base64，若导入 FileMaker 可转为容器字段）、`SortOrder`（排序序号）、`UpdatedAt`（更新时间）。

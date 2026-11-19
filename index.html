@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>工业废气治理工实操模拟仿真考试系统（1.1.1 设备验收）</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=20261119d">
 </head>
 <body>
   <header class="topbar">
@@ -23,13 +23,13 @@
     </div>
 
     <div class="mode-switcher" role="group" aria-label="系统模式切换">
-      <button type="button" class="mode-btn active" data-mode="practice">🎯 练习演示模式</button>
-      <button type="button" class="mode-btn" data-mode="exam">📝 正式考试模式</button>
-      <button type="button" class="mode-btn" data-mode="edit">🛠️ 教师编辑/标点</button>
+      <button type="button" class="mode-btn active" id="mode-btn-practice" data-mode="practice">🎯 练习演示模式</button>
+      <button type="button" class="mode-btn" id="mode-btn-exam" data-mode="exam">📝 正式考试模式</button>
+      <button type="button" class="mode-btn" id="mode-btn-edit" data-mode="edit">🛠️ 教师编辑/标点</button>
     </div>
 
     <div class="topbar-actions">
-      <div class="status-chip">
+      <div class="status-chip" id="progress-status-chip">
         已查部位 <strong id="stat-hotspots">0/8</strong> · 已答题 <strong id="stat-questions">0/15</strong>
       </div>
       <div class="status-chip timer-chip" id="timer-chip" style="display:none;">
@@ -39,11 +39,12 @@
       <button type="button" class="btn btn-ghost" id="btn-open-docs">📋 台账与验收方案</button>
       <button type="button" class="btn btn-ghost" id="btn-reset-exam">🔄 重置</button>
       <button type="button" class="btn btn-ghost" id="btn-open-settings">⚙️ 数据库 / 题库</button>
-      <a href="gantt-roadmap.html" class="btn btn-ghost" style="text-decoration:none;" title="查看全周期任务清单与交互式甘特图">📅 任务清单与甘特图</a>
+      <button type="button" class="btn btn-ghost" id="btn-open-password" title="修改当前登录用户的密码">🔑 修改密码</button>
+      <button type="button" class="btn btn-primary" id="btn-open-login" title="登录或切换其他角色账号">🚪 切换账号</button>
     </div>
   </header>
 
-  <main class="stage-container">
+  <main class="stage-container" id="main-stage-container">
     <!-- 教师编辑模式提示横幅 -->
     <section class="edit-banner" id="edit-banner" aria-live="polite">
       <div>
@@ -52,6 +53,10 @@
       </div>
       <div class="edit-banner-actions">
         <button type="button" class="btn btn-warning btn-sm" id="btn-toggle-place-mode">➕ 在图上新增热点</button>
+        <label class="btn btn-primary btn-sm" style="cursor:pointer;" title="上传新装置图并存入数据库 WMPSES_试卷场景.ExamPicture 字段">
+          🖼️ 更换场景底图 (ExamPicture)
+          <input type="file" id="input-exam-picture" accept="image/*" style="display:none;">
+        </label>
         <button type="button" class="btn btn-success btn-sm" id="btn-save-bank">💾 保存并同步题库</button>
         <button type="button" class="btn btn-danger btn-sm" id="btn-restore-default">↩️ 恢复出厂题库</button>
       </div>
@@ -96,6 +101,7 @@
       </div>
       <div class="modal-body">
         <div class="sim-widget-box" id="visual-widget-container"></div>
+        <div id="sim-simulator-panel" style="margin-bottom:14px;"></div>
         <div class="question-list" id="question-list-container"></div>
       </div>
       <div class="modal-footer">
@@ -191,12 +197,199 @@
     </div>
   </div>
 
+  <!-- 6. 系统统一登录与角色切换弹窗 -->
+  <div class="modal-backdrop" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="lm-title">
+    <div class="modal-dialog wide">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-code-badge">统一认证</span>
+          <h2 class="modal-title" id="lm-title">系统登录与角色权限切换（WMPSES_用户人员）</h2>
+        </div>
+        <button type="button" class="modal-close" id="btn-close-login-modal" data-close="login-modal" aria-label="关闭登录">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="login-current-banner" style="padding:10px 12px;border-radius:8px;background:#162033;border:1px solid rgba(56,189,248,0.28);margin-bottom:12px;font-size:12.5px;"></div>
+
+        <div style="font-size:12px;color:#cbd5e1;margin-bottom:10px;">
+          💡 所有人员账号密码统一存储于 <code>WMPSES_用户人员.Password</code>（<strong>SHA-256 加密存储</strong>，所有预设账号初始密码均为 <code>123456</code>）。不同角色登录后将自动展示对应的操作模式与顶部功能按钮。
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:700;color:#7dd3fc;margin-bottom:6px;">⚡ 示范账号快捷填入（点击一键填入账号及默认密码 123456）</div>
+          <div id="login-quick-users" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;"></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="login-username">账号（考号 / 工号 / 姓名）</label>
+            <input type="text" id="login-username" class="form-control" placeholder="如 ZK202611001 或 TC-GY-01">
+          </div>
+          <div class="form-field">
+            <label for="login-password">登录密码（预设 123456）</label>
+            <input type="password" id="login-password" class="form-control" placeholder="请输入密码（默认 123456）">
+          </div>
+        </div>
+        <div id="login-error-tip" style="color:#fda4af;font-size:12.5px;min-height:18px;margin-bottom:8px;"></div>
+
+        <div id="login-role-matrix-tip" style="padding:10px 12px;border-radius:8px;background:#0f172a;border:1px solid rgba(148,163,184,0.22);font-size:12px;color:#cbd5e1;">
+          <div style="font-weight:700;color:#fde68a;margin-bottom:6px;">🛡️ 各角色可见功能按钮权限矩阵</div>
+          <div style="line-height:1.7;">
+            · <strong>考生</strong>：仅开放「练习演示」「正式考试」「交卷汇总」「只读台账与验收方案」「重置」「修改密码」「切换账号」；隐藏教师标点与数据库/题库管理。<br>
+            · <strong>命题教师 / 系统管理员</strong>：开放全部工作模式、标点编辑工具条、数据库/题库与规则配置（全部 4 个标签页）及人员管理。<br>
+            · <strong>审题专家</strong>：开放「练习演示」「教师编辑/标点」「只读/审定台账」「数据库/题库」，隐藏「正式考试」「重置」及出厂恢复/删人等高危操作。<br>
+            · <strong>考评员</strong>：开放「练习演示」「正式考试」「只读台账」「重置」及数据中心（仅题库/考生信息与 SQLite 预览），隐藏「教师编辑/标点」「否定项规则修改」。<br>
+            · <strong>监考员</strong>：开放「练习演示」「正式考试」「重置」及数据中心（仅考生名册切换与 SQLite 预览），隐藏「教师编辑/标点」「台账方案」。
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="btn-logout-user">退出当前登录</button>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost" id="btn-cancel-login" data-close="login-modal">暂不切换</button>
+          <button type="button" class="btn btn-success" id="btn-do-login">🔐 验证并登录</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 用户个人密码修改弹窗 -->
+  <div class="modal-backdrop" id="password-modal" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-code-badge">安全中心</span>
+          <h2 class="modal-title" id="pm-title">修改个人登录密码</h2>
+        </div>
+        <button type="button" class="modal-close" data-close="password-modal" aria-label="关闭改密">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="pwd-user-summary" style="padding:10px 12px;border-radius:8px;background:#162033;border:1px solid rgba(56,189,248,0.25);margin-bottom:10px;font-size:12.5px;"></div>
+        <div id="pwd-hash-preview" style="font-size:11.5px;color:#94a3b8;margin-bottom:12px;word-break:break-all;"></div>
+        <div class="form-field">
+          <label for="pwd-old">原密码</label>
+          <input type="password" id="pwd-old" class="form-control" placeholder="请输入当前密码（未改过则为 123456）">
+        </div>
+        <div class="form-field">
+          <label for="pwd-new">新密码（至少 4 位）</label>
+          <input type="password" id="pwd-new" class="form-control" placeholder="请输入新密码">
+        </div>
+        <div class="form-field">
+          <label for="pwd-confirm">确认新密码</label>
+          <input type="password" id="pwd-confirm" class="form-control" placeholder="请再次输入新密码">
+        </div>
+        <div id="pwd-error-tip" style="color:#fda4af;font-size:12.5px;min-height:18px;"></div>
+      </div>
+      <div class="modal-footer">
+        <span style="font-size:12px;color:#94a3b8;">提交后自动 SHA-256 加密写入 SQLite 与 CSV</span>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost" data-close="password-modal">取消</button>
+          <button type="button" class="btn btn-success" id="btn-do-change-pwd">✅ 确认修改密码</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. 专业仪表模板构建器弹窗（WMPSES_工况卡片模板） -->
+  <div class="modal-backdrop" id="template-modal" role="dialog" aria-modal="true" aria-labelledby="tm-title">
+    <div class="modal-dialog wide">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-code-badge">模板库</span>
+          <h2 class="modal-title" id="tm-title">专业仪表模板构建器（管理「顶部工况可视化卡片」选择源）</h2>
+        </div>
+        <button type="button" class="modal-close" data-close="template-modal" aria-label="关闭模板构建器">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:12px;color:#cbd5e1;margin-bottom:10px;">
+          💡 在此处可自由组合左右工业 SVG 仪表部件（或上传设备局部特写照片）并自定义参数范围与默认值。保存到 SQLite <code>WMPSES_工况卡片模板</code> 后，会立即出现在热点编辑器「顶部工况可视化卡片」下拉框中！
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+            <strong style="font-size:12.5px;color:#7dd3fc;">📚 已有工况卡片模板（点击卡片可加载调整）</strong>
+            <button type="button" class="btn btn-warning btn-sm" id="btn-tpl-new">➕ 清空新建模板</button>
+          </div>
+          <div id="tpl-list-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;max-height:170px;overflow:auto;"></div>
+        </div>
+
+        <input type="hidden" id="tpl-id">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="tpl-code">模板编码（英文/数字/下划线，唯一标识）</label>
+            <input type="text" id="tpl-code" class="form-control" placeholder="如 pump_seal_monitor">
+          </div>
+          <div class="form-field">
+            <label for="tpl-name">下拉框显示名称（必填）</label>
+            <input type="text" id="tpl-name" class="form-control" placeholder="如 循环泵机械密封与出口压力监控">
+          </div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+          <div class="form-field">
+            <label for="tpl-left-type">左侧面板 SVG 部件</label>
+            <select id="tpl-left-type" class="form-control"></select>
+          </div>
+          <div class="form-field">
+            <label for="tpl-left-title">左侧面板标题</label>
+            <input type="text" id="tpl-left-title" class="form-control" placeholder="如 泵出口压力监测">
+          </div>
+          <div class="form-field">
+            <label for="tpl-left-code">左侧仪表位号</label>
+            <input type="text" id="tpl-left-code" class="form-control" placeholder="如 PI-701">
+          </div>
+          <div class="form-field">
+            <label for="tpl-right-type">右侧面板 SVG 部件</label>
+            <select id="tpl-right-type" class="form-control"></select>
+          </div>
+          <div class="form-field">
+            <label for="tpl-right-title">右侧面板标题</label>
+            <input type="text" id="tpl-right-title" class="form-control" placeholder="如 机械密封温度/联锁">
+          </div>
+          <div class="form-field">
+            <label for="tpl-right-code">右侧仪表位号</label>
+            <input type="text" id="tpl-right-code" class="form-control" placeholder="如 TI-701 / SIS">
+          </div>
+        </div>
+
+        <div id="tpl-custom-img-row" style="display:none;padding:10px 12px;border-radius:8px;background:#0f172a;border:1px solid rgba(245,158,11,0.35);margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span style="font-size:12px;color:#fde68a;">📷 自定义局部特写图（用于「自定义上传现场特写图」部件）</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <label class="btn btn-primary btn-sm" style="cursor:pointer;">
+                选择图片文件
+                <input type="file" id="tpl-custom-image" accept="image/*" style="display:none;">
+              </label>
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-tpl-clear-img">清除图片</button>
+            </div>
+          </div>
+          <div id="tpl-custom-img-status" style="font-size:11.5px;color:#94a3b8;margin-top:6px;">尚未选择图片</div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div style="font-size:12.5px;font-weight:700;color:#7dd3fc;margin-bottom:6px;">⚙️ 可调参数项与滑块默认值配置（更改后自动刷新下方实时预览）</div>
+          <div id="tpl-params-editor" style="overflow:auto;max-height:190px;border:1px solid rgba(148,163,184,0.22);border-radius:8px;"></div>
+        </div>
+
+        <div>
+          <div style="font-size:12.5px;font-weight:700;color:#7dd3fc;margin-bottom:6px;">👁️ 实时 SVG 渲染预览</div>
+          <div id="tpl-live-preview" class="sim-widget-box" style="margin-bottom:0;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span style="font-size:12px;color:#94a3b8;">存入 SQLite WMPSES_工况卡片模板 并同步导出 9_WMPSES_工况卡片模板.csv</span>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost" data-close="template-modal">关闭</button>
+          <button type="button" class="btn btn-success" id="btn-tpl-save">💾 保存模板到数据库</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
-  <script src="js/plant-image-data.js"></script>
-  <script src="js/question-bank.js"></script>
-  <script src="js/visual-widgets.js"></script>
-  <script src="js/fm-adapter.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/plant-image-data.js?v=20261119d"></script>
+  <script src="js/question-bank.js?v=20261119d"></script>
+  <script src="js/visual-widgets.js?v=20261119d"></script>
+  <script src="js/fm-adapter.js?v=20261119d"></script>
+  <script src="js/app.js?v=20261119d"></script>
 </body>
 </html>

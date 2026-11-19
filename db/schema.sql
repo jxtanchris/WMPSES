@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS "WMPSES_试卷场景" (
     "DurationMinutes" INTEGER NOT NULL DEFAULT 30,
     "Status"          TEXT NOT NULL DEFAULT '已启用',
     "Version"         TEXT NOT NULL DEFAULT '1.0.0',
-    "UpdatedAt"       TEXT NOT NULL DEFAULT (date('now', 'localtime'))
+    "UpdatedAt"       TEXT NOT NULL DEFAULT (date('now', 'localtime')),
+    "ExamPicture"     TEXT NOT NULL DEFAULT ''
 );
 
 -- 2. 全景图设备热点部位表
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS "WMPSES_设备热点" (
     "CoordY"        REAL NOT NULL DEFAULT 50.0,
     "WidgetType"    TEXT NOT NULL DEFAULT 'generic',
     "SceneSummary"  TEXT NOT NULL DEFAULT '',
+    "WidgetParamsJSON" TEXT NOT NULL DEFAULT '{}',
     FOREIGN KEY ("fk_ExamID") REFERENCES "WMPSES_试卷场景"("pk_ExamID") ON DELETE CASCADE
 );
 
@@ -73,6 +75,7 @@ CREATE INDEX IF NOT EXISTS "idx_questions_exam"
 CREATE TABLE IF NOT EXISTS "WMPSES_考试记录" (
     "pk_ResultID"      TEXT PRIMARY KEY NOT NULL,
     "fk_ExamID"        TEXT NOT NULL,
+    "fk_UserID"        TEXT NOT NULL DEFAULT '',
     "ExamineeName"     TEXT NOT NULL DEFAULT '现场考生',
     "ExamineeID"       TEXT NOT NULL DEFAULT '',
     "ExamMode"         TEXT NOT NULL DEFAULT 'exam',
@@ -162,3 +165,63 @@ CREATE TABLE IF NOT EXISTS "WMPSES_工况资料与引用标准" (
 
 CREATE INDEX IF NOT EXISTS "idx_docs_exam_cat"
     ON "WMPSES_工况资料与引用标准" ("fk_ExamID", "DocCategory", "SortOrder");
+
+-- 9. 用户人员统一管理表（考生、命题教师、审题专家、考评员、监考员同表按 RoleType 区分）
+CREATE TABLE IF NOT EXISTS "WMPSES_用户人员" (
+    "pk_UserID"     TEXT PRIMARY KEY NOT NULL,
+    "UserCode"      TEXT NOT NULL DEFAULT '',
+    "FullName"      TEXT NOT NULL,
+    "RoleType"      TEXT NOT NULL DEFAULT '考生',
+    "Password"      TEXT NOT NULL DEFAULT '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
+    "Department"    TEXT NOT NULL DEFAULT '',
+    "SkillLevel"    TEXT NOT NULL DEFAULT '',
+    "Specialty"     TEXT NOT NULL DEFAULT '',
+    "CertificateNo" TEXT NOT NULL DEFAULT '',
+    "BatchNo"       TEXT NOT NULL DEFAULT '',
+    "Phone"         TEXT NOT NULL DEFAULT '',
+    "Status"        TEXT NOT NULL DEFAULT '正常',
+    "CreatedAt"     TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE INDEX IF NOT EXISTS "idx_users_role_code"
+    ON "WMPSES_用户人员" ("RoleType", "UserCode");
+
+-- 10. 题库变更审计日志表（记录教师编辑/命题/审题/底图与规则修改留痕）
+CREATE TABLE IF NOT EXISTS "WMPSES_题库变更日志" (
+    "pk_LogID"      TEXT PRIMARY KEY NOT NULL,
+    "fk_ExamID"     TEXT NOT NULL,
+    "fk_UserID"     TEXT NOT NULL DEFAULT '',
+    "OperatorName"  TEXT NOT NULL DEFAULT '',
+    "ActionType"    TEXT NOT NULL DEFAULT '更新题库',
+    "VersionAfter"  TEXT NOT NULL DEFAULT '1.0.0',
+    "HotspotCount"  INTEGER NOT NULL DEFAULT 8,
+    "QuestionCount" INTEGER NOT NULL DEFAULT 15,
+    "TotalScore"    INTEGER NOT NULL DEFAULT 50,
+    "ChangeSummary" TEXT NOT NULL DEFAULT '',
+    "ChangedAt"     TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY ("fk_ExamID") REFERENCES "WMPSES_试卷场景"("pk_ExamID") ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS "idx_changelog_exam_time"
+    ON "WMPSES_题库变更日志" ("fk_ExamID", "ChangedAt" DESC);
+
+-- 11. 工况可视化卡片模板库（支持系统内置与教师新增自定义专业仪表模板）
+CREATE TABLE IF NOT EXISTS "WMPSES_工况卡片模板" (
+    "pk_TemplateID"     TEXT PRIMARY KEY NOT NULL,
+    "TemplateCode"      TEXT NOT NULL UNIQUE,
+    "TemplateName"      TEXT NOT NULL,
+    "IsBuiltin"         INTEGER NOT NULL DEFAULT 0,
+    "LeftPanelType"     TEXT NOT NULL DEFAULT 'gauge_dial',
+    "LeftPanelTitle"    TEXT NOT NULL DEFAULT '',
+    "LeftPanelCode"     TEXT NOT NULL DEFAULT '',
+    "RightPanelType"    TEXT NOT NULL DEFAULT 'dcs_interlock',
+    "RightPanelTitle"   TEXT NOT NULL DEFAULT '',
+    "RightPanelCode"    TEXT NOT NULL DEFAULT '',
+    "ParamSchemaJSON"   TEXT NOT NULL DEFAULT '[]',
+    "CustomImageBase64" TEXT NOT NULL DEFAULT '',
+    "SortOrder"         INTEGER NOT NULL DEFAULT 10,
+    "UpdatedAt"         TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE INDEX IF NOT EXISTS "idx_widget_templates_order"
+    ON "WMPSES_工况卡片模板" ("IsBuiltin" DESC, "SortOrder" ASC);

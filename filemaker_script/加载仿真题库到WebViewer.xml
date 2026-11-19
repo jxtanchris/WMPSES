@@ -30,16 +30,31 @@
     </Step>
     <Step enable="True" id="141" name="Set Variable">
       <Value>
-        <Calculation><![CDATA[JSONSetElement ( "{}" ;
-  [ "id" ; WMPSES_试卷场景::pk_ExamID ; JSONString ] ;
-  [ "title" ; WMPSES_试卷场景::Title ; JSONString ] ;
-  [ "subtitle" ; WMPSES_试卷场景::Subtitle ; JSONString ] ;
-  [ "examCode" ; WMPSES_试卷场景::ExamCode ; JSONString ] ;
-  [ "totalScore" ; GetAsNumber ( WMPSES_试卷场景::TotalScore ) ; JSONNumber ] ;
-  [ "passScore" ; GetAsNumber ( WMPSES_试卷场景::PassScore ) ; JSONNumber ] ;
-  [ "durationMinutes" ; GetAsNumber ( WMPSES_试卷场景::DurationMinutes ) ; JSONNumber ] ;
-  [ "version" ; WMPSES_试卷场景::Version ; JSONString ] ;
-  [ "updatedAt" ; GetAsText ( WMPSES_试卷场景::UpdatedAt ) ; JSONString ]
+        <Calculation><![CDATA[Let ( [
+  fn = Lower ( GetContainerAttribute ( WMPSES_试卷场景::ExamPicture ; "filename" ) ) ;
+  mime = Case (
+    PatternCount ( fn ; ".png" ) > 0 ; "image/png" ;
+    PatternCount ( fn ; ".webp" ) > 0 ; "image/webp" ;
+    "image/jpeg"
+  ) ;
+  picDataUri = If (
+    not IsEmpty ( WMPSES_试卷场景::ExamPicture ) ;
+    "data:" & mime & ";base64," & Base64EncodeRFC ( 4648 ; WMPSES_试卷场景::ExamPicture ) ;
+    ""
+  )
+] ;
+  JSONSetElement ( "{}" ;
+    [ "id" ; WMPSES_试卷场景::pk_ExamID ; JSONString ] ;
+    [ "title" ; WMPSES_试卷场景::Title ; JSONString ] ;
+    [ "subtitle" ; WMPSES_试卷场景::Subtitle ; JSONString ] ;
+    [ "examCode" ; WMPSES_试卷场景::ExamCode ; JSONString ] ;
+    [ "totalScore" ; GetAsNumber ( WMPSES_试卷场景::TotalScore ) ; JSONNumber ] ;
+    [ "passScore" ; GetAsNumber ( WMPSES_试卷场景::PassScore ) ; JSONNumber ] ;
+    [ "durationMinutes" ; GetAsNumber ( WMPSES_试卷场景::DurationMinutes ) ; JSONNumber ] ;
+    [ "version" ; WMPSES_试卷场景::Version ; JSONString ] ;
+    [ "updatedAt" ; GetAsText ( WMPSES_试卷场景::UpdatedAt ) ; JSONString ] ;
+    [ "examPicture" ; picDataUri ; JSONString ]
+  )
 )]]></Calculation>
       </Value>
       <Repetition>

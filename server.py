@@ -88,6 +88,26 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
             return
 
+        if path == "/api/users":
+            qs = urllib.parse.parse_qs(parsed.query)
+            role = (qs.get("role") or [None])[0]
+            exam_id = (qs.get("examId") or ["WMPSES-1.1.1-V1"])[0]
+            try:
+                users = db_manager.get_users(role_type=role)
+                logs = db_manager.get_change_logs(exam_id=exam_id)
+                self._send_json(HTTPStatus.OK, {"ok": True, "users": users, "changeLogs": logs})
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/templates":
+            try:
+                templates = db_manager.get_widget_templates()
+                self._send_json(HTTPStatus.OK, {"ok": True, "templates": templates})
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
         # 禁止直接下载敏感文件
         if path.startswith("/.git") or path.endswith(".db"):
             self._send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "Forbidden"})
@@ -107,16 +127,74 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/bank":
             try:
-                res = db_manager.save_question_bank(body)
+                bank_payload = body.get("bank") if isinstance(body, dict) and "bank" in body else body
+                change_meta = body.get("changeMeta") if isinstance(body, dict) else None
+                res = db_manager.save_question_bank(bank_payload, change_meta=change_meta)
                 self._send_json(
                     HTTPStatus.OK,
                     {
                         "ok": True,
-                        "message": "已同步写入 SQLite 关系表并更新 FileMaker 种子 CSV",
+                        "message": "已同步写入 SQLite 关系表并记录变更日志",
                         "bank": res["bank"],
                         "counts": res["counts"],
+                        "changeLogs": res.get("changeLogs", []),
                     },
                 )
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/users":
+            try:
+                res = db_manager.save_user(body)
+                self._send_json(HTTPStatus.OK, {"ok": True, **res})
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/users/delete":
+            try:
+                uid = str(body.get("id") or body.get("pk_UserID") or "")
+                res = db_manager.delete_user(uid)
+                self._send_json(HTTPStatus.OK, res)
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/templates":
+            try:
+                res = db_manager.save_widget_template(body)
+                self._send_json(HTTPStatus.OK, res)
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/templates/delete":
+            try:
+                key = str(body.get("id") or body.get("code") or "")
+                res = db_manager.delete_widget_template(key)
+                self._send_json(HTTPStatus.OK, res)
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/auth/login":
+            try:
+                identifier = str(body.get("username") or body.get("userCode") or body.get("id") or "").strip()
+                password = str(body.get("password") or "")
+                res = db_manager.authenticate_user(identifier, password)
+                self._send_json(HTTPStatus.OK, res)
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/auth/password":
+            try:
+                user_id = str(body.get("userId") or body.get("id") or "").strip()
+                old_pwd = str(body.get("oldPassword") or "")
+                new_pwd = str(body.get("newPassword") or "")
+                res = db_manager.change_user_password(user_id, old_pwd, new_pwd)
+                self._send_json(HTTPStatus.OK, res)
             except Exception as exc:
                 self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
             return

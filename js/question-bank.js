@@ -16,7 +16,8 @@
       passScore: 30,
       durationMinutes: 30,
       version: '1.0.0',
-      updatedAt: '2026-11-19'
+      updatedAt: '2026-11-19',
+      examPicture: global.PLANT_IMAGE_BASE64 || 'assets/plant-panorama.jpg'
     },
     hotspots: [
       {
@@ -28,6 +29,7 @@
         x: 16.0,
         y: 34.0,
         widgetType: 'scrubber_top',
+        widgetParams: { peelArea: 0.3, topPressure: 0.15, expiredDays: 15 },
         sceneSummary: '碱洗塔喷淋层上方内壁防腐层起皮脱落约0.3m²，塔顶压力表PI-101强检标签已过期15天。',
         questions: [
           {
@@ -77,6 +79,7 @@
         x: 16.5,
         y: 73.0,
         widgetType: 'scrubber_bottom',
+        widgetParams: { dcsLevel: 60, localLevel: 20, interlockStatus: '旁路 (BYPASS)', missingBolts: 2 },
         sceneSummary: 'LALL-101低低液位联锁处于旁路且无挂牌审批；DCS显示60%而就地液位仅20%；DN500法兰同侧相邻缺2条M20螺栓。',
         questions: [
           {
@@ -126,6 +129,7 @@
         x: 27.6,
         y: 77.0,
         widgetType: 'induced_fan',
+        widgetParams: { mainOilOffset: -8, mainOilQuality: '乳白色浑浊乳化', auxOilOffset: 5 },
         sceneSummary: '主引风机油位低于下限约8mm且油品呈乳白色乳化；辅助侧油位在低限上方5mm且清亮透明。',
         questions: [
           {
@@ -173,6 +177,7 @@
         x: 35.8,
         y: 58.0,
         widgetType: 'cooling_water',
+        widgetParams: { pressure: 0.28, valveStatus: '关闭', flow: 0, returnTemp: 45.0, maxTemp: 50 },
         sceneSummary: '主冷却水管压力表显示0.28MPa，但流量计示数为0 m³/h且供水阀关闭；另一分支回水温度实测45℃（设计≤50℃）。',
         questions: [
           {
@@ -220,6 +225,7 @@
         x: 50.2,
         y: 43.0,
         widgetType: 'rto_chamber',
+        widgetParams: { chamberTemp: 28, railBendCm: 4, manholeStatus: '已打开 (待入内检查)' },
         sceneSummary: 'RTO二层平台一处护栏中横杆局部弯曲变形，立柱焊缝完好；人孔已开启，需检查受限空间作业安全前置条件。',
         questions: [
           {
@@ -269,6 +275,7 @@
         x: 50.2,
         y: 77.0,
         widgetType: 'rto_valves',
+        widgetParams: { airPressure: 0.32, switchTime: 9.0, stdSwitchTime: 3.0 },
         sceneSummary: '切换阀仪表气源压力仅0.32MPa（设计0.5~0.7MPa），就地动作测试切换阀全行程时间由3s延长至9s。',
         questions: [
           {
@@ -300,6 +307,7 @@
         x: 68.0,
         y: 46.0,
         widgetType: 'cems_stack',
+        widgetParams: { gasAlarmMode: 'CAL (标定维护/未投用)', zeroDrift: 0.9, stdGasExpiredDays: 23 },
         sceneSummary: '可燃气体报警仪处于“标定”未投用状态；CEMS零点漂移+0.9%（要求±0.5%）、标气超期23天；CEMS量程与环评批复一致。',
         questions: [
           {
@@ -347,6 +355,7 @@
         x: 82.0,
         y: 76.0,
         widgetType: 'utilities_plc',
+        widgetParams: { airMainPressure: 0.68, n2Pressure: 0.50, powerStatus: 'I/II段均带电·备自投正常', nameplateStatus: '铭牌污损·介质色标不清' },
         sceneSummary: '压缩空气0.68MPa、氮气0.50MPa、双回路供电正常；现场设备铭牌与管道色标污损不清；需给出整套装置最终验收结论。',
         questions: [
           {
@@ -484,6 +493,120 @@
       { id: 'STD-12', docCategory: '引用标准', sortOrder: 12, docCode: 'GB/T 29639-2020', docTitle: '《生产经营单位生产安全事故应急预案编制导则》', deptOrCategory: '应急', relatedHotspotCode: 'R-101', contentSummary: '受限空间中毒窒息与超温联锁停车的应急处置流程。' },
       { id: 'STD-13', docCategory: '引用标准', sortOrder: 13, docCode: 'GB/T 22239-2019', docTitle: '《信息安全技术 网络安全等级保护基本要求》', deptOrCategory: '信息化', relatedHotspotCode: 'ALL', contentSummary: '仿真考试系统信息安全、日志留存与等保二级要求。' },
       { id: 'STD-14', docCategory: '引用标准', sortOrder: 14, docCode: 'GB/T 25000.51-2016', docTitle: '《系统与软件工程 SQuaRE 第51部分》', deptOrCategory: '信息化', relatedHotspotCode: 'ALL', contentSummary: '软件产品质量评价与系统验收测试细则。' }
+    ],
+    users: [
+      { id: 'USR-EX-001', userCode: 'ZK202611001', fullName: '张建国', roleType: '考生', password: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', department: '涂装一车间RTO运行班', skillLevel: '二级/技师', specialty: '工业废气治理', certificateNo: '', batchNo: '2026-11-第一批', phone: '13800138001', status: '正常' },
+      { id: 'USR-EX-002', userCode: 'ZK202611002', fullName: '李梅', roleType: '考生', password: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', department: '精细化工环保运维班', skillLevel: '二级/技师', specialty: '工业废气治理', certificateNo: '', batchNo: '2026-11-第一批', phone: '13800138002', status: '正常' },
+      { id: 'USR-EX-003', userCode: 'ZK202611003', fullName: '王浩然', roleType: '考生', password: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', department: '包装印刷VOCs治理站', skillLevel: '二级/技师', specialty: '工业废气治理', certificateNo: '', batchNo: '2026-11-第一批', phone: '13800138003', status: '正常' },
+      { id: 'USR-TC-001', userCode: 'TC-GY-01', fullName: '陈明远', roleType: '命题教师', password: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', department: '环保工艺教研室', skillLevel: '高级工程师', specialty: '废气工艺与RTO热工', certificateNo: 'MT-2024-018', batchNo: '命题组', phone: '13900139001', status: '正常' },
+      { id: 'USR-TC-002', userCode: 'TC-AQ-02', fullName: '周志强', roleType: '命题教师', password: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', department: '安全仪表教研室', skillLevel: '注册安全工程师', specialty: '安全联锁与特殊作业', certificateNo: 'MT-2024-025', batchNo: '命题组', phone: '13900139002', status: '正常' },
+      { id: 'USR-REV-001', userCode: 'EX-SH-01', fullName: '刘教授', roleType: '审题专家', password: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', department: '省职业技能鉴定专家库', skillLevel: '正高级工程师', specialty: '标准符合性与现场审题', certificateNo: 'ZJ-2023-102', batchNo: '审题组', phone: '13700137001', status: '正常' },
+      { id: 'USR-EV-001', userCode: 'KP-2025-08', fullName: '赵丽华', roleType: '考评员', password: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', department: '市环境监测站/考评中心', skillLevel: '一级考评员', specialty: '答辩评分与Kappa标定', certificateNo: 'KP-2025-0088', batchNo: '考评组', phone: '13600136001', status: '正常' },
+      { id: 'USR-JK-001', userCode: 'JK-01', fullName: '孙伟', roleType: '监考员', password: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', department: '技能鉴定考点考务科', skillLevel: '考务专员', specialty: '机房考务与异常处置', certificateNo: 'JK-2025-011', batchNo: '监考组', phone: '13500135001', status: '正常' }
+    ],
+    changeLogs: [
+      { id: 'LOG-INIT-001', examId: 'WMPSES-1.1.1-V1', userId: 'USR-TC-001', operatorName: '陈明远 (命题教师)', actionType: '初始化入库', versionAfter: '1.0.0', hotspotCount: 8, questionCount: 15, totalScore: 50, changeSummary: '初始化 V1 基准卷（碱洗预处理＋三室RTO）：录入 8 个核心设备热点、15 道题（50分）、D1~D10 缺陷与 G1~G3 干扰项。', changedAt: '2026-11-19 10:00:00' },
+      { id: 'LOG-INIT-002', examId: 'WMPSES-1.1.1-V1', userId: 'USR-REV-001', operatorName: '刘教授 (审题专家)', actionType: '三审签审通过', versionAfter: '1.0.0', hotspotCount: 8, questionCount: 15, totalScore: 50, changeSummary: '完成 24 项确认单、4 份工况台账、N1/N2/N3 否定项规则表与 ExamPicture 装置底图核验入库。', changedAt: '2026-11-19 14:30:00' }
+    ],
+    widgetTemplates: [
+      {
+        id: 'TPL-01', code: 'scrubber_top', name: '碱洗塔上部（防腐脱落 + 压力表过期标签）', isBuiltin: true, sortOrder: 1,
+        leftPanelType: 'cert_nameplate', leftPanelTitle: '现场外观特写 · 喷淋层上方塔壁', leftPanelCode: 'T-101-W01',
+        rightPanelType: 'gauge_dial', rightPanelTitle: '塔顶仪表与检定标签放大', rightPanelCode: 'PI-101',
+        paramSchema: [
+          { key: 'peelArea', label: '防腐层脱落面积', type: 'number', min: 0, max: 2.0, step: 0.1, unit: 'm²', default: 0.3 },
+          { key: 'topPressure', label: '塔顶压力 PI-101', type: 'number', min: 0, max: 0.8, step: 0.01, unit: 'MPa', default: 0.15 },
+          { key: 'expiredDays', label: '检定超期天数(负数为剩余)', type: 'number', min: -180, max: 180, step: 1, unit: '天', default: 15 }
+        ]
+      },
+      {
+        id: 'TPL-02', code: 'scrubber_bottom', name: '碱洗塔下部（液位联锁旁路/假液位 + 缺螺栓）', isBuiltin: true, sortOrder: 2,
+        leftPanelType: 'sight_glass', leftPanelTitle: '联锁与液位仪表对比（DCS vs 就地）', leftPanelCode: 'LT-101 / SIS',
+        rightPanelType: 'flange_bolts', rightPanelTitle: '塔底循环出口法兰局部放大', rightPanelCode: 'FL-102 (DN500)',
+        paramSchema: [
+          { key: 'dcsLevel', label: 'DCS 远传液位 LT-101', type: 'number', min: 0, max: 100, step: 1, unit: '%', default: 60 },
+          { key: 'localLevel', label: '就地液位计实测', type: 'number', min: 0, max: 100, step: 1, unit: '%', default: 20 },
+          { key: 'interlockStatus', label: 'LALL-101 联锁状态', type: 'select', options: ['旁路 (BYPASS)', '正常投用 (NORMAL)'], default: '旁路 (BYPASS)' },
+          { key: 'missingBolts', label: 'FL-102 缺失螺栓数', type: 'number', min: 0, max: 4, step: 1, unit: '条', default: 2 }
+        ]
+      },
+      {
+        id: 'TPL-03', code: 'induced_fan', name: '引风机（油位低乳化 vs 正常油位对比视镜）', isBuiltin: true, sortOrder: 3,
+        leftPanelType: 'sight_glass', leftPanelTitle: '情况 B · 主引风机轴承箱油标视镜', leftPanelCode: 'LG-201A',
+        rightPanelType: 'sight_glass', rightPanelTitle: '情况 A · 备用/辅助侧轴承油标对照', rightPanelCode: 'LG-201B',
+        paramSchema: [
+          { key: 'mainOilOffset', label: '主轴承箱油位偏差(相对MIN)', type: 'number', min: -25, max: 30, step: 1, unit: 'mm', default: -8 },
+          { key: 'mainOilQuality', label: '主轴承箱油品状态', type: 'select', options: ['乳白色浑浊乳化', '金黄清亮无杂质'], default: '乳白色浑浊乳化' },
+          { key: 'auxOilOffset', label: '辅助侧油位偏差(相对MIN)', type: 'number', min: -20, max: 30, step: 1, unit: 'mm', default: 5 }
+        ]
+      },
+      {
+        id: 'TPL-04', code: 'cooling_water', name: '循环冷却水（0.28MPa但流量0 + 回水45℃）', isBuiltin: true, sortOrder: 4,
+        leftPanelType: 'pipe_valve_flow', leftPanelTitle: '冷却水总管压力、流量与阀门状态', leftPanelCode: 'PI-301 / FI-301',
+        rightPanelType: 'dcs_interlock', rightPanelTitle: '冷却水回水温度与运行趋势', rightPanelCode: 'TI-302 / DCS',
+        paramSchema: [
+          { key: 'pressure', label: '主管压力 PI-301', type: 'number', min: 0, max: 1.5, step: 0.01, unit: 'MPa', default: 0.28 },
+          { key: 'valveStatus', label: '供水手动阀状态', type: 'select', options: ['关闭', '开启'], default: '关闭' },
+          { key: 'flow', label: '电磁流量计 FI-301', type: 'number', min: 0, max: 120, step: 1, unit: 'm³/h', default: 0 },
+          { key: 'returnTemp', label: '回水温度实测 TI-302', type: 'number', min: 15, max: 80, step: 0.5, unit: '℃', default: 45.0 },
+          { key: 'maxTemp', label: '设计允许上限温度', type: 'number', min: 30, max: 70, step: 1, unit: '℃', default: 50 }
+        ]
+      },
+      {
+        id: 'TPL-05', code: 'rto_chamber', name: 'RTO本体（平台护栏变形 + 受限空间警示）', isBuiltin: true, sortOrder: 5,
+        leftPanelType: 'dcs_interlock', leftPanelTitle: '三室 RTO 蓄热床与平台护栏现状', leftPanelCode: 'R-101 / PL-2F',
+        rightPanelType: 'dcs_interlock', rightPanelTitle: '炉膛/塔内受限空间人孔检查点', rightPanelCode: 'MH-101 (安全红线)',
+        paramSchema: [
+          { key: 'chamberTemp', label: 'RTO 蓄热室温度', type: 'number', min: 15, max: 200, step: 1, unit: '℃', default: 28 },
+          { key: 'railBendCm', label: '护栏横杆弯曲变形量', type: 'number', min: 0, max: 15, step: 0.5, unit: 'cm', default: 4 },
+          { key: 'manholeStatus', label: '人孔受限空间状态', type: 'select', options: ['已打开 (待入内检查)', '已气体检测与盲板隔离', '已封闭复位'], default: '已打开 (待入内检查)' }
+        ]
+      },
+      {
+        id: 'TPL-06', code: 'rto_valves', name: 'RTO切换阀组（气源0.32MPa + 动作9s迟滞）', isBuiltin: true, sortOrder: 6,
+        leftPanelType: 'gauge_dial', leftPanelTitle: '切换阀仪表气源减压站', leftPanelCode: 'PI-401 (IA)',
+        rightPanelType: 'dcs_interlock', rightPanelTitle: '提升切换阀就地动作测试', rightPanelCode: 'XV-401A/B/C',
+        paramSchema: [
+          { key: 'airPressure', label: '仪表气源压力 PI-401', type: 'number', min: 0, max: 1.0, step: 0.01, unit: 'MPa', default: 0.32 },
+          { key: 'switchTime', label: '切换阀全行程动作时间', type: 'number', min: 1.0, max: 15.0, step: 0.5, unit: 's', default: 9.0 },
+          { key: 'stdSwitchTime', label: '标准动作时间上限', type: 'number', min: 1.0, max: 6.0, step: 0.5, unit: 's', default: 3.0 }
+        ]
+      },
+      {
+        id: 'TPL-07', code: 'cems_stack', name: '烟囱与CEMS（报警仪标定态 + 零漂0.9%超期23天）', isBuiltin: true, sortOrder: 7,
+        leftPanelType: 'gas_cems_alarm', leftPanelTitle: '可燃气体报警控制器就地面板', leftPanelCode: 'GD-501',
+        rightPanelType: 'gas_cems_alarm', rightPanelTitle: 'CEMS 烟气在线监测单元面板', rightPanelCode: 'AT-502 (HJ 76)',
+        paramSchema: [
+          { key: 'gasAlarmMode', label: '可燃气体报警仪模式', type: 'select', options: ['CAL (标定维护/未投用)', 'RUN (正常在线监测)'], default: 'CAL (标定维护/未投用)' },
+          { key: 'zeroDrift', label: 'CEMS 零点漂移', type: 'number', min: -2.0, max: 2.0, step: 0.1, unit: '% F.S.', default: 0.9 },
+          { key: 'stdGasExpiredDays', label: '标气超期天数(负数有效)', type: 'number', min: -180, max: 90, step: 1, unit: '天', default: 23 }
+        ]
+      },
+      {
+        id: 'TPL-08', code: 'utilities_plc', name: '公用工程与PLC（气电正常 + 铭牌污损 + 总结论）', isBuiltin: true, sortOrder: 8,
+        leftPanelType: 'dcs_interlock', leftPanelTitle: '公用工程与双回路配电柜监控', leftPanelCode: 'UT-601 / MCC',
+        rightPanelType: 'cert_nameplate', rightPanelTitle: '现场设备铭牌与管道介质标识特写', rightPanelCode: 'TAG-602',
+        paramSchema: [
+          { key: 'airMainPressure', label: '压缩空气总管压力', type: 'number', min: 0, max: 1.0, step: 0.01, unit: 'MPa', default: 0.68 },
+          { key: 'n2Pressure', label: '氮气密封总管压力', type: 'number', min: 0, max: 1.0, step: 0.01, unit: 'MPa', default: 0.50 },
+          { key: 'powerStatus', label: '双回路供电状态', type: 'select', options: ['I/II段均带电·备自投正常', '仅单段带电·备自投告警'], default: 'I/II段均带电·备自投正常' },
+          { key: 'nameplateStatus', label: '铭牌与介质色标', type: 'select', options: ['铭牌污损·介质色标不清', '铭牌齐全·介质色标清晰'], default: '铭牌污损·介质色标不清' }
+        ]
+      },
+      {
+        id: 'TPL-09', code: 'generic', name: '通用可调双仪表卡（自定义新增热点专用）', isBuiltin: true, sortOrder: 9,
+        leftPanelType: 'gauge_dial', leftPanelTitle: '左表盘参数实时监控', leftPanelCode: 'PI-001',
+        rightPanelType: 'dcs_interlock', rightPanelTitle: '右看板运行参数监控', rightPanelCode: 'DCS-001',
+        paramSchema: [
+          { key: 'param1Label', label: '左表盘参数名称', type: 'text', default: '系统压力 PI' },
+          { key: 'param1Value', label: '左表盘读数', type: 'number', min: 0, max: 1.6, step: 0.01, unit: '', default: 0.45 },
+          { key: 'param1Unit', label: '左表盘单位', type: 'text', default: 'MPa' },
+          { key: 'param2Label', label: '右看板参数名称', type: 'text', default: '运行温度 TI' },
+          { key: 'param2Value', label: '右看板数值', type: 'number', min: 0, max: 200, step: 1, unit: '', default: 38 },
+          { key: 'param2Unit', label: '右看板单位', type: 'text', default: '℃' },
+          { key: 'deviceStatus', label: '现场运行状态', type: 'select', options: ['异常告警', '待检停机', '正常投用'], default: '待检停机' }
+        ]
+      }
     ]
   };
 })(window);
