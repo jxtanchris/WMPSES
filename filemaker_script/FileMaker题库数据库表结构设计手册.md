@@ -326,12 +326,28 @@ Let ( [
 
 ## 五、3 分钟快速建表操作指南（导入种子 CSV）
 
-在您新建的 FileMaker 数据库（例如 `WMPSES_Exam.fmp12`）中，无需手动一个个敲字段名，直接利用 `filemaker_script/seed_data/` 下的 3 个 CSV 文件即可一键生成表结构并灌入全部 8 个热点、15 道题：
+在您新建的 FileMaker 数据库（例如 `WMPSES_Exam.fmp12`）中，无需手动一个个敲字段名，直接利用 `filemaker_script/seed_data/` 下的 6 个 CSV 文件即可一键生成全部题库与《设计方案》规范表结构：
 
 1. **导入表 1**：在 FileMaker Pro 菜单点击 `文件 -> 导入记录 -> 文件...`，选择 `seed_data/1_WMPSES_试卷场景.csv`：
    - 将“目标”下拉框选为 **新建表（`WMPSES_试卷场景`）**；
    - 勾选 **“不要导入第一条记录（使用作字段名称）”**，完成导入（导入 3 条试卷场景记录）。
-2. **导入表 2**：再次 `导入记录 -> 文件...`，选择 `seed_data/2_WMPSES_设备热点.csv`，目标选 **新建表（`WMPSES_设备热点`）**（导入 8 个热点）。
-3. **导入表 3**：再次 `导入记录 -> 文件...`，选择 `seed_data/3_WMPSES_习题库.csv`，目标选 **新建表（`WMPSES_习题库`）**（导入 15 道题目）。
-4. **手动补充表 4 & 表 5**：在“管理数据库”中新建 `WMPSES_考试记录` 和 `WMPSES_作答明细` 两张表，并按第三节建立关系连接。
-5. **配置计算字段与布局**：在表 1/2/3 中添加第四节的计算字段（或直接使用本目录提供的关系型循环脚本），在考试布局中放置名称为 `wv_exam` 的 WebViewer 即可！
+2. **导入表 2**：导入 `seed_data/2_WMPSES_设备热点.csv`，目标选 **新建表（`WMPSES_设备热点`）**（导入 8 个热点）。
+3. **导入表 3**：导入 `seed_data/3_WMPSES_习题库.csv`，目标选 **新建表（`WMPSES_习题库`）**（导入 15 道题目）。
+4. **导入表 6**：导入 `seed_data/4_WMPSES_否定项规则.csv`，目标选 **新建表（`WMPSES_否定项规则`）**（导入 N1 / N2-A / N2-B / N3 规则）。
+5. **导入表 7**：导入 `seed_data/5_WMPSES_验收规范与确认单.csv`，目标选 **新建表（`WMPSES_验收规范与确认单`）**（导入 6 方面 24 个标准核查项）。
+6. **导入表 8**：导入 `seed_data/6_WMPSES_工况资料与引用标准.csv`，目标选 **新建表（`WMPSES_工况资料与引用标准`）**（导入 4 份工况台账与 14 部引用国标）。
+7. **手动补充表 4 & 表 5**：在“管理数据库”中新建 `WMPSES_考试记录` 和 `WMPSES_作答明细` 两张表，并按第三节建立关系连接。
+8. **配置计算字段与布局**：在表 1/2/3 中添加第四节的计算字段（或直接使用本目录提供的关系型循环脚本），在考试布局中放置名称为 `wv_exam` 的 WebViewer 即可！
+
+---
+
+## 六、扩展表：表 6~8（《设计方案》规范与表驱动否定项规则）
+
+为与本地 SQLite 8 表结构保持 1:1 对齐，将《设计方案（设备验收1.1.1）》中的核心规则与资料拆分至以下三张表（均通过 `fk_ExamID` 关联 `WMPSES_试卷场景::pk_ExamID`）：
+
+- **表 6：`WMPSES_否定项规则`**（共 11 列）：
+  - `pk_RuleID`（主键，如 `N1`、`N2-A`、`N2-B`、`N3`）、`fk_ExamID`、`SortOrder`、`RuleCode`、`RuleName`、`ConditionType`（`OVERTIME` / `CONCLUSION_WRONG` / `MAJOR_MISS_COUNT` / `QUESTION_WRONG`）、`ThresholdValue`（如漏判 `3` 项）、`TargetRef`、`PenaltyAction`（`ZERO_SCORE` / `WARN_ONLY`）、`IsEnabled`（`1`/`0`）、`AlertMessage`。
+- **表 7：`WMPSES_验收规范与确认单`**（共 11 列）：
+  - `pk_CheckItemID`（`CHK-01`~`CHK-24`）、`fk_ExamID`、`fk_HotspotID`、`ItemNo`、`AspectName`、`CheckItemName`、`InteractionWay`、`StandardBasis`、`SceneStatus`、`StandardConclusion`、`RelatedDefectCode`。
+- **表 8：`WMPSES_工况资料与引用标准`**（共 9 列）：
+  - `pk_DocID`、`fk_ExamID`、`DocCategory`（`工况台账` / `引用标准`）、`SortOrder`、`DocCode`、`DocTitle`、`DeptOrCategory`、`ContentSummary`、`RelatedHotspotCode`。

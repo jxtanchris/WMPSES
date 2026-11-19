@@ -1,0 +1,5 @@
+﻿"pk_RuleID","fk_ExamID","SortOrder","RuleCode","RuleName","ConditionType","ThresholdValue","TargetRef","PenaltyAction","IsEnabled","AlertMessage"
+"N1","WMPSES-1.1.1-V1","1","N1","操作超时未提交","OVERTIME","25.0","durationMinutes","ZERO_SCORE","1","N1：操作阶段超过规定时限仍未提交，按方案规则触发本题 0 分。"
+"N2-A","WMPSES-1.1.1-V1","2","N2-A","总体验收结论误判放行","CONCLUSION_WRONG","1.0","q-final","ZERO_SCORE","1","N2：装置存在重大隐患却未判“不合格、不具备启动条件”，直接触发一票否决（0分）。"
+"N2-B","WMPSES-1.1.1-V1","3","N2-B","重大缺陷漏判或误判达阈值","MAJOR_MISS_COUNT","3.0","IsMajorDefect=1","ZERO_SCORE","1","N2：重大缺陷（D1~D6）漏判或误判达到或超过设定阈值（{threshold} 项），触发一票否决（0分）。"
+"N3","WMPSES-1.1.1-V1","4","N3","未做安全确认进入受限空间（建议项）","QUESTION_WRONG","1.0","q-n3","ZERO_SCORE","1","N3：未完成气体检测、盲板隔离与监护确认即进入受限空间，触发安全红线否定项（0分）。"

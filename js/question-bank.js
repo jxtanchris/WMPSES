@@ -388,6 +388,102 @@
           }
         ]
       }
+    ],
+    vetoRules: [
+      {
+        id: 'N1',
+        order: 1,
+        code: 'N1',
+        name: '操作超时未提交',
+        conditionType: 'OVERTIME',
+        thresholdValue: 25,
+        targetRef: 'durationMinutes',
+        penaltyAction: 'ZERO_SCORE',
+        isEnabled: true,
+        alertMessage: 'N1：操作阶段超过规定时限仍未提交，按方案规则触发本题 0 分。'
+      },
+      {
+        id: 'N2-A',
+        order: 2,
+        code: 'N2-A',
+        name: '总体验收结论误判放行',
+        conditionType: 'CONCLUSION_WRONG',
+        thresholdValue: 1,
+        targetRef: 'q-final',
+        penaltyAction: 'ZERO_SCORE',
+        isEnabled: true,
+        alertMessage: 'N2：装置存在重大隐患却未判“不合格、不具备启动条件”，直接触发一票否决（0分）。'
+      },
+      {
+        id: 'N2-B',
+        order: 3,
+        code: 'N2-B',
+        name: '重大缺陷漏判或误判达阈值',
+        conditionType: 'MAJOR_MISS_COUNT',
+        thresholdValue: 3,
+        targetRef: 'IsMajorDefect=1',
+        penaltyAction: 'ZERO_SCORE',
+        isEnabled: true,
+        alertMessage: 'N2：重大缺陷（D1~D6）漏判或误判达到或超过设定阈值（{threshold} 项），触发一票否决（0分）。'
+      },
+      {
+        id: 'N3',
+        order: 4,
+        code: 'N3',
+        name: '未做安全确认进入受限空间（建议项）',
+        conditionType: 'QUESTION_WRONG',
+        thresholdValue: 1,
+        targetRef: 'q-n3',
+        penaltyAction: 'ZERO_SCORE',
+        isEnabled: true,
+        alertMessage: 'N3：未完成气体检测、盲板隔离与监护确认即进入受限空间，触发安全红线否定项（0分）。'
+      }
+    ],
+    checklistItems: [
+      { id: 'CHK-01', hotspotId: 'hs-scrubber-top', itemNo: 1, aspectName: '设备本体外观', checkItemName: '塔体与管道防腐层', interactionWay: '环绕巡视、内壁特写查看与测厚核对', standardBasis: '防腐层无起皮、无脱落，测厚不低于设计值的90%', sceneStatus: '碱洗塔喷淋层上方内壁防腐层起皮脱落约0.3m²，露出碳钢基材', standardConclusion: '不合格（重大）', relatedDefectCode: 'D1' },
+      { id: 'CHK-02', hotspotId: 'hs-scrubber-bottom', itemNo: 2, aspectName: '设备本体外观', checkItemName: '法兰紧固与垫片', interactionWay: '局部放大核查螺栓数量与垫片老化情况', standardBasis: '法兰螺栓规格齐全无缺失，垫片无老化龟裂、无渗漏', sceneStatus: 'DN500法兰同侧相邻缺失2条M20螺栓（垫片完好、常温无渗漏）', standardConclusion: '不合格（一般）', relatedDefectCode: 'D7' },
+      { id: 'CHK-03', hotspotId: 'hs-rto-chamber', itemNo: 3, aspectName: '设备本体外观', checkItemName: '支吊架与基础', interactionWay: '现场巡视平台支架与护栏结构承载力', standardBasis: '支吊架牢固无松脱、基础无沉降、安全护栏完好无变形', sceneStatus: 'RTO二层平台一处护栏中横杆局部变形，不影响整体结构承载', standardConclusion: '不合格（一般）', relatedDefectCode: 'D9' },
+      { id: 'CHK-04', hotspotId: 'hs-utilities-plc', itemNo: 4, aspectName: '设备本体外观', checkItemName: '保温、伴热与铭牌标识', interactionWay: '现场目视铭牌与管线色标流向牌', standardBasis: '保温完整无破损，设备铭牌与介质色标、流向牌清晰准确', sceneStatus: '现场设备铭牌与管道介质标识污损、色标不清', standardConclusion: '不合格（一般）', relatedDefectCode: 'D10' },
+      { id: 'CHK-05', hotspotId: 'hs-induced-fan', itemNo: 5, aspectName: '润滑冷却系统', checkItemName: '油位与油质', interactionWay: '油标视镜观察与油样取样比对', standardBasis: '油位处于油标上下限之间且油品透明无乳化、无杂质', sceneStatus: '主引风机油位低于下限约8mm且呈乳白色乳化；辅助侧低于上限但在低限上方5mm清亮', standardConclusion: '不合格（重大）', relatedDefectCode: 'D2 / G1' },
+      { id: 'CHK-06', hotspotId: 'hs-induced-fan', itemNo: 6, aspectName: '润滑冷却系统', checkItemName: '油泵与油压', interactionWay: '就地油压表与润滑站运行台账核对', standardBasis: '润滑油泵完好备用，供油压力符合设备设计值', sceneStatus: '备用润滑油泵盘车及油路切换正常', standardConclusion: '合格', relatedDefectCode: '' },
+      { id: 'CHK-07', hotspotId: 'hs-cooling-water', itemNo: 7, aspectName: '润滑冷却系统', checkItemName: '冷却水流量、压力、温度', interactionWay: '就地压力表、流量计与回水温度对比', standardBasis: '冷却水流量>0，压力正常，回水温度≤50℃（温差≤8℃）', sceneStatus: '主回路压力0.28MPa但流量为0、供水阀关闭；另一分支回水45℃（≤50℃）', standardConclusion: '不合格（重大）', relatedDefectCode: 'D3 / G2' },
+      { id: 'CHK-08', hotspotId: 'hs-cooling-water', itemNo: 8, aspectName: '润滑冷却系统', checkItemName: '过滤器压差', interactionWay: '查看冷却水Y型过滤器前后压差表', standardBasis: '过滤器前后压差≤0.05MPa，无堵塞污物', sceneStatus: '冷却水过滤器压差0.02MPa，在允许范围内', standardConclusion: '合格', relatedDefectCode: '' },
+      { id: 'CHK-09', hotspotId: 'hs-cooling-water', itemNo: 9, aspectName: '管线阀门', checkItemName: '阀门开关状态与标识', interactionWay: '查看阀门手轮位置、阀位标识与开度指示', standardBasis: '工艺阀门开关状态与启动前工艺要求一致，挂牌清晰', sceneStatus: '冷却水供水手动阀处于全关闭状态', standardConclusion: '不合格（重大）', relatedDefectCode: 'D3' },
+      { id: 'CHK-10', hotspotId: 'hs-rto-chamber', itemNo: 10, aspectName: '管线阀门', checkItemName: '盲板抽堵与台账', interactionWay: '现场核查盲板位置并调阅盲板抽堵台账', standardBasis: '工艺盲板抽堵记录齐全可追溯，进入受限空间前可靠盲板隔离', sceneStatus: '系统工艺盲板抽堵台账一致，受限空间隔离条件待逐项确认', standardConclusion: '合格 / 待确认', relatedDefectCode: 'N3' },
+      { id: 'CHK-11', hotspotId: 'hs-rto-valves', itemNo: 11, aspectName: '管线阀门', checkItemName: '止回阀与软连接', interactionWay: '检查风机出口软连接与止回阀安装方向', standardBasis: '软连接无龟裂破损，止回阀流向与介质流向一致', sceneStatus: '风机进出口软连接及止回阀安装完好', standardConclusion: '合格', relatedDefectCode: '' },
+      { id: 'CHK-12', hotspotId: 'hs-rto-valves', itemNo: 12, aspectName: '管线阀门', checkItemName: '仪表气源压力', interactionWay: '减压阀压力表读数与切换阀就地动作测试', standardBasis: '仪表气源压力0.5～0.7MPa，三室切换阀全行程时间≤3s', sceneStatus: '气源压力仅0.32MPa，切换阀全行程时间延长至9s', standardConclusion: '不合格（重大）', relatedDefectCode: 'D4' },
+      { id: 'CHK-13', hotspotId: 'hs-scrubber-bottom', itemNo: 13, aspectName: '监测仪表', checkItemName: '就地压力、温度、流量、液位指示', interactionWay: '就地液位计/压力表与DCS远传示值对比', standardBasis: '就地与远传指示偏差≤1.5%，引压管畅通无假指示', sceneStatus: 'DCS液位显示60%，就地实际仅20%，差压液位计引压管堵塞', standardConclusion: '不合格（重大）', relatedDefectCode: 'D6' },
+      { id: 'CHK-14', hotspotId: 'hs-cems-stack', itemNo: 14, aspectName: '监测仪表', checkItemName: 'CEMS采样与分析单元', interactionWay: '查看CEMS分析仪面板漂移值、量程与校验记录', standardBasis: '零点漂移≤±0.5%，标气在有效期内，量程符合环评批复', sceneStatus: '零点漂移+0.9%（超标），标气过期23天；量程与环评批复一致', standardConclusion: '不合格（重大）', relatedDefectCode: 'D5 / G3' },
+      { id: 'CHK-15', hotspotId: 'hs-cems-stack', itemNo: 15, aspectName: '监测仪表', checkItemName: '报警值与联锁设定', interactionWay: '核查DCS报警联锁设定值台账', standardBasis: '高高/低低报警值及联锁触发阈值符合设计与工艺规程', sceneStatus: '碱洗塔低低液位联锁阈值设定25%，符合设计值', standardConclusion: '合格', relatedDefectCode: '' },
+      { id: 'CHK-16', hotspotId: 'hs-scrubber-top', itemNo: 16, aspectName: '监测仪表', checkItemName: '校验有效期与标签', interactionWay: '放大查看强检压力表、报警仪检定标签日期', standardBasis: '所有强制检定仪表均在检定有效期内且标签完好', sceneStatus: '塔顶压力表PI-101检定标签已过期15天', standardConclusion: '不合格（一般）', relatedDefectCode: 'D8' },
+      { id: 'CHK-17', hotspotId: 'hs-scrubber-bottom', itemNo: 17, aspectName: '安全联锁保护', checkItemName: '联锁投用状态', interactionWay: '查阅DCS/SIS安全联锁画面投用状态', standardBasis: '全部安全联锁（含LALL-101）均处于投用状态并动作试验合格', sceneStatus: '碱洗塔LALL-101低低液位联锁处于旁路状态', standardConclusion: '不合格（重大）', relatedDefectCode: 'D6' },
+      { id: 'CHK-18', hotspotId: 'hs-scrubber-bottom', itemNo: 18, aspectName: '安全联锁保护', checkItemName: '旁路审批与挂牌', interactionWay: '核对旁路管理台账与现场挂牌情况', standardBasis: '任何联锁旁路必须有书面审批单与现场明显挂牌', sceneStatus: 'LALL-101联锁旁路无现场挂牌，旁路审批单缺失', standardConclusion: '不合格（重大）', relatedDefectCode: 'D6' },
+      { id: 'CHK-19', hotspotId: 'hs-cems-stack', itemNo: 19, aspectName: '安全联锁保护', checkItemName: '可燃、有毒气体报警', interactionWay: '现场查看可燃气体报警控制器状态灯', standardBasis: '气体报警仪处于正常监测运行态，无屏蔽或离线', sceneStatus: '可燃气体报警仪处于“CAL标定”状态，检测元件未投用', standardConclusion: '不合格（重大）', relatedDefectCode: 'D5' },
+      { id: 'CHK-20', hotspotId: 'hs-rto-chamber', itemNo: 20, aspectName: '安全联锁保护', checkItemName: '消防设施与紧急停车', interactionWay: '检查现场灭火器压力表、洗眼器及ESD按钮', standardBasis: '灭火器压力处于绿区，紧急停车按钮（ESD）功能完好、无遮挡', sceneStatus: '现场灭火器与ESD急停按钮完好有效（入塔作业须履行受限空间审批）', standardConclusion: '合格', relatedDefectCode: '' },
+      { id: 'CHK-21', hotspotId: 'hs-utilities-plc', itemNo: 21, aspectName: '公用工程配套', checkItemName: '压缩空气', interactionWay: '查看压缩空气储罐就地压力表与公用工程画面', standardBasis: '压缩空气总管压力处于 0.6～0.8 MPa 区间，干燥无积水', sceneStatus: '压缩空气总管实测 0.68 MPa，符合要求', standardConclusion: '合格', relatedDefectCode: '' },
+      { id: 'CHK-22', hotspotId: 'hs-utilities-plc', itemNo: 22, aspectName: '公用工程配套', checkItemName: '氮气与蒸汽', interactionWay: '查看氮气密封总管压力表与吹扫管线', standardBasis: '氮气总管压力处于 0.4～0.6 MPa 区间，满足吹扫及密封需求', sceneStatus: '氮气密封总管实测 0.50 MPa，符合要求', standardConclusion: '合格', relatedDefectCode: '' },
+      { id: 'CHK-23', hotspotId: 'hs-utilities-plc', itemNo: 23, aspectName: '公用工程配套', checkItemName: '循环水', interactionWay: '核查公用工程循环水站总供水压差与备用泵状态', standardBasis: '循环水母管压力与水质达标，具备向各支路供水能力', sceneStatus: '循环水总站母管备压正常（注意需开启装置区支路供水阀）', standardConclusion: '合格（总站）', relatedDefectCode: '' },
+      { id: 'CHK-24', hotspotId: 'hs-utilities-plc', itemNo: 24, aspectName: '公用工程配套', checkItemName: '双回路供电', interactionWay: '检查低压配电柜I段/II段进线指示灯与备自投状态', standardBasis: 'I段主电源与II段备用电源均带电，备自投处于就绪状态', sceneStatus: '双回路供电I段、II段均显示绿灯带电，备自投就绪', standardConclusion: '合格', relatedDefectCode: '' }
+    ],
+    scenarioDocs: [
+      { id: 'DOC-TZ-01', docCategory: '工况台账', sortOrder: 1, docCode: 'DOC-JX-2026-11', docTitle: '1. 本次大修检修记录（碱洗＋三室RTO）', deptOrCategory: '设备检修部', relatedHotspotCode: 'A-101A / B-101 / V-101', contentSummary: '本次大修包含碱洗塔喷淋层检修（注：内壁防腐修补项显示“未完成终验”）、主引风机轴承解体回装、RTO蓄热体清灰及气动切换阀调校。检修单位尚未提交塔内防腐测厚合格复验单与切换阀9s迟滞消缺记录。' },
+      { id: 'DOC-TZ-02', docCategory: '工况台账', sortOrder: 2, docCode: 'DOC-TZ-2026-01', docTitle: '2. 废气治理联合装置设备与工艺设计台账', deptOrCategory: '工艺技术科', relatedHotspotCode: 'W-101 / V-101 / U-101', contentSummary: '核心设计指标：① 引风机轴承箱油位须处于上下限之间且无乳化；② 循环冷却水流量>0、回水温度设计上限≤50℃；③ RTO切换阀仪表气源0.5～0.7MPa、全行程≤3.0s；④ 公用工程压缩空气0.6～0.8MPa、氮气0.4～0.6MPa；⑤ 碱洗塔低低液位联锁LALL-101设定值25%。' },
+      { id: 'DOC-TZ-03', docCategory: '工况台账', sortOrder: 3, docCode: 'DOC-YS-2025-11', docTitle: '3. 上次启动前设备验收报告及问题闭环清单', deptOrCategory: '安全环保部', relatedHotspotCode: 'A-101B / R-101', contentSummary: '上次检修曾提出“碱洗塔差压液位计引压管易结晶堵塞”、“联锁旁路必须严格履行书面审批与现场挂牌”两项重点整改要求。本次验收需重点核查LALL-101旁路状态与就地/DCS液位一致性。' },
+      { id: 'DOC-TZ-04', docCategory: '工况台账', sortOrder: 4, docCode: 'DOC-CEMS-2026-10', docTitle: '4. CEMS与气体报警仪校验记录台账', deptOrCategory: '仪表运维班', relatedHotspotCode: 'M-101 / A-101A', contentSummary: '① CEMS校验规定零点漂移允许±0.5% F.S.，量程按项目环评批复设定（区别于出厂铭牌最大量程），当前校准用标准气体有效期记录已超期23天；② 塔顶压力表PI-101有效期至2026-11-04（已超期15天）；③ 入口可燃气体报警仪在检修时切至CAL标定态。' },
+      { id: 'STD-01', docCategory: '引用标准', sortOrder: 1, docCode: '职业技能-2019', docTitle: '《工业废气治理工国家职业技能标准（2019年版）》（6-28-02-05）', deptOrCategory: '职业技能', relatedHotspotCode: 'ALL', contentSummary: '考核点1.1.1（50分/30分钟）、分值权重及安全否定项设置的根本依据。' },
+      { id: 'STD-02', docCategory: '引用标准', sortOrder: 2, docCode: '技能规程-2018', docTitle: '《国家职业技能标准编制技术规程（2018年版）》', deptOrCategory: '职业技能', relatedHotspotCode: 'ALL', contentSummary: '技能要求拆解与操作/知识权重结构的理解口径。' },
+      { id: 'STD-03', docCategory: '引用标准', sortOrder: 3, docCode: '认定规程', docTitle: '《职业技能等级认定工作规程（试行）》', deptOrCategory: '职业技能', relatedHotspotCode: 'ALL', contentSummary: '考务组织、监考屏蔽规则、成绩认定与档案留痕管理。' },
+      { id: 'STD-04', docCategory: '引用标准', sortOrder: 4, docCode: 'GB 37822-2019', docTitle: '《挥发性有机物无组织排放控制标准》', deptOrCategory: '大气环境', relatedHotspotCode: 'A-101B / V-101', contentSummary: '法兰密封、切换阀短窜与VOCs泄漏逸散类缺陷判定背景。' },
+      { id: 'STD-05', docCategory: '引用标准', sortOrder: 5, docCode: 'GB 16297-1996', docTitle: '《大气污染物综合排放标准》', deptOrCategory: '大气环境', relatedHotspotCode: 'M-101', contentSummary: '污染物排放限值与超标风险判定依据。' },
+      { id: 'STD-06', docCategory: '引用标准', sortOrder: 6, docCode: 'HJ 2000-2018', docTitle: '《大气污染治理工程技术导则》', deptOrCategory: '大气环境', relatedHotspotCode: 'A-101A', contentSummary: '碱洗塔、RTO治理设施设计防腐与验收技术要求。' },
+      { id: 'STD-07', docCategory: '引用标准', sortOrder: 7, docCode: 'HJ 75-2017', docTitle: '《固定污染源烟气排放连续监测技术规范》', deptOrCategory: '监测', relatedHotspotCode: 'M-101', contentSummary: 'CEMS安装位置、量程设置与日常运行验收要求。' },
+      { id: 'STD-08', docCategory: '引用标准', sortOrder: 8, docCode: 'HJ 76-2017', docTitle: '《固定污染源烟气排放连续监测系统技术要求及检测方法》', deptOrCategory: '监测', relatedHotspotCode: 'M-101', contentSummary: 'CEMS零点漂移（±0.5%）、标气有效期与校验周期判定。' },
+      { id: 'STD-09', docCategory: '引用标准', sortOrder: 9, docCode: 'GB 30871-2022', docTitle: '《危险化学品企业特殊作业安全规范》', deptOrCategory: '安全', relatedHotspotCode: 'R-101 / A-101B', contentSummary: '进入塔内/炉内受限空间作业气体分析、盲板抽堵隔离与监护要求（N3）。' },
+      { id: 'STD-10', docCategory: '引用标准', sortOrder: 10, docCode: 'GB 50160-2008', docTitle: '《石油化工企业设计防火标准》（2018年版）', deptOrCategory: '安全', relatedHotspotCode: 'R-101', contentSummary: '装置防火间距与现场消防设施配置核查要求。' },
+      { id: 'STD-11', docCategory: '引用标准', sortOrder: 11, docCode: 'GB 50058-2014', docTitle: '《爆炸危险环境电力装置设计规范》', deptOrCategory: '安全', relatedHotspotCode: 'M-101 / U-101', contentSummary: '防爆电气与入口可燃气体报警仪投用选型规范。' },
+      { id: 'STD-12', docCategory: '引用标准', sortOrder: 12, docCode: 'GB/T 29639-2020', docTitle: '《生产经营单位生产安全事故应急预案编制导则》', deptOrCategory: '应急', relatedHotspotCode: 'R-101', contentSummary: '受限空间中毒窒息与超温联锁停车的应急处置流程。' },
+      { id: 'STD-13', docCategory: '引用标准', sortOrder: 13, docCode: 'GB/T 22239-2019', docTitle: '《信息安全技术 网络安全等级保护基本要求》', deptOrCategory: '信息化', relatedHotspotCode: 'ALL', contentSummary: '仿真考试系统信息安全、日志留存与等保二级要求。' },
+      { id: 'STD-14', docCategory: '引用标准', sortOrder: 14, docCode: 'GB/T 25000.51-2016', docTitle: '《系统与软件工程 SQuaRE 第51部分》', deptOrCategory: '信息化', relatedHotspotCode: 'ALL', contentSummary: '软件产品质量评价与系统验收测试细则。' }
     ]
   };
 })(window);

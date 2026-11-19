@@ -11,7 +11,8 @@
   };
 
   const DEFAULT_CONFIG = {
-    sourceMode: 'auto', // 'auto' | 'local' | 'webviewer' | 'dataapi' | 'rest'
+    sourceMode: 'auto', // 'auto' | 'sqlite' | 'local' | 'webviewer' | 'dataapi' | 'rest'
+    sqliteApiUrl: 'http://127.0.0.1:8765',
     fmScripts: {
       loadBank: '加载仿真题库到WebViewer',
       submitResult: '接收仿真考试交卷成绩',
@@ -95,9 +96,35 @@
         : []
     }));
 
+    const vetoRules = Array.isArray(bank.vetoRules) && bank.vetoRules.length
+      ? bank.vetoRules.map((r, idx) => ({
+          id: r.id || 'N-' + (idx + 1),
+          order: Number(r.order) || (idx + 1),
+          code: r.code || r.id || 'N-' + (idx + 1),
+          name: r.name || '未命名否定项规则',
+          conditionType: r.conditionType || 'QUESTION_WRONG',
+          thresholdValue: Number(r.thresholdValue != null ? r.thresholdValue : 1),
+          targetRef: r.targetRef || '',
+          penaltyAction: r.penaltyAction || 'ZERO_SCORE',
+          isEnabled: r.isEnabled !== undefined ? Boolean(r.isEnabled) : true,
+          alertMessage: r.alertMessage || ''
+        }))
+      : (fallback.vetoRules || []);
+
+    const checklistItems = Array.isArray(bank.checklistItems) && bank.checklistItems.length
+      ? bank.checklistItems
+      : (fallback.checklistItems || []);
+
+    const scenarioDocs = Array.isArray(bank.scenarioDocs) && bank.scenarioDocs.length
+      ? bank.scenarioDocs
+      : (fallback.scenarioDocs || []);
+
     return {
       meta: Object.assign({}, fallback.meta, bank.meta || {}),
-      hotspots: normalizedHotspots
+      hotspots: normalizedHotspots,
+      vetoRules: vetoRules,
+      checklistItems: checklistItems,
+      scenarioDocs: scenarioDocs
     };
   }
 
@@ -108,6 +135,7 @@
       const parsed = safeParseJson(raw, {});
       return {
         sourceMode: parsed.sourceMode || DEFAULT_CONFIG.sourceMode,
+        sqliteApiUrl: parsed.sqliteApiUrl || DEFAULT_CONFIG.sqliteApiUrl,
         fmScripts: Object.assign({}, DEFAULT_CONFIG.fmScripts, parsed.fmScripts || {}),
         dataApi: Object.assign({}, DEFAULT_CONFIG.dataApi, parsed.dataApi || {}),
         restApi: Object.assign({}, DEFAULT_CONFIG.restApi, parsed.restApi || {}),
@@ -273,6 +301,30 @@
     }
   }
 
+  function getSqliteBase(cfg) {
+    const raw = (cfg && cfg.sqliteApiUrl) || DEFAULT_CONFIG.sqliteApiUrl;
+    return String(raw).replace(/\/+$/, '');
+  }
+
+  async function requestSqlite(cfg, path, options) {
+    const base = getSqliteBase(cfg);
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 2500) : null;
+    try {
+      const resp = await fetch(`${base}${path}`, Object.assign({
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller ? controller.signal : undefined
+      }, options || {}));
+      const data = await resp.json();
+      if (!resp.ok || data.ok === false) {
+        throw new Error(data.error || `HTTP ${resp.status}`);
+      }
+      return data;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
   const FMDataAdapter = {
     getConfig: function () {
       return loadConfig();
@@ -282,6 +334,7 @@
       const current = loadConfig();
       const next = {
         sourceMode: partial.sourceMode || current.sourceMode,
+        sqliteApiUrl: partial.sqliteApiUrl !== undefined ? (partial.sqliteApiUrl || DEFAULT_CONFIG.sqliteApiUrl) : current.sqliteApiUrl,
         fmScripts: Object.assign({}, current.fmScripts, partial.fmScripts || {}),
         dataApi: Object.assign({}, current.dataApi, partial.dataApi || {}),
         restApi: Object.assign({}, current.restApi, partial.restApi || {}),
@@ -328,6 +381,31 @@
       return deepClone(global.DEFAULT_QUESTION_BANK);
     },
 
+    resetBankWithBackend: async function () {
+      const cfg = loadConfig();
+      if (cfg.sourceMode === 'auto' || cfg.sourceMode === 'sqlite') {
+        try {
+          const res = await requestSqlite(cfg, '/api/bank/reset', { method: 'POST', body: '{}' });
+          const bank = this.saveLocalBank(res.bank);
+          return {
+            bank: bank,
+            message: '已将 SQLite 数据库恢复为出厂示范数据（8热点 / 15题）'
+          };
+        } catch (err) {
+          // 降级本地重置
+        }
+      }
+      return {
+        bank: this.resetDefaultBank(),
+        message: '已恢复出厂默认题库（本地缓存）'
+      };
+    },
+
+    fetchSqliteTables: async function () {
+      const cfg = loadConfig();
+      return await requestSqlite(cfg, '/api/tables', { method: 'GET' });
+    },
+
     loadQuestionBank: async function () {
       const cfg = loadConfig();
       const mode = cfg.sourceMode;
@@ -358,13 +436,47 @@
         return { bank: this.loadLocalBank(), source: 'FileMaker WebViewer（已就绪）' };
       }
 
-      return { bank: this.loadLocalBank(), source: '本地题库（离线可用）' };
+      if (mode === 'sqlite' || mode === 'auto') {
+        try {
+          const res = await requestSqlite(cfg, '/api/bank', { method: 'GET' });
+          const bank = this.saveLocalBank(res.bank);
+          return { bank: bank, source: 'SQLite 数据库 (db/wmpses.db)', sqliteConnected: true };
+        } catch (err) {
+          if (mode === 'sqlite') {
+            return {
+              bank: this.loadLocalBank(),
+              source: 'SQLite 服务未连接，已使用本地兜底（' + err.message + '）',
+              error: err.message
+            };
+          }
+        }
+      }
+
+      return { bank: this.loadLocalBank(), source: '本地离线模式（未检测到 SQLite 服务）' };
     },
 
     saveQuestionBank: async function (bank) {
-      const saved = this.saveLocalBank(bank);
+      let saved = this.saveLocalBank(bank);
       const cfg = loadConfig();
       const syncStatus = [];
+      let sqliteSaved = false;
+
+      if (cfg.sourceMode === 'auto' || cfg.sourceMode === 'sqlite') {
+        try {
+          const res = await requestSqlite(cfg, '/api/bank', {
+            method: 'POST',
+            body: JSON.stringify(saved)
+          });
+          saved = this.saveLocalBank(res.bank);
+          sqliteSaved = true;
+          const cnt = res.counts || {};
+          syncStatus.push(`已实时存入 SQLite（热点 ${cnt['WMPSES_设备热点'] || saved.hotspots.length} 条 / 习题 ${cnt['WMPSES_习题库'] || 0} 条）并同步 FileMaker CSV`);
+        } catch (err) {
+          if (cfg.sourceMode === 'sqlite') {
+            syncStatus.push('SQLite 保存失败：' + err.message);
+          }
+        }
+      }
 
       if (isFileMakerWebViewer()) {
         const res = callFMScript(cfg.fmScripts.saveBank, {
@@ -386,7 +498,8 @@
 
       return {
         bank: saved,
-        syncMessage: syncStatus.length ? syncStatus.join('；') : '已保存到浏览器本地存储（可随时导出 JSON 或同步 FileMaker）'
+        sqliteSaved: sqliteSaved,
+        syncMessage: syncStatus.length ? syncStatus.join('；') : '已保存到浏览器本地缓存（启动 server.py 后可写入 SQLite 数据库）'
       };
     },
 
@@ -402,6 +515,21 @@
         global.localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(list.slice(0, 20)));
       } catch (e) {
         // ignore
+      }
+
+      // 2. 写入本地 SQLite 关系表 (WMPSES_考试记录 + WMPSES_作答明细)
+      if (cfg.sourceMode === 'auto' || cfg.sourceMode === 'sqlite') {
+        try {
+          const res = await requestSqlite(cfg, '/api/results', {
+            method: 'POST',
+            body: JSON.stringify(resultPayload)
+          });
+          syncResults.push(`成绩及明细已写入 SQLite 数据库 (记录ID: ${String(res.resultId || '').slice(0, 8)}…)`);
+        } catch (err) {
+          if (cfg.sourceMode === 'sqlite') {
+            syncResults.push(`SQLite 写入失败：${err.message}`);
+          }
+        }
       }
 
       // 2. WebViewer 脚本回传

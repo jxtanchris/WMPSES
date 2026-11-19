@@ -23,7 +23,10 @@
     wrongOnlyInReport: false,
     lastReportResult: null,
     editingHotspotDraft: null,
-    activeSettingsTab: 'bank'
+    activeSettingsTab: 'bank',
+    activeDocsTab: 'docs',
+    activeSqliteTable: 'WMPSES_设备热点',
+    sqliteSnapshot: null
   };
 
   function $(id) {
@@ -280,8 +283,7 @@
         try { pin.releasePointerCapture(e.pointerId); } catch (_) {}
       }
       if (moved) {
-        adapter.saveLocalBank(state.bank);
-        showToast(`已调整「${hs.name}」坐标至 (${hs.x}%, ${hs.y}%)`, 'success');
+        persistEditToBackend(`已移动「${hs.name}」至 (${hs.x}%, ${hs.y}%)`);
       } else {
         openEditorModal(hs.id);
       }
@@ -633,32 +635,84 @@
       });
     });
 
-    const vetoReasons = [];
-    if (state.overtimeTriggered) {
-      vetoReasons.push('N1：考试超时未按时提交');
-    }
-    if (criticalConclusionWrong) {
-      vetoReasons.push('N2：核心放行结论判定错误（存在重大隐患时未判为“不合格、不具备启动条件”）');
-    }
-    if (majorMissedCount >= 3) {
-      vetoReasons.push(`N2：重大缺陷（D1~D6）漏判或误判达 ${majorMissedCount} 项（达到或超过 3 项阈值）`);
-    }
-
-    const vetoTriggered = vetoReasons.length > 0;
-    const passScore = (state.bank && state.bank.meta && Number(state.bank.meta.passScore)) || 30;
-    const passed = earnedScore >= passScore && !vetoTriggered;
-
     const cfg = adapter.getConfig();
     const durationSeconds = state.mode === 'exam' && state.examStartTime
       ? Math.min(state.examDurationSeconds, Math.max(1, Math.round((Date.now() - state.examStartTime) / 1000)))
       : 0;
 
+    // 表驱动否定项规则引擎（读取 WMPSES_否定项规则 表动态判定，不再写死）
+    const vetoRules = (state.bank && Array.isArray(state.bank.vetoRules)) ? state.bank.vetoRules : [];
+    const triggeredRules = [];
+    const vetoReasons = [];
+    let hasZeroPenalty = false;
+
+    vetoRules.forEach((rule) => {
+      if (!rule.isEnabled) return;
+      const cond = String(rule.conditionType || '').toUpperCase();
+      const threshold = Number(rule.thresholdValue != null ? rule.thresholdValue : 1);
+      const targetRef = String(rule.targetRef || '').trim();
+      let hit = false;
+
+      if (cond === 'OVERTIME') {
+        hit = Boolean(state.overtimeTriggered) || (state.mode === 'exam' && durationSeconds > threshold * 60);
+      } else if (cond === 'CONCLUSION_WRONG') {
+        const targetDetail = targetRef
+          ? details.find((d) => d.questionId === targetRef)
+          : null;
+        if (targetDetail) {
+          const answered = targetDetail.userAnswer && targetDetail.userAnswer.length > 0;
+          hit = state.mode === 'exam' ? !targetDetail.isCorrect : (answered && !targetDetail.isCorrect);
+        } else {
+          hit = criticalConclusionWrong;
+        }
+      } else if (cond === 'MAJOR_MISS_COUNT') {
+        const missedInPractice = details.filter((d) => {
+          const qObj = hotspots.flatMap((h) => h.questions || []).find((qq) => qq.id === d.questionId);
+          const isMajor = qObj && qObj.isMajorDefect;
+          if (!isMajor) return false;
+          return state.mode === 'exam'
+            ? !d.isCorrect
+            : (d.userAnswer && d.userAnswer.length > 0 && !d.isCorrect);
+        }).length;
+        hit = missedInPractice >= threshold;
+      } else if (cond === 'QUESTION_WRONG') {
+        const targetDetail = details.find((d) => d.questionId === targetRef);
+        if (targetDetail) {
+          const answered = targetDetail.userAnswer && targetDetail.userAnswer.length > 0;
+          hit = state.mode === 'exam' ? !targetDetail.isCorrect : (answered && !targetDetail.isCorrect);
+        }
+      }
+
+      if (hit) {
+        const msg = String(rule.alertMessage || `${rule.code}：${rule.name}`).replace('{threshold}', String(threshold));
+        triggeredRules.push({
+          id: rule.id,
+          code: rule.code,
+          name: rule.name,
+          penaltyAction: rule.penaltyAction || 'ZERO_SCORE',
+          message: msg
+        });
+        vetoReasons.push(msg);
+        if ((rule.penaltyAction || 'ZERO_SCORE') === 'ZERO_SCORE') {
+          hasZeroPenalty = true;
+        }
+      }
+    });
+
+    const vetoTriggered = vetoReasons.length > 0;
+    const effectiveScore = hasZeroPenalty ? 0 : earnedScore;
+    const passScore = (state.bank && state.bank.meta && Number(state.bank.meta.passScore)) || 30;
+    const passed = effectiveScore >= passScore && !hasZeroPenalty;
+
     return {
+      examId: (state.bank && state.bank.meta && state.bank.meta.id) || 'WMPSES-1.1.1-V1',
       studentName: cfg.student.name || '现场考生',
       examineeId: cfg.student.examineeId || '',
       examCode: (state.bank && state.bank.meta && state.bank.meta.examCode) || '1.1.1',
       mode: state.mode,
       earnedScore: earnedScore,
+      effectiveScore: effectiveScore,
+      hasZeroPenalty: hasZeroPenalty,
       totalScore: totalScore,
       correctCount: correctCount,
       totalCount: totalCount,
@@ -667,6 +721,7 @@
       vetoTriggered: vetoTriggered,
       vetoReason: vetoReasons.join('；'),
       vetoReasons: vetoReasons,
+      triggeredRules: triggeredRules,
       majorMissedCount: majorMissedCount,
       durationSeconds: durationSeconds,
       submittedAt: new Date().toISOString(),
@@ -712,14 +767,19 @@
 
     const vetoHtml = result.vetoTriggered
       ? `<div class="veto-alert triggered">
-           <strong>⚠️ 触发《国家职业技能标准》否定项提示（真实考核将记 0 分）：</strong>
+           <strong>⚠️ 触发《WMPSES_否定项规则》一票否决条款（${result.hasZeroPenalty ? '最终有效分已判 0 分' : '仅警告不判零'}）：</strong>
            <ul style="margin:6px 0 0 18px;padding:0;">
              ${result.vetoReasons.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}
            </ul>
          </div>`
       : `<div class="veto-alert safe">
-           <strong>✅ 未触发安全与重大隐患“一票否决”否定项</strong>（核心放行判定与重大缺陷识别通过底线核验）。
+           <strong>✅ 未触发《WMPSES_否定项规则》一票否决红线</strong>（按当前数据库启用的规则核验通过）。
          </div>`;
+
+    const shownScore = result.effectiveScore != null ? result.effectiveScore : result.earnedScore;
+    const scoreSubText = result.hasZeroPenalty
+      ? `有效得分（卷面原分 ${result.earnedScore} 分）`
+      : '卷面得分';
 
     const filteredDetails = onlyWrong ? result.details.filter((d) => !d.isCorrect) : result.details;
     const reviewHtml = filteredDetails.length
@@ -747,8 +807,8 @@
     body.innerHTML = `
       <div class="report-hero">
         <div class="report-stat">
-          <div class="report-stat-val ${result.passed ? 'pass' : 'fail'}">${result.earnedScore} / ${result.totalScore}</div>
-          <div class="report-stat-label">卷面得分</div>
+          <div class="report-stat-val ${result.passed ? 'pass' : 'fail'}">${shownScore} / ${result.totalScore}</div>
+          <div class="report-stat-label">${scoreSubText}</div>
         </div>
         <div class="report-stat">
           <div class="report-stat-val">${result.correctCount} / ${result.totalCount}</div>
@@ -1015,13 +1075,264 @@
     });
   }
 
+  async function persistEditToBackend(prefixMsg) {
+    const res = await adapter.saveQuestionBank(state.bank);
+    state.bank = res.bank;
+    if (res.sqliteSaved) {
+      $('data-source-badge').textContent = '· SQLite 数据库 (db/wmpses.db)';
+    }
+    renderHotspotsAndDock();
+    showToast(prefixMsg ? `${prefixMsg} · ${res.syncMessage}` : res.syncMessage, 'success');
+  }
+
+  function renderSqliteTableViewerHtml(snapshot) {
+    if (!snapshot) {
+      return '<div style="padding:18px;color:#94a3b8;">正在从本地 SQLite 服务读取表数据...</div>';
+    }
+    if (snapshot.error) {
+      return `
+        <div style="padding:16px;border-radius:10px;background:rgba(180,83,9,0.2);border:1px solid rgba(245,158,11,0.5);color:#fde68a;">
+          <strong>⚠️ 未检测到运行中的 SQLite 后台服务</strong>
+          <div style="margin-top:6px;font-size:12.5px;">请先启动项目根目录下的本地 SQLite 后台服务，即可将教师新增/编辑的热点和习题实时写入 <code>db/wmpses.db</code>：</div>
+          <pre style="margin:8px 0 0;padding:8px 10px;border-radius:6px;background:#090e1a;color:#7dd3fc;overflow:auto;">python3 /Users/mac/projects/WMPSES/server.py</pre>
+          <div style="margin-top:6px;font-size:12px;color:#cbd5e1;">（或在 Finder 中直接双击项目下的 <code>启动SQLite后台服务.command</code>）</div>
+        </div>
+      `;
+    }
+
+    const counts = snapshot.counts || {};
+    const tableNames = Object.keys(snapshot.tables || {});
+    if (!tableNames.includes(state.activeSqliteTable) && tableNames.length) {
+      state.activeSqliteTable = tableNames[0];
+    }
+    const rows = (snapshot.tables && snapshot.tables[state.activeSqliteTable]) || [];
+
+    const countChips = tableNames.map((tbl) => `
+      <button type="button" class="tab-btn sqlite-tbl-btn ${state.activeSqliteTable === tbl ? 'active' : ''}" data-tbl="${escapeHtml(tbl)}">
+        ${escapeHtml(tbl)} (${counts[tbl] != null ? counts[tbl] : 0})
+      </button>
+    `).join('');
+
+    let tableContent = '<div style="padding:16px;color:#94a3b8;">该表暂无记录</div>';
+    if (rows.length) {
+      const cols = Object.keys(rows[0]);
+      const ths = cols.map((c) => `<th style="padding:7px 10px;text-align:left;background:#090e1a;color:#7dd3fc;white-space:nowrap;border-bottom:1px solid rgba(148,163,184,0.25);">${escapeHtml(c)}</th>`).join('');
+      const trs = rows.map((r) => `
+        <tr>
+          ${cols.map((c) => {
+            const val = r[c] == null ? '' : String(r[c]);
+            const shortVal = val.length > 72 ? val.slice(0, 72) + '…' : val;
+            return `<td style="padding:6px 10px;border-bottom:1px solid rgba(148,163,184,0.12);white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(val)}">${escapeHtml(shortVal)}</td>`;
+          }).join('')}
+        </tr>
+      `).join('');
+      tableContent = `
+        <div style="overflow:auto;max-height:360px;border:1px solid rgba(148,163,184,0.25);border-radius:8px;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead><tr>${ths}</tr></thead>
+            <tbody>${trs}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    return `
+      <div style="font-size:12px;color:#86efac;margin-bottom:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span>🟢 已连接数据库：<code>${escapeHtml(snapshot.dbPath || 'db/wmpses.db')}</code></span>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-refresh-sqlite">🔄 刷新表数据</button>
+      </div>
+      <div class="tabs-bar" style="margin-bottom:10px;">${countChips}</div>
+      ${tableContent}
+    `;
+  }
+
+  async function loadAndRenderSqliteTab() {
+    try {
+      state.sqliteSnapshot = await adapter.fetchSqliteTables();
+    } catch (err) {
+      state.sqliteSnapshot = { error: err.message };
+    }
+    const container = $('sqlite-viewer-container');
+    if (container) {
+      container.innerHTML = renderSqliteTableViewerHtml(state.sqliteSnapshot);
+      container.querySelectorAll('.sqlite-tbl-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.activeSqliteTable = btn.dataset.tbl;
+          container.innerHTML = renderSqliteTableViewerHtml(state.sqliteSnapshot);
+          bindSqliteViewerButtons(container);
+        });
+      });
+      bindSqliteViewerButtons(container);
+    }
+  }
+
+  function bindSqliteViewerButtons(container) {
+    container.querySelectorAll('.sqlite-tbl-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.activeSqliteTable = btn.dataset.tbl;
+        container.innerHTML = renderSqliteTableViewerHtml(state.sqliteSnapshot);
+        bindSqliteViewerButtons(container);
+      });
+    });
+    const refreshBtn = $('btn-refresh-sqlite');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', loadAndRenderSqliteTab);
+    }
+  }
+
   // ==========================================
-  // 设置 & FileMaker 对接弹窗
+  // 工况台账、24项验收规范与设计方案弹窗
+  // ==========================================
+  function openDocsModal(initialTab) {
+    if (initialTab) state.activeDocsTab = initialTab;
+    renderDocsModal();
+    openModal('docs-modal');
+  }
+
+  function renderDocsModal() {
+    const body = $('docs-modal-body');
+    const docs = (state.bank && state.bank.scenarioDocs) || [];
+    const checklist = (state.bank && state.bank.checklistItems) || [];
+    const vetoRules = (state.bank && state.bank.vetoRules) || [];
+
+    const accountDocs = docs.filter((d) => d.docCategory === '工况台账');
+    const stdDocs = docs.filter((d) => d.docCategory === '引用标准');
+
+    const docsHtml = accountDocs.map((d) => `
+      <div class="question-card" style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+          <strong style="color:#7dd3fc;">${escapeHtml(d.docTitle)}</strong>
+          <span class="q-type-badge">${escapeHtml(d.docCode)} · ${escapeHtml(d.deptOrCategory)}</span>
+        </div>
+        <div style="color:#e2e8f0;font-size:13px;">${escapeHtml(d.contentSummary)}</div>
+        ${d.relatedHotspotCode ? `<div style="margin-top:6px;font-size:11.5px;color:#94a3b8;">关联设备位号：${escapeHtml(d.relatedHotspotCode)}</div>` : ''}
+      </div>
+    `).join('');
+
+    const checklistHtml = `
+      <div style="overflow:auto;max-height:430px;border:1px solid rgba(148,163,184,0.22);border-radius:8px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="background:#090e1a;color:#7dd3fc;">
+              <th style="padding:8px;text-align:center;">序号</th>
+              <th style="padding:8px;text-align:left;">验收方面</th>
+              <th style="padding:8px;text-align:left;">核查项</th>
+              <th style="padding:8px;text-align:left;">判定依据标准</th>
+              <th style="padding:8px;text-align:left;">现场工况（关联缺陷）</th>
+              <th style="padding:8px;text-align:center;">定位</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${checklist.map((c) => `
+              <tr style="border-bottom:1px solid rgba(148,163,184,0.12);">
+                <td style="padding:7px;text-align:center;">${c.itemNo}</td>
+                <td style="padding:7px;white-space:nowrap;">${escapeHtml(c.aspectName)}</td>
+                <td style="padding:7px;font-weight:600;color:#f8fafc;">${escapeHtml(c.checkItemName)}</td>
+                <td style="padding:7px;color:#cbd5e1;">${escapeHtml(c.standardBasis)}</td>
+                <td style="padding:7px;color:#94a3b8;">
+                  ${escapeHtml(c.sceneStatus)}
+                  ${c.relatedDefectCode ? `<span class="q-score-badge" style="margin-left:4px;">${escapeHtml(c.relatedDefectCode)}</span>` : ''}
+                </td>
+                <td style="padding:7px;text-align:center;">
+                  ${c.hotspotId ? `<button type="button" class="btn btn-primary btn-sm docs-jump-hs" data-hsid="${escapeHtml(c.hotspotId)}">前往</button>` : '-'}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    const stdHtml = `
+      <div style="overflow:auto;max-height:430px;border:1px solid rgba(148,163,184,0.22);border-radius:8px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+          <thead>
+            <tr style="background:#090e1a;color:#7dd3fc;">
+              <th style="padding:8px;text-align:left;">类别</th>
+              <th style="padding:8px;text-align:left;">标准编号</th>
+              <th style="padding:8px;text-align:left;">标准名称</th>
+              <th style="padding:8px;text-align:left;">在本系统中的用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${stdDocs.map((s) => `
+              <tr style="border-bottom:1px solid rgba(148,163,184,0.12);">
+                <td style="padding:7px;white-space:nowrap;">${escapeHtml(s.deptOrCategory)}</td>
+                <td style="padding:7px;white-space:nowrap;color:#38bdf8;">${escapeHtml(s.docCode)}</td>
+                <td style="padding:7px;font-weight:600;">${escapeHtml(s.docTitle)}</td>
+                <td style="padding:7px;color:#cbd5e1;">${escapeHtml(s.contentSummary)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    const vetoViewHtml = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+        <span style="color:#cbd5e1;font-size:12.5px;">当前考试判分实时读取下表规则执行一票否决核验：</span>
+        <button type="button" class="btn btn-warning btn-sm" id="btn-docs-goto-veto-cfg">⚙️ 编辑否定项规则与阈值</button>
+      </div>
+      ${vetoRules.map((r) => `
+        <div class="question-card" style="margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+            <strong>[${escapeHtml(r.code)}] ${escapeHtml(r.name)}</strong>
+            <span class="q-defect-badge ${r.isEnabled ? 'major' : 'interference'}">${r.isEnabled ? '已启用' : '已停用'} · ${r.penaltyAction === 'ZERO_SCORE' ? '触发记 0 分' : '仅提示警告'}</span>
+          </div>
+          <div style="margin-top:6px;font-size:12.5px;color:#cbd5e1;">
+            触发条件：<code>${escapeHtml(r.conditionType)}</code> ｜ 阈值：<strong>${r.thresholdValue}</strong> ｜ 目标：<code>${escapeHtml(r.targetRef || '-')}</code>
+          </div>
+          <div style="margin-top:4px;font-size:12px;color:#94a3b8;">告警说明：${escapeHtml(r.alertMessage)}</div>
+        </div>
+      `).join('')}
+    `;
+
+    body.innerHTML = `
+      <div class="tabs-bar">
+        <button type="button" class="tab-btn docs-tab-btn ${state.activeDocsTab === 'docs' ? 'active' : ''}" data-dtab="docs">📄 4份现场工况台账</button>
+        <button type="button" class="tab-btn docs-tab-btn ${state.activeDocsTab === 'checklist' ? 'active' : ''}" data-dtab="checklist">✅ 6方面24项验收规范 (${checklist.length})</button>
+        <button type="button" class="tab-btn docs-tab-btn ${state.activeDocsTab === 'standards' ? 'active' : ''}" data-dtab="standards">📚 附录C引用国标 (${stdDocs.length})</button>
+        <button type="button" class="tab-btn docs-tab-btn ${state.activeDocsTab === 'veto' ? 'active' : ''}" data-dtab="veto">⚖️ 否定项规则库 (${vetoRules.length})</button>
+      </div>
+      <div style="display:${state.activeDocsTab === 'docs' ? 'block' : 'none'};">${docsHtml}</div>
+      <div style="display:${state.activeDocsTab === 'checklist' ? 'block' : 'none'};">${checklistHtml}</div>
+      <div style="display:${state.activeDocsTab === 'standards' ? 'block' : 'none'};">${stdHtml}</div>
+      <div style="display:${state.activeDocsTab === 'veto' ? 'block' : 'none'};">${vetoViewHtml}</div>
+    `;
+
+    body.querySelectorAll('.docs-tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.activeDocsTab = btn.dataset.dtab;
+        renderDocsModal();
+      });
+    });
+
+    body.querySelectorAll('.docs-jump-hs').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        closeModal('docs-modal');
+        onHotspotActivated(btn.dataset.hsid);
+      });
+    });
+
+    const gotoVeto = $('btn-docs-goto-veto-cfg');
+    if (gotoVeto) {
+      gotoVeto.addEventListener('click', () => {
+        closeModal('docs-modal');
+        openSettingsModal('veto');
+      });
+    }
+  }
+
+  // ==========================================
+  // 设置 & SQLite / FileMaker 对接弹窗
   // ==========================================
   function openSettingsModal(initialTab) {
     if (initialTab) state.activeSettingsTab = initialTab;
     renderSettingsModal();
     openModal('settings-modal');
+    if (state.activeSettingsTab === 'sqlite') {
+      loadAndRenderSqliteTab();
+    }
   }
 
   function renderSettingsModal() {
@@ -1041,11 +1352,61 @@
         `).join('')
       : '<div style="color:#94a3b8;font-size:12px;">暂无历史交卷记录</div>';
 
+    const vetoRules = (state.bank && state.bank.vetoRules) || [];
+    const vetoCfgHtml = vetoRules.map((r, idx) => `
+      <div class="editor-question-box" style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <strong>[${escapeHtml(r.code)}] ${escapeHtml(r.name)}</strong>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" class="veto-cfg-enabled" data-vidx="${idx}" ${r.isEnabled ? 'checked' : ''}>
+            <span>启用此规则</span>
+          </label>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>判定条件类型（只读）</label>
+            <input type="text" class="form-control" value="${escapeHtml(r.conditionType)}" disabled>
+          </div>
+          <div class="form-field">
+            <label>触发阈值 (如 25分钟 / 漏判3项)</label>
+            <input type="number" step="1" min="1" class="form-control veto-cfg-threshold" data-vidx="${idx}" value="${r.thresholdValue}">
+          </div>
+          <div class="form-field">
+            <label>触发后处置动作</label>
+            <select class="form-control veto-cfg-action" data-vidx="${idx}">
+              <option value="ZERO_SCORE" ${r.penaltyAction === 'ZERO_SCORE' ? 'selected' : ''}>直接判 0 分（一票否决）</option>
+              <option value="WARN_ONLY" ${r.penaltyAction === 'WARN_ONLY' ? 'selected' : ''}>仅提示警告（不扣分）</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label>触发提示说明文案（支持 {threshold} 占位符）</label>
+          <input type="text" class="form-control veto-cfg-msg" data-vidx="${idx}" value="${escapeHtml(r.alertMessage)}">
+        </div>
+      </div>
+    `).join('');
+
     const body = $('settings-modal-body');
     body.innerHTML = `
       <div class="tabs-bar">
         <button type="button" class="tab-btn ${state.activeSettingsTab === 'bank' ? 'active' : ''}" data-tab="bank">📦 题库管理与考生信息</button>
-        <button type="button" class="tab-btn ${state.activeSettingsTab === 'fm' ? 'active' : ''}" data-tab="fm">🔗 FileMaker / REST 接口配置</button>
+        <button type="button" class="tab-btn ${state.activeSettingsTab === 'veto' ? 'active' : ''}" data-tab="veto">⚖️ 否定项规则表配置</button>
+        <button type="button" class="tab-btn ${state.activeSettingsTab === 'sqlite' ? 'active' : ''}" data-tab="sqlite">🗄️ SQLite 数据库表预览</button>
+        <button type="button" class="tab-btn ${state.activeSettingsTab === 'fm' ? 'active' : ''}" data-tab="fm">🔗 数据源与 FileMaker 配置</button>
+      </div>
+
+      <div id="tab-panel-veto" style="display:${state.activeSettingsTab === 'veto' ? 'block' : 'none'};">
+        <div style="font-size:12.5px;color:#cbd5e1;margin-bottom:10px;">
+          修改后点击下方保存按钮，将实时写入 SQLite <code>WMPSES_否定项规则</code> 表并立即作用于后续交卷评判。
+        </div>
+        ${vetoCfgHtml}
+        <div style="margin-top:10px;">
+          <button type="button" class="btn btn-success" id="btn-save-veto-rules">💾 保存否定项规则到 SQLite</button>
+        </div>
+      </div>
+
+      <div id="tab-panel-sqlite" style="display:${state.activeSettingsTab === 'sqlite' ? 'block' : 'none'};">
+        <div id="sqlite-viewer-container">${renderSqliteTableViewerHtml(state.sqliteSnapshot)}</div>
       </div>
 
       <div id="tab-panel-bank" style="display:${state.activeSettingsTab === 'bank' ? 'block' : 'none'};">
@@ -1075,12 +1436,17 @@
         <div class="form-field">
           <label>数据源工作模式</label>
           <select id="cfg-source-mode" class="form-control">
-            <option value="auto" ${cfg.sourceMode === 'auto' ? 'selected' : ''}>自动探测（优先 WebViewer / 已配置 API，离线兜底）</option>
-            <option value="local" ${cfg.sourceMode === 'local' ? 'selected' : ''}>纯本地离线模式（localStorage + 默认题库）</option>
+            <option value="auto" ${cfg.sourceMode === 'auto' ? 'selected' : ''}>自动探测（优先本地 SQLite 服务 / WebViewer / Data API，离线兜底）</option>
+            <option value="sqlite" ${cfg.sourceMode === 'sqlite' ? 'selected' : ''}>本地 SQLite 数据库服务 (db/wmpses.db)</option>
+            <option value="local" ${cfg.sourceMode === 'local' ? 'selected' : ''}>纯浏览器离线模式（localStorage + 默认题库）</option>
             <option value="webviewer" ${cfg.sourceMode === 'webviewer' ? 'selected' : ''}>FileMaker WebViewer 双向脚本桥接</option>
             <option value="dataapi" ${cfg.sourceMode === 'dataapi' ? 'selected' : ''}>FileMaker Data API (REST)</option>
             <option value="rest" ${cfg.sourceMode === 'rest' ? 'selected' : ''}>自定义 REST API 网关</option>
           </select>
+        </div>
+        <div class="form-field">
+          <label>本地 SQLite 后台服务地址</label>
+          <input type="text" id="cfg-sqlite-url" class="form-control" value="${escapeHtml(cfg.sqliteApiUrl || 'http://127.0.0.1:8765')}">
         </div>
 
         <h4 style="margin:14px 0 8px;color:#7dd3fc;">1. FileMaker WebViewer 脚本名称映射（配套 XML 已生成在 filemaker_script/）</h4>
@@ -1164,11 +1530,14 @@
       </div>
     `;
 
-    body.querySelectorAll('.tab-btn').forEach((btn) => {
+    body.querySelectorAll('.tab-btn[data-tab]').forEach((btn) => {
       btn.addEventListener('click', () => {
         saveSettingsFromDom(true);
         state.activeSettingsTab = btn.dataset.tab;
         renderSettingsModal();
+        if (state.activeSettingsTab === 'sqlite') {
+          loadAndRenderSqliteTab();
+        }
       });
     });
 
@@ -1188,11 +1557,10 @@
         reader.onload = function () {
           try {
             const parsed = JSON.parse(String(reader.result));
-            state.bank = adapter.saveLocalBank(parsed);
+            state.bank = adapter.normalizeQuestionBank(parsed);
             state.answers = {};
             state.practiceChecked = {};
-            renderHotspotsAndDock();
-            showToast(`成功导入题库（${state.bank.hotspots.length} 个部位）`, 'success');
+            persistEditToBackend(`成功导入题库（${state.bank.hotspots.length} 个部位）`);
           } catch (err) {
             showToast('题库 JSON 解析失败：' + err.message, 'error');
           }
@@ -1203,13 +1571,14 @@
 
     const resetBankBtn = $('btn-settings-reset-bank');
     if (resetBankBtn) {
-      resetBankBtn.addEventListener('click', () => {
+      resetBankBtn.addEventListener('click', async () => {
         if (!global.confirm('确定恢复出厂默认题库吗？您的自定义热点与修改将被覆盖。')) return;
-        state.bank = adapter.resetDefaultBank();
+        const res = await adapter.resetBankWithBackend();
+        state.bank = res.bank;
         state.answers = {};
         state.practiceChecked = {};
         renderHotspotsAndDock();
-        showToast('已恢复出厂默认题库', 'success');
+        showToast(res.message, 'success');
       });
     }
 
@@ -1225,12 +1594,33 @@
         else showToast('拉取成功：' + res.source, 'success');
       });
     }
+
+    const saveVetoBtn = $('btn-save-veto-rules');
+    if (saveVetoBtn) {
+      saveVetoBtn.addEventListener('click', () => {
+        const rules = state.bank.vetoRules || [];
+        document.querySelectorAll('.veto-cfg-enabled').forEach((el) => {
+          rules[Number(el.dataset.vidx)].isEnabled = el.checked;
+        });
+        document.querySelectorAll('.veto-cfg-threshold').forEach((el) => {
+          rules[Number(el.dataset.vidx)].thresholdValue = Math.max(1, Number(el.value) || 1);
+        });
+        document.querySelectorAll('.veto-cfg-action').forEach((el) => {
+          rules[Number(el.dataset.vidx)].penaltyAction = el.value;
+        });
+        document.querySelectorAll('.veto-cfg-msg').forEach((el) => {
+          rules[Number(el.dataset.vidx)].alertMessage = el.value.trim();
+        });
+        persistEditToBackend('已更新《WMPSES_否定项规则》');
+      });
+    }
   }
 
   function saveSettingsFromDom(silent) {
     if (!$('cfg-student-name')) return;
     const next = adapter.updateConfig({
       sourceMode: $('cfg-source-mode') ? $('cfg-source-mode').value : undefined,
+      sqliteApiUrl: $('cfg-sqlite-url') ? $('cfg-sqlite-url').value.trim() : undefined,
       student: {
         name: $('cfg-student-name').value.trim() || '现场考生',
         examineeId: $('cfg-student-id').value.trim()
@@ -1320,6 +1710,7 @@
 
     // 顶部操作
     $('btn-submit-exam').addEventListener('click', () => submitExamAndShowReport(false));
+    $('btn-open-docs').addEventListener('click', () => openDocsModal('docs'));
     $('btn-reset-exam').addEventListener('click', resetCurrentProgress);
     $('btn-open-settings').addEventListener('click', () => openSettingsModal('bank'));
     $('btn-student-badge').addEventListener('click', () => openSettingsModal('bank'));
@@ -1388,25 +1779,22 @@
       state.placingNewHotspot = false;
       $('panorama-stage').classList.remove('placing-new');
       $('btn-toggle-place-mode').textContent = '➕ 在图上新增热点';
-      adapter.saveLocalBank(state.bank);
-      renderHotspotsAndDock();
+      persistEditToBackend(`已在图上新增热点「${newHs.name}」`);
       openEditorModal(newHs.id);
     });
 
-    $('btn-save-bank').addEventListener('click', async () => {
-      const res = await adapter.saveQuestionBank(state.bank);
-      state.bank = res.bank;
-      renderHotspotsAndDock();
-      showToast(res.syncMessage, 'success');
+    $('btn-save-bank').addEventListener('click', () => {
+      persistEditToBackend('');
     });
 
-    $('btn-restore-default').addEventListener('click', () => {
+    $('btn-restore-default').addEventListener('click', async () => {
       if (!global.confirm('确定恢复出厂默认的 8 个部位与 15 道题目吗？')) return;
-      state.bank = adapter.resetDefaultBank();
+      const res = await adapter.resetBankWithBackend();
+      state.bank = res.bank;
       state.answers = {};
       state.practiceChecked = {};
       renderHotspotsAndDock();
-      showToast('已恢复出厂默认题库', 'success');
+      showToast(res.message, 'success');
     });
 
     // 热点编辑器弹窗保存/删除
@@ -1417,10 +1805,8 @@
       if (idx !== -1) {
         state.bank.hotspots[idx] = draft;
       }
-      state.bank = adapter.saveLocalBank(state.bank);
-      renderHotspotsAndDock();
       closeModal('editor-modal');
-      showToast(`已更新「${draft.name}」配置（请点击上方“保存并同步题库”同步到 FileMaker）`, 'success');
+      persistEditToBackend(`已更新「${draft.name}」`);
     });
 
     $('btn-delete-hotspot').addEventListener('click', () => {
@@ -1428,10 +1814,8 @@
       if (!draft) return;
       if (!global.confirm(`确定删除热点「${draft.name}」及其所有题目吗？`)) return;
       state.bank.hotspots = state.bank.hotspots.filter((h) => h.id !== draft.id);
-      state.bank = adapter.saveLocalBank(state.bank);
-      renderHotspotsAndDock();
       closeModal('editor-modal');
-      showToast('已删除热点', 'info');
+      persistEditToBackend(`已删除热点「${draft.name}」`);
     });
 
     // 设置弹窗保存

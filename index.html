@@ -36,8 +36,9 @@
         ⏱️ <span id="timer-text">30:00</span>
       </div>
       <button type="button" class="btn btn-success" id="btn-submit-exam">📊 查看汇总 / 交卷</button>
+      <button type="button" class="btn btn-ghost" id="btn-open-docs">📋 台账与验收方案</button>
       <button type="button" class="btn btn-ghost" id="btn-reset-exam">🔄 重置</button>
-      <button type="button" class="btn btn-ghost" id="btn-open-settings">⚙️ FileMaker / 题库</button>
+      <button type="button" class="btn btn-ghost" id="btn-open-settings">⚙️ 数据库 / 题库</button>
       <a href="gantt-roadmap.html" class="btn btn-ghost" style="text-decoration:none;" title="查看全周期任务清单与交互式甘特图">📅 任务清单与甘特图</a>
     </div>
   </header>
@@ -151,13 +152,13 @@
     </div>
   </div>
 
-  <!-- 4. FileMaker / 题库与后端对接配置弹窗 -->
+  <!-- 4. SQLite / FileMaker / 题库与后端对接配置弹窗 -->
   <div class="modal-backdrop" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="sm-title">
-    <div class="modal-dialog">
+    <div class="modal-dialog wide">
       <div class="modal-header">
         <div class="modal-title-group">
-          <span class="modal-code-badge">系统配置</span>
-          <h2 class="modal-title" id="sm-title">题库导入导出 & FileMaker 对接配置</h2>
+          <span class="modal-code-badge">数据中心</span>
+          <h2 class="modal-title" id="sm-title">题库管理 · SQLite 表数据查看 · FileMaker 对接配置</h2>
         </div>
         <button type="button" class="modal-close" data-close="settings-modal" aria-label="关闭设置">✕</button>
       </div>
@@ -168,6 +169,24 @@
           <button type="button" class="btn btn-ghost" data-close="settings-modal">关闭</button>
           <button type="button" class="btn btn-primary" id="btn-save-settings">💾 保存配置</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 工况台账、24项验收规范与设计方案弹窗 -->
+  <div class="modal-backdrop" id="docs-modal" role="dialog" aria-modal="true" aria-labelledby="dm-title">
+    <div class="modal-dialog wide">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-code-badge">设计方案库</span>
+          <h2 class="modal-title" id="dm-title">工况台账 · 24项验收确认单规范 · 引用标准与否定项规则</h2>
+        </div>
+        <button type="button" class="modal-close" data-close="docs-modal" aria-label="关闭资料">✕</button>
+      </div>
+      <div class="modal-body" id="docs-modal-body"></div>
+      <div class="modal-footer">
+        <span style="font-size:12px;color:#94a3b8;">数据来源：SQLite 关系表（WMPSES_工况资料与引用标准 / WMPSES_验收规范与确认单 / WMPSES_否定项规则）</span>
+        <button type="button" class="btn btn-ghost" data-close="docs-modal">关闭</button>
       </div>
     </div>
   </div>
