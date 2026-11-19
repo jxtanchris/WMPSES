@@ -1,0 +1,393 @@
+/**
+ * 工业废气治理工（二级/技师）实操模拟仿真考试系统 - 默认题库配置
+ * 依据：《工业废气治理工国家职业技能标准（2019年版）》1.1.1 系统启动前设备验收
+ * 覆盖：碱洗预处理＋三室蓄热式焚烧（RTO）联合装置 8 个核心部位、15 道题（共 50 分）、全部 D1~D10 缺陷与 G1~G3 干扰项
+ */
+(function (global) {
+  'use strict';
+
+  global.DEFAULT_QUESTION_BANK = {
+    meta: {
+      id: 'WMPSES-1.1.1-V1',
+      title: '工业废气治理工（二级/技师）实操模拟仿真考试系统',
+      subtitle: '1.1.1 系统启动前设备验收（碱洗预处理＋三室RTO联合装置）',
+      examCode: '6-28-02-05 / 1.1.1',
+      totalScore: 50,
+      passScore: 30,
+      durationMinutes: 30,
+      version: '1.0.0',
+      updatedAt: '2026-11-19'
+    },
+    hotspots: [
+      {
+        id: 'hs-scrubber-top',
+        order: 1,
+        code: 'A-101A',
+        name: '碱洗塔上部与塔顶平台',
+        category: '设备本体外观 / 监测仪表',
+        x: 16.0,
+        y: 34.0,
+        widgetType: 'scrubber_top',
+        sceneSummary: '碱洗塔喷淋层上方内壁防腐层起皮脱落约0.3m²，塔顶压力表PI-101强检标签已过期15天。',
+        questions: [
+          {
+            id: 'q-d1',
+            defectCode: 'D1',
+            defectLevel: 'major',
+            isMajorDefect: true,
+            type: 'single',
+            score: 4,
+            title: '核查碱洗塔喷淋层上方内壁时，发现防腐层大面积起皮脱落并露出碳钢基材（面积约0.3m²）。关于该现象的验收判定与处理，正确的是（ ）。',
+            options: [
+              { key: 'A', text: '合格，碱洗塔为常温低压设备，局部脱落不影响启动' },
+              { key: 'B', text: '不合格（一般缺陷），先启动投运，待下次大修时一并处理' },
+              { key: 'C', text: '不合格（重大缺陷），必须停工修补防腐并经测厚与复验合格后方可启动' },
+              { key: 'D', text: '无法判定，只需在验收台账备注“注意观察”即可放行' }
+            ],
+            answer: ['C'],
+            referenceStandard: 'HJ 2000-2018《大气污染治理工程技术导则》及设备防腐验收规范',
+            explanation: '碱洗塔内部存在碱性吸收液及可能穿透的酸性腐蚀介质，喷淋层上方内壁防腐层大面积脱落露出碳钢基材（0.3m²）会迅速引起塔体腐蚀减薄甚至穿孔泄漏，属于重大缺陷（D1），不得放行启动，必须停工修复防腐层并复测厚度合格。'
+          },
+          {
+            id: 'q-d8',
+            defectCode: 'D8',
+            defectLevel: 'general',
+            isMajorDefect: false,
+            type: 'single',
+            score: 3,
+            title: '放大查看塔顶压力表（PI-101）强检标签，显示检定有效期至 2026-11-04（当前已过期15天），表盘指示 0.15MPa。该项核查应判定为（ ）。',
+            options: [
+              { key: 'A', text: '合格，只要指针能动作且外观无破损即可继续使用' },
+              { key: 'B', text: '不合格（一般缺陷），需登记台账并限期更换或重新校验贴标' },
+              { key: 'C', text: '合格（干扰项），强检标签有30天宽限期' },
+              { key: 'D', text: '直接触发系统级中毒窒息否定项' }
+            ],
+            answer: ['B'],
+            referenceStandard: '《计量法》及本方案表2缺陷清单（D8）',
+            explanation: '压力表超过检定有效期（过期15天）属于不合格项，按实际风险审定为一般缺陷（D8），应登记缺陷台账并限期送检或更换合格仪表，防止读数失准。'
+          }
+        ]
+      },
+      {
+        id: 'hs-scrubber-bottom',
+        order: 2,
+        code: 'A-101B',
+        name: '碱洗塔下部法兰与液位联锁',
+        category: '安全联锁保护 / 设备本体外观',
+        x: 16.5,
+        y: 73.0,
+        widgetType: 'scrubber_bottom',
+        sceneSummary: 'LALL-101低低液位联锁处于旁路且无挂牌审批；DCS显示60%而就地液位仅20%；DN500法兰同侧相邻缺2条M20螺栓。',
+        questions: [
+          {
+            id: 'q-d6',
+            defectCode: 'D6',
+            defectLevel: 'major',
+            isMajorDefect: true,
+            type: 'multiple',
+            score: 4,
+            title: '对比 DCS 联锁画面与塔底就地液位计后，下列分析与判定正确的有（ ）。（多选）',
+            options: [
+              { key: 'A', text: '差压液位计引压管堵塞造成假液位（DCS显示60%，实际仅20%），属于重大缺陷' },
+              { key: 'B', text: 'LALL-101 液位低低联锁处于旁路状态且无挂牌、无审批单，违背安全联锁管理规定' },
+              { key: 'C', text: '若在此状态下强行启动循环泵，可能导致低液位泵空转烧毁或气体串压风险' },
+              { key: 'D', text: '应以 DCS 远传 60% 读数为准，现场就地玻璃板液位计可忽略' }
+            ],
+            answer: ['A', 'B', 'C'],
+            referenceStandard: 'GB 30871-2022 / 安全联锁投用及仪表比对规程（D6）',
+            explanation: 'D6场景中同时存在“联锁未经审批挂牌被旁路”和“引压管堵塞导致假液位”两项致命隐患。必须疏通引压管恢复真实液位指示，并取消旁路、做联锁动作试验确认投用后方可启动。'
+          },
+          {
+            id: 'q-d7',
+            defectCode: 'D7',
+            defectLevel: 'general',
+            isMajorDefect: false,
+            type: 'single',
+            score: 3,
+            title: '检查碱洗塔下部循环出口 DN500 法兰（FL-102）紧固情况，发现同侧相邻缺失 2 条 M20 螺栓（垫片完好、常温无渗漏）。按本方案缺陷分级标准应判为（ ）。',
+            options: [
+              { key: 'A', text: '合格，只要不渗漏就可以减少螺栓数量' },
+              { key: 'B', text: '不合格（一般缺陷），须补齐同规格 M20 螺栓并按对角顺序紧固到位' },
+              { key: 'C', text: '合格，同侧缺失2条属于安装工艺允许误差' },
+              { key: 'D', text: '不需要记录到缺陷台账中' }
+            ],
+            answer: ['B'],
+            referenceStandard: '管道与设备法兰紧固验收规范（D7）',
+            explanation: '法兰螺栓必须齐全、紧固力矩均匀，同侧相邻缺失2条M20螺栓属于不合格项（D7一般缺陷），开车前应督促检修人员补齐螺栓并复紧。'
+          }
+        ]
+      },
+      {
+        id: 'hs-induced-fan',
+        order: 3,
+        code: 'B-101',
+        name: '引风机与润滑油系统',
+        category: '润滑冷却系统',
+        x: 27.6,
+        y: 77.0,
+        widgetType: 'induced_fan',
+        sceneSummary: '主引风机油位低于下限约8mm且油品呈乳白色乳化；辅助侧油位在低限上方5mm且清亮透明。',
+        questions: [
+          {
+            id: 'q-d2',
+            defectCode: 'D2',
+            defectLevel: 'major',
+            isMajorDefect: true,
+            type: 'single',
+            score: 4,
+            title: '观察主引风机轴承箱油标（情况B），油位低于下限约 8mm，且油样呈乳白色乳化状。该问题的危害及判定是（ ）。',
+            options: [
+              { key: 'A', text: '合格，开机运行升温后水分会自动蒸发' },
+              { key: 'B', text: '不合格（一般缺陷），只需直接补充新润滑油至上下限之间即可' },
+              { key: 'C', text: '不合格（重大缺陷），直接启动易造成轴承润滑失效烧毁，须查明进水原因并彻底换油清洗' },
+              { key: 'D', text: '干扰项，油位略低于下限属正常热胀冷缩余量' }
+            ],
+            answer: ['C'],
+            referenceStandard: '转动设备润滑系统验收规范（D2）',
+            explanation: '润滑油低于下限且发生乳化（混入水分）会导致油膜破坏，大功率引风机启动后极易发生轴承抱死烧毁（重大缺陷 D2）。不能仅补油，必须排净乳化油、排查密封或冷却器漏水点、清洗并重新加注合格润滑油。'
+          },
+          {
+            id: 'q-g1',
+            defectCode: 'G1',
+            defectLevel: 'interference',
+            isMajorDefect: false,
+            type: 'judge',
+            score: 2,
+            title: '辅助侧轴承箱油标（情况A）显示油位处于下限刻度上方 5mm 处，且油品金黄清亮无杂质。有考生认为“接近下限即属于油位不足缺陷”，这种判断是否正确？（判断对错）',
+            options: [
+              { key: 'A', text: '正确（应该判定为不合格）' },
+              { key: 'B', text: '错误（该情况仍在上下限允许区间内，应判为合格）' }
+            ],
+            answer: ['B'],
+            referenceStandard: '本方案场景判定原则及 PDF 第 9 页对照练习（G1）',
+            explanation: '“接近下限不等于低于下限”。油位在油标下限上方 5mm 且油质清亮透明，完全处于允许区间内，属于本题刻意设置的干扰项（G1），不应误判为缺陷。'
+          }
+        ]
+      },
+      {
+        id: 'hs-cooling-water',
+        order: 4,
+        code: 'W-101',
+        name: '循环冷却水管线与阀组',
+        category: '润滑冷却系统 / 管线阀门',
+        x: 35.8,
+        y: 58.0,
+        widgetType: 'cooling_water',
+        sceneSummary: '主冷却水管压力表显示0.28MPa，但流量计示数为0 m³/h且供水阀关闭；另一分支回水温度实测45℃（设计≤50℃）。',
+        questions: [
+          {
+            id: 'q-d3',
+            defectCode: 'D3',
+            defectLevel: 'major',
+            isMajorDefect: true,
+            type: 'single',
+            score: 4,
+            title: '查看冷却水系统现场仪表，主供水管压力表显示 0.28MPa，但电磁流量计显示 0.00 m³/h，供水手动阀处于关闭位置。此时能否判定“冷却水已正常投用”？（ ）',
+            options: [
+              { key: 'A', text: '可以，有 0.28MPa 压力说明水已进入设备' },
+              { key: 'B', text: '不可以，管路存在憋压假象且流量为 0、供水阀关闭，属于重大缺陷（冷却水未投用）' },
+              { key: 'C', text: '可以，只要在 DCS 上强制把流量计设为正常值即可启动' },
+              { key: 'D', text: '属于一般缺陷，启动后再缓慢开启供水阀即可' }
+            ],
+            answer: ['B'],
+            referenceStandard: 'PDF 第 8 页判断练习及本方案（D3）',
+            explanation: '不能只看压力表！压力 0.28MPa 可能是阀前静压或管线憋压，核对阀位（关闭）与流量计（0 m³/h）可知冷却水根本未流动投用。若盲目启动将导致设备及风机轴承超温损坏，属重大缺陷（D3）。'
+          },
+          {
+            id: 'q-g2',
+            defectCode: 'G2',
+            defectLevel: 'interference',
+            isMajorDefect: false,
+            type: 'judge',
+            score: 2,
+            title: '某分支循环冷却水回水温度表（TI-302）当前读数为 45.0℃，设备设计要求回水温度 ≤ 50℃。该回水温度指标是否合格？（ ）',
+            options: [
+              { key: 'A', text: '合格，45.0℃ 未超出 ≤50℃ 的设计允许上限（属正常范围干扰项）' },
+              { key: 'B', text: '不合格，回水温度超过 40℃ 即构成重大高温故障' }
+            ],
+            answer: ['A'],
+            referenceStandard: '本方案表2干扰项清单（G2）',
+            explanation: '判定必须以设计值与规程为准，不能凭主观感觉认为“45℃偏热就是异常”。在设计要求 ≤50℃ 的前提下，45.0℃ 处于合格范围，属于干扰项（G2）。'
+          }
+        ]
+      },
+      {
+        id: 'hs-rto-chamber',
+        order: 5,
+        code: 'R-101',
+        name: '三室RTO本体与二层平台',
+        category: '设备本体外观 / 安全附件',
+        x: 50.2,
+        y: 43.0,
+        widgetType: 'rto_chamber',
+        sceneSummary: 'RTO二层平台一处护栏中横杆局部弯曲变形，立柱焊缝完好；人孔已开启，需检查受限空间作业安全前置条件。',
+        questions: [
+          {
+            id: 'q-d9',
+            defectCode: 'D9',
+            defectLevel: 'general',
+            isMajorDefect: false,
+            type: 'single',
+            score: 3,
+            title: '在 RTO 二层平台巡检时，发现东侧护栏一处中横杆受碰撞轻微弯曲变形，但立柱焊接牢固且不影响整体结构承载。该缺陷应如何定级与处置？（ ）',
+            options: [
+              { key: 'A', text: '重大缺陷，必须整套废气装置停产大修才能验收' },
+              { key: 'B', text: '一般缺陷（D9），不影响装置核心工艺安全，登记台账并限期整形修复' },
+              { key: 'C', text: '完全合格，不需要任何登记记录' },
+              { key: 'D', text: '立即判定整套设备可以无条件放行' }
+            ],
+            answer: ['B'],
+            referenceStandard: '本方案表2缺陷清单（D9）',
+            explanation: '区分问题轻重是技师实操的核心能力：护栏局部横杆变形但不影响承载力，属于一般缺陷（D9），应记录缺陷台账并限期整改，不应将其混同为导致停运的重大工艺隐患。'
+          },
+          {
+            id: 'q-n3',
+            defectCode: 'N3',
+            defectLevel: 'safety',
+            isMajorDefect: false,
+            type: 'multiple',
+            score: 3,
+            title: '验收人员若需通过人孔进入 RTO 蓄热室或碱洗塔内部检查填料与防腐层，按安全底线要求（GB 30871-2022），入内前必须完成哪些确认？（ ）（多选）',
+            options: [
+              { key: 'A', text: '完成机械通风置换及氧含量、可燃气体、有毒气体检测合格' },
+              { key: 'B', text: '确认与运行系统可靠盲板隔离，并办理受限空间作业审批' },
+              { key: 'C', text: '在人孔外设专人监护并备好应急救援器材' },
+              { key: 'D', text: '只要自己带着手电筒、屏住呼吸快速进出，就无需检测与监护' }
+            ],
+            answer: ['A', 'B', 'C'],
+            referenceStandard: 'GB 30871-2022《危险化学品企业特殊作业安全规范》及方案否定项 N3',
+            explanation: '未经气体分析检测、可靠隔离、审批与专人监护便进入塔内或炉内受限空间，极易引发中毒、窒息事故（本方案安全否定项 N3 红线）。'
+          }
+        ]
+      },
+      {
+        id: 'hs-rto-valves',
+        order: 6,
+        code: 'V-101',
+        name: 'RTO下部切换阀组与气源',
+        category: '管线阀门',
+        x: 50.2,
+        y: 77.0,
+        widgetType: 'rto_valves',
+        sceneSummary: '切换阀仪表气源压力仅0.32MPa（设计0.5~0.7MPa），就地动作测试切换阀全行程时间由3s延长至9s。',
+        questions: [
+          {
+            id: 'q-d4',
+            defectCode: 'D4',
+            defectLevel: 'major',
+            isMajorDefect: true,
+            type: 'single',
+            score: 4,
+            title: '检测 RTO 切换阀组发现：仪表气源压力为 0.32MPa（设计要求 0.5～0.7MPa），就地动作测试切换阀全行程时间由正常的 3s 延长至 9s。该隐患造成的直接后果及判定是（ ）。',
+            options: [
+              { key: 'A', text: '一般缺陷，阀门能动作即可，时间长一点反而运行更平稳' },
+              { key: 'B', text: '重大缺陷（D4），气源不足导致切换阀严重迟滞，易造成三室切换时未处理废气短窜超标排放或压力剧烈波动' },
+              { key: 'C', text: '合格，只要把主空压机停掉即可恢复' },
+              { key: 'D', text: '仅需修改 DCS 阀门报警延时参数掩盖即可' }
+            ],
+            answer: ['B'],
+            referenceStandard: 'RTO切换阀组验收规范及本方案（D4）',
+            explanation: '三室 RTO 靠切换阀快速准确切换实现蓄热与吹扫。仪表气源仅 0.32MPa 造成切换动作耗时 9s（正常≤3s），会导致进出气交叉短窜、VOCs 瞬时超标和炉膛压力波动，必须判为重大缺陷（D4），须先排查气源减压阀或管路泄漏恢复至 0.5~0.7MPa 并复测动作时间。'
+          }
+        ]
+      },
+      {
+        id: 'hs-cems-stack',
+        order: 7,
+        code: 'M-101',
+        name: '排气筒与CEMS/报警监测站',
+        category: '监测仪表 / 安全联锁保护',
+        x: 68.0,
+        y: 46.0,
+        widgetType: 'cems_stack',
+        sceneSummary: '可燃气体报警仪处于“标定”未投用状态；CEMS零点漂移+0.9%（要求±0.5%）、标气超期23天；CEMS量程与环评批复一致。',
+        questions: [
+          {
+            id: 'q-d5',
+            defectCode: 'D5',
+            defectLevel: 'major',
+            isMajorDefect: true,
+            type: 'multiple',
+            score: 4,
+            title: '在排气筒监测站与入口可燃气体报警控制器前核查，下列哪些属于阻碍系统安全环保启动的重大缺陷（D5）？（ ）（多选）',
+            options: [
+              { key: 'A', text: '可燃气体报警仪停留在“CAL 标定”模式，检测元件未正常投用' },
+              { key: 'B', text: 'CEMS 分析仪零点漂移达 +0.9% F.S.（超出 ±0.5% 规范限值）' },
+              { key: 'C', text: 'CEMS 校准用标准气体已过期 23 天，无法完成有效标定' },
+              { key: 'D', text: 'CEMS 设置的量程与环评批复一致' }
+            ],
+            answer: ['A', 'B', 'C'],
+            referenceStandard: 'HJ 75-2017 / HJ 76-2017 及 GB 50058 防爆监测要求（D5）',
+            explanation: 'RTO 入口可燃气体浓度（%LEL）未投用会导致高浓度废气窜入炉膛引发闪爆风险；CEMS 零点漂移超 ±0.5% 且标气过期 23 天导致环保排放监测失真。A、B、C 均为重大隐患；D 项与环评批复一致属正常设置。'
+          },
+          {
+            id: 'q-g3',
+            defectCode: 'G3',
+            defectLevel: 'interference',
+            isMajorDefect: false,
+            type: 'judge',
+            score: 2,
+            title: '核对 CEMS 分析仪量程参数时，发现其设定值与项目环评批复要求完全一致，但与仪表出厂铭牌上的默认最大量程不同。是否应将其判为不合格缺陷？（ ）',
+            options: [
+              { key: 'A', text: '是，必须强行改回出厂铭牌最大值' },
+              { key: 'B', text: '否，量程设置与环评批复及实际工艺排放浓度匹配即属合格（干扰项）' }
+            ],
+            answer: ['B'],
+            referenceStandard: 'HJ 75-2017 量程设定规范及本方案（G3）',
+            explanation: 'CEMS 实际运行量程应根据污染源排放标准与环评批复设定，出厂铭牌仅标示仪表硬件支持的最大能力范围。因此与环评批复一致属于正常合格状态（G3干扰项）。'
+          }
+        ]
+      },
+      {
+        id: 'hs-utilities-plc',
+        order: 8,
+        code: 'U-101',
+        name: '公用工程站与PLC总控柜',
+        category: '公用工程配套 / 总体放行结论',
+        x: 82.0,
+        y: 76.0,
+        widgetType: 'utilities_plc',
+        sceneSummary: '压缩空气0.68MPa、氮气0.50MPa、双回路供电正常；现场设备铭牌与管道色标污损不清；需给出整套装置最终验收结论。',
+        questions: [
+          {
+            id: 'q-d10',
+            defectCode: 'D10',
+            defectLevel: 'general',
+            isMajorDefect: false,
+            type: 'single',
+            score: 3,
+            title: '在公用工程站与控制柜区检查发现：压缩空气总管 0.68MPa（设计 0.6~0.8）、氮气 0.50MPa（设计 0.4~0.6）、双回路供电均正常带电；但部分现场设备铭牌及管道介质标识污损、色标不清（D10）。下列评价最准确的是（ ）。',
+            options: [
+              { key: 'A', text: '公用工程气/电参数全部不合格，需停电改造' },
+              { key: 'B', text: '公用工程主参数合格；铭牌与介质色标污损属于一般缺陷（D10），需登记并限期补全标识' },
+              { key: 'C', text: '铭牌与管道色标污损属于重大缺陷，可直接触发设备爆炸' },
+              { key: 'D', text: '只要双回路供电有 I 段带电即可，II 段备自投不需要检查' }
+            ],
+            answer: ['B'],
+            referenceStandard: '本方案表3公用工程判定口径及表2缺陷清单（D10）',
+            explanation: '压缩空气（0.68MPa）、氮气（0.50MPa）及双回路供电均符合启动条件；铭牌与介质色标污损影响现场管理与辨识，属一般缺陷（D10），应限期清洁或补牌。'
+          },
+          {
+            id: 'q-final',
+            defectCode: 'CONCLUSION',
+            defectLevel: 'critical',
+            isMajorDefect: false,
+            isCriticalConclusion: true,
+            type: 'single',
+            score: 5,
+            title: '【核心放行判定】综合本次对“碱洗预处理＋三室RTO联合装置”六大方面的全部检查结果，关于本套检修后装置能否启动及后续处置要求，最终验收结论应为（ ）。',
+            options: [
+              { key: 'A', text: '验收合格，具备启动条件，一般缺陷可在运行后逐步消除' },
+              { key: 'B', text: '验收不合格，不具备启动条件；须对 6 项重大缺陷停工整改并经复验、签字确认后方可移交启动，4 项一般缺陷限期整改' },
+              { key: 'C', text: '验收基本合格，仅开启引风机和 RTO 主燃烧器试运行 2 小时再说' },
+              { key: 'D', text: '只需把存在缺陷的仪表和联锁全部切至旁路即可强行启动' }
+            ],
+            answer: ['B'],
+            referenceStandard: '《工业废气治理工国家职业技能标准（2019年版）》1.1.1 核心判定及否定项规程',
+            explanation: '本装置存在防腐脱落(D1)、油位低且乳化(D2)、冷却水未投用(D3)、气源不足切换迟滞(D4)、报警仪未投用与CEMS超期(D5)、液位联锁旁路与假指示(D6)共 6 项重大缺陷，绝对不具备启动条件！若误判“合格/放行”，在国家技能考核中将直接触发“一票否决（0分）”否定项。'
+          }
+        ]
+      }
+    ]
+  };
+})(window);

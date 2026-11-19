@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmxmlsnippet type="FMObjectList">
+  <Script includeInMenu="True" runFullAccess="False" id="102" name="接收仿真考试交卷成绩">
+    <Step enable="True" id="89" name="# (comment)">
+      <Text>用途：接收前端 WebViewer 交卷传回的 JSON 参数，分别写入 WMPSES_考试记录 主表与 WMPSES_作答明细 子表</Text>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[Get ( LayoutName )]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$originLayout</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[Get ( ScriptParameter )]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$payload</Name>
+    </Step>
+    <Step enable="True" id="68" name="If">
+      <Calculation><![CDATA[IsEmpty ( $payload ) or Left ( JSONGetElement ( $payload ; "" ) ; 1 ) = "?"]]></Calculation>
+    </Step>
+    <Step enable="True" id="87" name="Show Custom Dialog">
+      <Title>
+        <Calculation><![CDATA["交卷数据异常"]]></Calculation>
+      </Title>
+      <Message>
+        <Calculation><![CDATA["未收到有效的 JSON 交卷数据"]]></Calculation>
+      </Message>
+      <Buttons>
+        <Button CommitState="True">
+          <Name>
+            <Calculation><![CDATA["确定"]]></Calculation>
+          </Name>
+        </Button>
+      </Buttons>
+    </Step>
+    <Step enable="True" id="103" name="Exit Script">
+      <Calculation><![CDATA[False]]></Calculation>
+    </Step>
+    <Step enable="True" id="70" name="End If"/>
+    <Step enable="True" id="89" name="# (comment)">
+      <Text>1. 写入 WMPSES_考试记录 主表</Text>
+    </Step>
+    <Step enable="True" id="6" name="Go to Layout">
+      <LayoutDestination value="SelectedLayout"/>
+      <Layout id="4" name="WMPSES_考试记录"/>
+    </Step>
+    <Step enable="True" id="79" name="New Record/Request"/>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[WMPSES_考试记录::pk_ResultID]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$resultId</Name>
+    </Step>
+    <Step enable="True" id="68" name="If">
+      <Calculation><![CDATA[IsEmpty ( $resultId )]]></Calculation>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[Get ( UUID )]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$resultId</Name>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[$resultId]]></Calculation>
+      <Field table="WMPSES_考试记录" id="1" name="pk_ResultID"/>
+    </Step>
+    <Step enable="True" id="70" name="End If"/>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[Let ( [ eid = JSONGetElement ( $payload ; "examId" ) ] ; If ( IsEmpty ( eid ) ; JSONGetElement ( $payload ; "examCode" ) ; eid ) )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="2" name="fk_ExamID"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[JSONGetElement ( $payload ; "studentName" )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="3" name="ExamineeName"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[JSONGetElement ( $payload ; "examineeId" )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="4" name="ExamineeID"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[JSONGetElement ( $payload ; "mode" )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="5" name="ExamMode"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[GetAsNumber ( JSONGetElement ( $payload ; "earnedScore" ) )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="6" name="Score"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[GetAsNumber ( JSONGetElement ( $payload ; "totalScore" ) )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="7" name="TotalScore"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[GetAsNumber ( JSONGetElement ( $payload ; "accuracy" ) )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="8" name="Accuracy"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[If ( GetAsBoolean ( JSONGetElement ( $payload ; "passed" ) ) ; "合格" ; "不合格" )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="9" name="PassStatus"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[If ( GetAsBoolean ( JSONGetElement ( $payload ; "vetoTriggered" ) ) ; 1 ; 0 )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="10" name="VetoTriggered"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[JSONGetElement ( $payload ; "vetoReason" )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="11" name="VetoReason"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[GetAsNumber ( JSONGetElement ( $payload ; "durationSeconds" ) )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="12" name="DurationSeconds"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[Get ( CurrentTimestamp )]]></Calculation>
+      <Field table="WMPSES_考试记录" id="13" name="SubmittedAt"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[$payload]]></Calculation>
+      <Field table="WMPSES_考试记录" id="14" name="ResultDetailJSON"/>
+    </Step>
+    <Step enable="True" id="75" name="Commit Records/Requests">
+      <NoInteract state="True"/>
+    </Step>
+    <Step enable="True" id="89" name="# (comment)">
+      <Text>2. 循环写入 WMPSES_作答明细 子表（逐题明细供数据分析）</Text>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[ValueCount ( JSONListKeys ( $payload ; "details" ) )]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$detailCount</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[0]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$i</Name>
+    </Step>
+    <Step enable="True" id="6" name="Go to Layout">
+      <LayoutDestination value="SelectedLayout"/>
+      <Layout id="5" name="WMPSES_作答明细"/>
+    </Step>
+    <Step enable="True" id="71" name="Loop"/>
+    <Step enable="True" id="72" name="Exit Loop If">
+      <Calculation><![CDATA[$i ≥ $detailCount]]></Calculation>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[JSONGetElement ( $payload ; "details[" & $i & "]" )]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$dJson</Name>
+    </Step>
+    <Step enable="True" id="79" name="New Record/Request"/>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[Get ( UUID )]]></Calculation>
+      <Field table="WMPSES_作答明细" id="1" name="pk_DetailID"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[$resultId]]></Calculation>
+      <Field table="WMPSES_作答明细" id="2" name="fk_ResultID"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[JSONGetElement ( $dJson ; "questionId" )]]></Calculation>
+      <Field table="WMPSES_作答明细" id="3" name="fk_QuestionID"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[JSONGetElement ( $dJson ; "hotspotCode" )]]></Calculation>
+      <Field table="WMPSES_作答明细" id="4" name="HotspotCode"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[JSONGetElement ( $dJson ; "defectCode" )]]></Calculation>
+      <Field table="WMPSES_作答明细" id="5" name="DefectCode"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[Substitute ( JSONListValues ( $dJson ; "userAnswer" ) ; ¶ ; "," )]]></Calculation>
+      <Field table="WMPSES_作答明细" id="6" name="UserAnswer"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[Substitute ( JSONListValues ( $dJson ; "correctAnswer" ) ; ¶ ; "," )]]></Calculation>
+      <Field table="WMPSES_作答明细" id="7" name="CorrectAnswer"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[If ( GetAsBoolean ( JSONGetElement ( $dJson ; "isCorrect" ) ) ; 1 ; 0 )]]></Calculation>
+      <Field table="WMPSES_作答明细" id="8" name="IsCorrect"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA[GetAsNumber ( JSONGetElement ( $dJson ; "earned" ) )]]></Calculation>
+      <Field table="WMPSES_作答明细" id="9" name="EarnedScore"/>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[$i + 1]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$i</Name>
+    </Step>
+    <Step enable="True" id="73" name="End Loop"/>
+    <Step enable="True" id="75" name="Commit Records/Requests">
+      <NoInteract state="True"/>
+    </Step>
+    <Step enable="True" id="6" name="Go to Layout">
+      <LayoutDestination value="LayoutNameByCalc"/>
+      <Layout>
+        <Calculation><![CDATA[$originLayout]]></Calculation>
+      </Layout>
+    </Step>
+    <Step enable="True" id="103" name="Exit Script">
+      <Calculation><![CDATA[True]]></Calculation>
+    </Step>
+  </Script>
+</fmxmlsnippet>

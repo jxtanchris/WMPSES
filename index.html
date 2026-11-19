@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工业废气治理工实操模拟仿真考试系统（1.1.1 设备验收）</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-group">
+      <div class="brand-icon" aria-hidden="true">🏭</div>
+      <div>
+        <h1 class="brand-title" id="app-title">工业废气治理工（二级/技师）实操模拟仿真考试系统</h1>
+        <div class="brand-subtitle">
+          <span id="app-subtitle">1.1.1 系统启动前设备验收（碱洗预处理＋三室RTO联合装置）</span>
+          <button type="button" class="student-pill" id="btn-student-badge" title="点击设置考生信息与 FileMaker 对接">
+            👤 <span id="student-name-display">现场考生</span>
+          </button>
+          <span id="data-source-badge" style="color:#94a3b8;">· 本地离线就绪</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mode-switcher" role="group" aria-label="系统模式切换">
+      <button type="button" class="mode-btn active" data-mode="practice">🎯 练习演示模式</button>
+      <button type="button" class="mode-btn" data-mode="exam">📝 正式考试模式</button>
+      <button type="button" class="mode-btn" data-mode="edit">🛠️ 教师编辑/标点</button>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="status-chip">
+        已查部位 <strong id="stat-hotspots">0/8</strong> · 已答题 <strong id="stat-questions">0/15</strong>
+      </div>
+      <div class="status-chip timer-chip" id="timer-chip" style="display:none;">
+        ⏱️ <span id="timer-text">30:00</span>
+      </div>
+      <button type="button" class="btn btn-success" id="btn-submit-exam">📊 查看汇总 / 交卷</button>
+      <button type="button" class="btn btn-ghost" id="btn-reset-exam">🔄 重置</button>
+      <button type="button" class="btn btn-ghost" id="btn-open-settings">⚙️ FileMaker / 题库</button>
+      <a href="gantt-roadmap.html" class="btn btn-ghost" style="text-decoration:none;" title="查看全周期任务清单与交互式甘特图">📅 任务清单与甘特图</a>
+    </div>
+  </header>
+
+  <main class="stage-container">
+    <!-- 教师编辑模式提示横幅 -->
+    <section class="edit-banner" id="edit-banner" aria-live="polite">
+      <div>
+        <strong>🛠️ 教师编辑 / 标点模式已开启：</strong>
+        <span id="edit-banner-tip">直接拖拽图片上的热点可微调坐标位置，点击热点可增删改习题、选项与标准解析。</span>
+      </div>
+      <div class="edit-banner-actions">
+        <button type="button" class="btn btn-warning btn-sm" id="btn-toggle-place-mode">➕ 在图上新增热点</button>
+        <button type="button" class="btn btn-success btn-sm" id="btn-save-bank">💾 保存并同步题库</button>
+        <button type="button" class="btn btn-danger btn-sm" id="btn-restore-default">↩️ 恢复出厂题库</button>
+      </div>
+    </section>
+
+    <!-- 全景图交互舞台 -->
+    <section class="stage-card">
+      <div class="stage-header-bar">
+        <div class="stage-hint" id="stage-hint">
+          💡 <strong>操作提示：</strong>点击装置图上闪烁的热点圆标（或下方设备导航卡片），查看现场仪表与设备特写并作答验收习题。
+        </div>
+        <div class="stage-legend">
+          <span class="legend-item"><i class="legend-dot pending"></i> 未核查</span>
+          <span class="legend-item"><i class="legend-dot partial"></i> 部分作答</span>
+          <span class="legend-item"><i class="legend-dot done"></i> 已完成 / 全对</span>
+          <span class="legend-item"><i class="legend-dot error"></i> 练习有错题</span>
+        </div>
+      </div>
+
+      <div class="panorama-viewport">
+        <div class="panorama-stage" id="panorama-stage">
+          <img id="panorama-img" class="panorama-img" alt="碱洗预处理与三室RTO联合装置全景图">
+          <div class="hotspot-layer" id="hotspot-layer"></div>
+        </div>
+      </div>
+
+      <!-- 底部设备快捷导航卡片 -->
+      <div class="device-dock" id="device-dock" aria-label="设备部位快捷导航"></div>
+    </section>
+  </main>
+
+  <!-- 1. 部位仿真工况与答题弹窗 -->
+  <div class="modal-backdrop" id="question-modal" role="dialog" aria-modal="true" aria-labelledby="qm-title">
+    <div class="modal-dialog wide">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-code-badge" id="qm-code">A-101A</span>
+          <h2 class="modal-title" id="qm-title">设备部位名称</h2>
+          <span class="modal-category" id="qm-category">验收方面</span>
+        </div>
+        <button type="button" class="modal-close" data-close="question-modal" aria-label="关闭弹窗">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="sim-widget-box" id="visual-widget-container"></div>
+        <div class="question-list" id="question-list-container"></div>
+      </div>
+      <div class="modal-footer">
+        <div id="qm-progress-text" style="color:#94a3b8;font-size:12.5px;">本部位完成进度：0 / 2</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-ghost" id="btn-prev-hotspot">← 上一部位</button>
+          <button type="button" class="btn btn-primary" id="btn-next-hotspot">下一部位 →</button>
+          <button type="button" class="btn btn-ghost" data-close="question-modal">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 考试交卷与练习汇总成绩单弹窗 -->
+  <div class="modal-backdrop" id="report-modal" role="dialog" aria-modal="true" aria-labelledby="rm-title">
+    <div class="modal-dialog wide">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-code-badge">考核评估报告</span>
+          <h2 class="modal-title" id="rm-title">启动前设备验收仿真成绩单</h2>
+        </div>
+        <button type="button" class="modal-close" data-close="report-modal" aria-label="关闭报告">✕</button>
+      </div>
+      <div class="modal-body" id="report-modal-body"></div>
+      <div class="modal-footer">
+        <div id="rm-sync-status" style="color:#7dd3fc;font-size:12.5px;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-ghost" id="btn-toggle-wrong-only">仅看错题</button>
+          <button type="button" class="btn btn-primary" id="btn-export-result-json">导出成绩 JSON</button>
+          <button type="button" class="btn btn-ghost" data-close="report-modal">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 教师热点与题目编辑器弹窗 -->
+  <div class="modal-backdrop" id="editor-modal" role="dialog" aria-modal="true" aria-labelledby="em-title">
+    <div class="modal-dialog wide">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-code-badge">热点编辑器</span>
+          <h2 class="modal-title" id="em-title">编辑热点部位与关联习题</h2>
+        </div>
+        <button type="button" class="modal-close" data-close="editor-modal" aria-label="关闭编辑器">✕</button>
+      </div>
+      <div class="modal-body" id="editor-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" id="btn-delete-hotspot">🗑️ 删除此热点</button>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost" data-close="editor-modal">取消</button>
+          <button type="button" class="btn btn-success" id="btn-save-hotspot-edit">✅ 应用修改到题库</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. FileMaker / 题库与后端对接配置弹窗 -->
+  <div class="modal-backdrop" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="sm-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-code-badge">系统配置</span>
+          <h2 class="modal-title" id="sm-title">题库导入导出 & FileMaker 对接配置</h2>
+        </div>
+        <button type="button" class="modal-close" data-close="settings-modal" aria-label="关闭设置">✕</button>
+      </div>
+      <div class="modal-body" id="settings-modal-body"></div>
+      <div class="modal-footer">
+        <span id="fm-env-indicator" style="font-size:12px;color:#94a3b8;"></span>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost" data-close="settings-modal">关闭</button>
+          <button type="button" class="btn btn-primary" id="btn-save-settings">💾 保存配置</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="js/plant-image-data.js"></script>
+  <script src="js/question-bank.js"></script>
+  <script src="js/visual-widgets.js"></script>
+  <script src="js/fm-adapter.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

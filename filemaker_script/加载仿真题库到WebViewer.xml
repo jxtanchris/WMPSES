@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmxmlsnippet type="FMObjectList">
+  <Script includeInMenu="True" runFullAccess="False" id="101" name="加载仿真题库到WebViewer">
+    <Step enable="True" id="89" name="# (comment)">
+      <Text>用途：从 FileMaker 5表关系型题库读取配置并注入 WebViewer ("wv_exam")</Text>
+    </Step>
+    <Step enable="True" id="89" name="# (comment)">
+      <Text>前提：当前处于 WMPSES_试卷场景 布局，且 WebViewer 对象名称为 "wv_exam"</Text>
+    </Step>
+    <Step enable="True" id="86" name="Set Error Capture">
+      <Set state="True"/>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[Get ( LayoutName )]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$originLayout</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[WMPSES_试卷场景::pk_ExamID]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$examId</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[JSONSetElement ( "{}" ;
+  [ "id" ; WMPSES_试卷场景::pk_ExamID ; JSONString ] ;
+  [ "title" ; WMPSES_试卷场景::Title ; JSONString ] ;
+  [ "subtitle" ; WMPSES_试卷场景::Subtitle ; JSONString ] ;
+  [ "examCode" ; WMPSES_试卷场景::ExamCode ; JSONString ] ;
+  [ "totalScore" ; GetAsNumber ( WMPSES_试卷场景::TotalScore ) ; JSONNumber ] ;
+  [ "passScore" ; GetAsNumber ( WMPSES_试卷场景::PassScore ) ; JSONNumber ] ;
+  [ "durationMinutes" ; GetAsNumber ( WMPSES_试卷场景::DurationMinutes ) ; JSONNumber ] ;
+  [ "version" ; WMPSES_试卷场景::Version ; JSONString ] ;
+  [ "updatedAt" ; GetAsText ( WMPSES_试卷场景::UpdatedAt ) ; JSONString ]
+)]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$metaJson</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[Evaluate ( "WMPSES_试卷场景::c_FullBankJSON" )]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$bankJson</Name>
+    </Step>
+    <Step enable="True" id="89" name="# (comment)">
+      <Text>若未配置计算字段 c_FullBankJSON，则动态查询关联表 WMPSES_设备热点 与 WMPSES_习题库 组装 JSON</Text>
+    </Step>
+    <Step enable="True" id="68" name="If">
+      <Calculation><![CDATA[IsEmpty ( $bankJson ) or Left ( $bankJson ; 1 ) = "?"]]></Calculation>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA["[]"]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$hotspotsArr</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[0]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$hsIdx</Name>
+    </Step>
+    <Step enable="True" id="6" name="Go to Layout">
+      <LayoutDestination value="SelectedLayout"/>
+      <Layout id="2" name="WMPSES_设备热点"/>
+    </Step>
+    <Step enable="True" id="22" name="Enter Find Mode">
+      <Restore state="False"/>
+    </Step>
+    <Step enable="True" id="76" name="Set Field">
+      <Calculation><![CDATA["==" & $examId]]></Calculation>
+      <Field table="WMPSES_设备热点" id="2" name="fk_ExamID"/>
+    </Step>
+    <Step enable="True" id="28" name="Perform Find">
+      <Restore state="False"/>
+    </Step>
+    <Step enable="True" id="68" name="If">
+      <Calculation><![CDATA[Get ( FoundCount ) > 0]]></Calculation>
+    </Step>
+    <Step enable="True" id="16" name="Go to Record/Request/Page">
+      <NoInteract state="True"/>
+      <RowPageLocation value="First"/>
+    </Step>
+    <Step enable="True" id="71" name="Loop"/>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[WMPSES_设备热点::pk_HotspotID]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$hsId</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[Let ( [
+  cnt = Count ( WMPSES_习题库::pk_QuestionID )
+] ;
+  While (
+    [ i = 1 ; qArr = "[]" ] ;
+    i ≤ cnt ;
+    [
+      optA = GetNthRecord ( WMPSES_习题库::OptionA ; i ) ;
+      optB = GetNthRecord ( WMPSES_习题库::OptionB ; i ) ;
+      optC = GetNthRecord ( WMPSES_习题库::OptionC ; i ) ;
+      optD = GetNthRecord ( WMPSES_习题库::OptionD ; i ) ;
+      optE = GetNthRecord ( WMPSES_习题库::OptionE ; i ) ;
+      opts = "[]" ;
+      oi = 0 ;
+      opts = If ( not IsEmpty ( optA ) ; JSONSetElement ( opts ; ["[" & oi & "].key" ; "A" ; JSONString] ; ["[" & oi & "].text" ; optA ; JSONString] ) ; opts ) ;
+      oi = If ( not IsEmpty ( optA ) ; oi + 1 ; oi ) ;
+      opts = If ( not IsEmpty ( optB ) ; JSONSetElement ( opts ; ["[" & oi & "].key" ; "B" ; JSONString] ; ["[" & oi & "].text" ; optB ; JSONString] ) ; opts ) ;
+      oi = If ( not IsEmpty ( optB ) ; oi + 1 ; oi ) ;
+      opts = If ( not IsEmpty ( optC ) ; JSONSetElement ( opts ; ["[" & oi & "].key" ; "C" ; JSONString] ; ["[" & oi & "].text" ; optC ; JSONString] ) ; opts ) ;
+      oi = If ( not IsEmpty ( optC ) ; oi + 1 ; oi ) ;
+      opts = If ( not IsEmpty ( optD ) ; JSONSetElement ( opts ; ["[" & oi & "].key" ; "D" ; JSONString] ; ["[" & oi & "].text" ; optD ; JSONString] ) ; opts ) ;
+      oi = If ( not IsEmpty ( optD ) ; oi + 1 ; oi ) ;
+      opts = If ( not IsEmpty ( optE ) ; JSONSetElement ( opts ; ["[" & oi & "].key" ; "E" ; JSONString] ; ["[" & oi & "].text" ; optE ; JSONString] ) ; opts ) ;
+      ansRaw = Substitute ( Trim ( GetNthRecord ( WMPSES_习题库::AnswerKeys ; i ) ) ; [ "，" ; "," ] ; [ " " ; "" ] ; [ "," ; ¶ ] ) ;
+      ansCnt = ValueCount ( ansRaw ) ;
+      ansArr = While (
+        [ k = 1 ; a = "[]" ] ;
+        k ≤ ansCnt ;
+        [
+          v = GetValue ( ansRaw ; k ) ;
+          a = If ( not IsEmpty ( v ) ; JSONSetElement ( a ; "[" & (k - 1) & "]" ; v ; JSONString ) ; a ) ;
+          k = k + 1
+        ] ;
+        a
+      ) ;
+      qObj = JSONSetElement ( "{}" ;
+        [ "id" ; GetNthRecord ( WMPSES_习题库::pk_QuestionID ; i ) ; JSONString ] ;
+        [ "defectCode" ; GetNthRecord ( WMPSES_习题库::DefectCode ; i ) ; JSONString ] ;
+        [ "defectLevel" ; GetNthRecord ( WMPSES_习题库::DefectLevel ; i ) ; JSONString ] ;
+        [ "isMajorDefect" ; GetAsBoolean ( GetNthRecord ( WMPSES_习题库::IsMajorDefect ; i ) ) ; JSONBoolean ] ;
+        [ "isCriticalConclusion" ; GetAsBoolean ( GetNthRecord ( WMPSES_习题库::IsCriticalConclusion ; i ) ) ; JSONBoolean ] ;
+        [ "type" ; GetNthRecord ( WMPSES_习题库::QuestionType ; i ) ; JSONString ] ;
+        [ "score" ; GetAsNumber ( GetNthRecord ( WMPSES_习题库::Score ; i ) ) ; JSONNumber ] ;
+        [ "title" ; GetNthRecord ( WMPSES_习题库::QuestionTitle ; i ) ; JSONString ] ;
+        [ "options" ; opts ; JSONArray ] ;
+        [ "answer" ; ansArr ; JSONArray ] ;
+        [ "referenceStandard" ; GetNthRecord ( WMPSES_习题库::ReferenceStandard ; i ) ; JSONString ] ;
+        [ "explanation" ; GetNthRecord ( WMPSES_习题库::Explanation ; i ) ; JSONString ]
+      ) ;
+      qArr = JSONSetElement ( qArr ; "[" & (i - 1) & "]" ; qObj ; JSONObject ) ;
+      i = i + 1
+    ] ;
+    qArr
+  )
+)]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$qArr</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[JSONSetElement ( "{}" ;
+  [ "id" ; WMPSES_设备热点::pk_HotspotID ; JSONString ] ;
+  [ "order" ; GetAsNumber ( WMPSES_设备热点::SortOrder ) ; JSONNumber ] ;
+  [ "code" ; WMPSES_设备热点::DeviceCode ; JSONString ] ;
+  [ "name" ; WMPSES_设备热点::DeviceName ; JSONString ] ;
+  [ "category" ; WMPSES_设备热点::Category ; JSONString ] ;
+  [ "x" ; GetAsNumber ( WMPSES_设备热点::CoordX ) ; JSONNumber ] ;
+  [ "y" ; GetAsNumber ( WMPSES_设备热点::CoordY ) ; JSONNumber ] ;
+  [ "widgetType" ; WMPSES_设备热点::WidgetType ; JSONString ] ;
+  [ "sceneSummary" ; WMPSES_设备热点::SceneSummary ; JSONString ] ;
+  [ "questions" ; $qArr ; JSONArray ]
+)]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$hsObj</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[JSONSetElement ( $hotspotsArr ; "[" & $hsIdx & "]" ; $hsObj ; JSONObject )]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$hotspotsArr</Name>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[$hsIdx + 1]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$hsIdx</Name>
+    </Step>
+    <Step enable="True" id="16" name="Go to Record/Request/Page">
+      <NoInteract state="True"/>
+      <RowPageLocation value="Next"/>
+      <Exit state="True"/>
+    </Step>
+    <Step enable="True" id="73" name="End Loop"/>
+    <Step enable="True" id="70" name="End If"/>
+    <Step enable="True" id="6" name="Go to Layout">
+      <LayoutDestination value="LayoutNameByCalc"/>
+      <Layout>
+        <Calculation><![CDATA[$originLayout]]></Calculation>
+      </Layout>
+    </Step>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[JSONSetElement ( "{}" ;
+  [ "meta" ; $metaJson ; JSONObject ] ;
+  [ "hotspots" ; $hotspotsArr ; JSONArray ]
+)]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$bankJson</Name>
+    </Step>
+    <Step enable="True" id="70" name="End If"/>
+    <Step enable="True" id="141" name="Set Variable">
+      <Value>
+        <Calculation><![CDATA[JSONSetElement ( "{}" ;
+  [ "name" ; Get ( AccountName ) ; JSONString ] ;
+  [ "examineeId" ; "" ; JSONString ]
+)]]></Calculation>
+      </Value>
+      <Repetition>
+        <Calculation><![CDATA[1]]></Calculation>
+      </Repetition>
+      <Name>$studentJson</Name>
+    </Step>
+    <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+      <ObjectName>
+        <Calculation><![CDATA["wv_exam"]]></Calculation>
+      </ObjectName>
+      <FunctionName>
+        <Calculation><![CDATA["FMExam.setStudentInfo"]]></Calculation>
+      </FunctionName>
+      <ParameterList>
+        <Parameter>
+          <Calculation><![CDATA[$studentJson]]></Calculation>
+        </Parameter>
+      </ParameterList>
+    </Step>
+    <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+      <ObjectName>
+        <Calculation><![CDATA["wv_exam"]]></Calculation>
+      </ObjectName>
+      <FunctionName>
+        <Calculation><![CDATA["FMExam.loadQuestionBank"]]></Calculation>
+      </FunctionName>
+      <ParameterList>
+        <Parameter>
+          <Calculation><![CDATA[$bankJson]]></Calculation>
+        </Parameter>
+      </ParameterList>
+    </Step>
+    <Step enable="True" id="103" name="Exit Script">
+      <Calculation><![CDATA[True]]></Calculation>
+    </Step>
+  </Script>
+</fmxmlsnippet>

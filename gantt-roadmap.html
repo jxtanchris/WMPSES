@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>启动前设备验收仿真考试系统 — 全周期任务清单与甘特图</title>
+  <style>
+    :root {
+      --bg-page: #0b1120;
+      --bg-card: #111827;
+      --bg-elevated: #1e293b;
+      --border: rgba(148, 163, 184, 0.2);
+      --text-main: #f8fafc;
+      --text-sub: #cbd5e1;
+      --text-muted: #94a3b8;
+      --blue: #0ea5e9;
+      --indigo: #6366f1;
+      --cyan: #06b6d4;
+      --amber: #f59e0b;
+      --emerald: #10b981;
+      --rose: #f43f5e;
+      --purple: #a855f7;
+      --slate: #64748b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top center, #13223f 0%, #090e1a 60%, #060911 100%);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 22px;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title-area h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .title-area p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: #7dd3fc;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.85);
+      color: var(--text-sub);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.16s ease;
+    }
+
+    .btn:hover {
+      background: rgba(51, 65, 85, 0.95);
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 18px 22px 36px;
+    }
+
+    /* 概览指标卡 */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-card {
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 4px 0 2px;
+      color: #38bdf8;
+    }
+
+    .kpi-sub {
+      font-size: 11.5px;
+      color: var(--text-sub);
+    }
+
+    .progress-bar-bg {
+      margin-top: 8px;
+      height: 7px;
+      border-radius: 999px;
+      background: #0f172a;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0ea5e9, #10b981);
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+
+    /* 控制栏 */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 12px 16px;
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .view-tabs {
+      display: inline-flex;
+      padding: 4px;
+      border-radius: 9px;
+      background: #090e1a;
+      border: 1px solid var(--border);
+      gap: 4px;
+    }
+
+    .view-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .view-tab.active {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+    }
+
+    .filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .filter-pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .filter-pill.active {
+      background: rgba(14, 165, 233, 0.2);
+      border-color: rgba(56, 189, 248, 0.6);
+      color: #7dd3fc;
+    }
+
+    /* 甘特图表格容器 */
+    .gantt-card {
+      background: rgba(17, 24, 39, 0.94);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .gantt-scroll {
+      overflow-x: auto;
+    }
+
+    .gantt-table {
+      width: 100%;
+      min-width: 1120px;
+      border-collapse: collapse;
+    }
+
+    .gantt-table th,
+    .gantt-table td {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      padding: 9px 10px;
+      vertical-align: middle;
+    }
+
+    .gantt-table thead th {
+      background: #0f172a;
+      color: #7dd3fc;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: left;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .gantt-table thead th.tick-col {
+      text-align: center;
+      padding: 9px 4px;
+      border-left: 1px dashed rgba(148, 163, 184, 0.12);
+    }
+
+    .task-row {
+      transition: background 0.14s ease;
+    }
+
+    .task-row:hover {
+      background: rgba(30, 41, 59, 0.65);
+    }
+
+    .task-row.completed {
+      opacity: 0.68;
+    }
+
+    .task-row.completed .task-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .phase-group-row td {
+      background: rgba(15, 23, 42, 0.95);
+      color: #e2e8f0;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 12px;
+      border-top: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .task-check {
+      width: 16px;
+      height: 16px;
+      accent-color: #10b981;
+      cursor: pointer;
+    }
+
+    .task-title-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      display: block;
+      width: 100%;
+    }
+
+    .task-title {
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .task-detail-preview {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .stage-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .cat-rule { background: rgba(244, 63, 94, 0.2); color: #fda4af; }
+    .cat-design { background: rgba(14, 165, 233, 0.2); color: #7dd3fc; }
+    .cat-model { background: rgba(99, 102, 241, 0.22); color: #c7d2fe; }
+    .cat-api { background: rgba(168, 85, 247, 0.22); color: #e9d5ff; }
+    .cat-dev { background: rgba(6, 182, 212, 0.2); color: #67e8f9; }
+    .cat-bank { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
+    .cat-test { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .cat-deploy { background: rgba(59, 130, 246, 0.22); color: #93c5fd; }
+    .cat-accept { background: rgba(34, 197, 94, 0.25); color: #86efac; }
+    .cat-ops { background: rgba(100, 116, 139, 0.3); color: #cbd5e1; }
+
+    /* 甘特条单元格 */
+    .timeline-cell {
+      padding: 0 !important;
+      position: relative;
+      height: 44px;
+    }
+
+    .timeline-grid {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      display: flex;
+    }
+
+    .timeline-slot {
+      flex: 1;
+      border-left: 1px dashed rgba(148, 163, 184, 0.12);
+      height: 100%;
+    }
+
+    .gantt-bar {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 20px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding: 0 7px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+    }
+
+    .gantt-bar.bar-rule { background: linear-gradient(90deg, #e11d48, #f43f5e); }
+    .gantt-bar.bar-design { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+    .gantt-bar.bar-model { background: linear-gradient(90deg, #4f46e5, #818cf8); }
+    .gantt-bar.bar-api { background: linear-gradient(90deg, #9333ea, #c084fc); }
+    .gantt-bar.bar-dev { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+    .gantt-bar.bar-bank { background: linear-gradient(90deg, #d97706, #fbbf24); color: #0f172a; }
+    .gantt-bar.bar-test { background: linear-gradient(90deg, #059669, #34d399); }
+    .gantt-bar.bar-deploy { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+    .gantt-bar.bar-accept { background: linear-gradient(90deg, #16a34a, #4ade80); color: #052e16; }
+    .gantt-bar.bar-ops { background: linear-gradient(90deg, #475569, #94a3b8); }
+
+    /* 详情展开行 */
+    .detail-drawer td {
+      background: rgba(9, 14, 26, 0.9);
+      padding: 10px 18px 14px 44px;
+      font-size: 12.5px;
+      color: var(--text-sub);
+    }
+
+    .detail-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .detail-box {
+      padding: 8px 10px;
+      border-radius: 7px;
+      background: #162033;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .detail-box strong {
+      color: #7dd3fc;
+      display: block;
+      margin-bottom: 2px;
+      font-size: 11.5px;
+    }
+
+    @media print {
+      body { background: #fff; color: #0f172a; }
+      .topbar .actions, .toolbar { display: none; }
+      .gantt-card, .kpi-card { background: #fff; color: #0f172a; border-color: #cbd5e1; box-shadow: none; }
+      .task-title { color: #0f172a; }
+      .gantt-table thead th { background: #f1f5f9; color: #0f172a; }
+      .phase-group-row td { background: #e2e8f0; color: #0f172a; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-area">
+      <h1>📅 启动前设备验收仿真考试系统 — 全周期任务清单与甘特图</h1>
+      <p>依据《启动前设备验收仿真考试系统介绍 (1).pdf》与《设计方案（1.1.1）》｜单题试点 11 周（220人天）· 全套 13 题 10~12 个月</p>
+    </div>
+    <div class="actions">
+      <a class="btn btn-primary" href="index.html">← 返回仿真考试系统</a>
+      <button type="button" class="btn" id="btn-export-csv">📊 导出任务清单 (CSV)</button>
+      <button type="button" class="btn" id="btn-print">🖨️ 打印 / 存为 PDF</button>
+      <button type="button" class="btn" id="btn-reset-check">🔄 重置勾选</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">试点总工期与投入</div>
+        <div class="kpi-value">11 周 / 220 人天</div>
+        <div class="kpi-sub">建模60 + 交互评分70 + 题库40 + 标定30 + 管理20</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">当前视图任务完成进度</div>
+        <div class="kpi-value" id="kpi-progress-text">0 / 0</div>
+        <div class="kpi-sub" id="kpi-progress-pct">完成率 0%</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="kpi-progress-bar"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">关键核心性能与可信指标</div>
+        <div class="kpi-value">Kappa ≥ 0.75</div>
+        <div class="kpi-sub">30路并发 · 响应≤200ms · 断线≤5min恢复 · 100%留痕</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">全套 13 题推广规模</div>
+        <div class="kpi-value">10 ~ 12 个月</div>
+        <div class="kpi-sub">分三批建设 · 复用底座后每题增量 60~80 人天</div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="view-tabs" role="tablist">
+        <button type="button" class="view-tab active" data-view="pilot">📌 11周单题试点甘特图 (W1–W11)</button>
+        <button type="button" class="view-tab" data-view="rollout">🚀 12个月全套13题推广甘特图 (M1–M12)</button>
+      </div>
+      <div class="filter-pills" id="filter-pills"></div>
+    </section>
+
+    <section class="gantt-card">
+      <div class="gantt-scroll">
+        <table class="gantt-table" id="gantt-table"></table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_KEY = 'wmpses_gantt_done_v1';
+
+      const CATEGORY_META = {
+        all: { label: '全部阶段', cls: '' },
+        rule: { label: '规则统一', cls: 'cat-rule', bar: 'bar-rule' },
+        design: { label: '需求与设计', cls: 'cat-design', bar: 'bar-design' },
+        model: { label: '场景与建模', cls: 'cat-model', bar: 'bar-model' },
+        api: { label: '软件调用与接口', cls: 'cat-api', bar: 'bar-api' },
+        dev: { label: '交互与评分开发', cls: 'cat-dev', bar: 'bar-dev' },
+        bank: { label: '题库与变式', cls: 'cat-bank', bar: 'bar-bank' },
+        test: { label: '标定与测试', cls: 'cat-test', bar: 'bar-test' },
+        deploy: { label: '机房部署与安全', cls: 'cat-deploy', bar: 'bar-deploy' },
+        accept: { label: '正式验收交付', cls: 'cat-accept', bar: 'bar-accept' },
+        ops: { label: '考务运维推广', cls: 'cat-ops', bar: 'bar-ops' }
+      };
+
+      // 单题试点 11 周数据 (ticks: 1..11)
+      const PILOT_TASKS = [
+        {
+          phase: '阶段 0：实施前规则校准与口径统一（前置阻塞项）',
+          items: [
+            {
+              id: 'p-01', cat: 'rule', title: '统一“重大缺陷六方面覆盖”与表2缺陷清单口径',
+              start: 1, span: 0.5, effort: '前置会议', owner: '工艺/命题组',
+              deliverable: '口径确认纪要',
+              detail: '解决D2/D3同属润滑冷却、公用工程缺重大缺陷的问题，决定是否调整表2或表8第15条规则。'
+            },
+            {
+              id: 'p-02', cat: 'rule', title: '统一“整数计分原则”与答辩1.5分扣分冲突',
+              start: 1, span: 0.5, effort: '前置会议', owner: '考务/命题组',
+              deliverable: '统一评分量表',
+              detail: '消除“不设0.5分”与表8第24/25题“缺1类扣1.5分”的矛盾，统一改为整数梯级。'
+            },
+            {
+              id: 'p-03', cat: 'rule', title: '统一计时（20min vs 25min N1）、断网缓存与N3受限空间否定项',
+              start: 1, span: 0.6, effort: '前置会议', owner: '考务/安全组',
+              deliverable: '考务规则锁定版',
+              detail: '确定方案+核查20分钟阶梯扣分与25分钟0分边界，并审定N3受限空间安全否定项。'
+            }
+          ]
+        },
+        {
+          phase: '阶段 1：需求解构与脚本设计（W1–W2 · 2周）',
+          items: [
+            {
+              id: 'p-11', cat: 'design', title: '拆解五项考核要求并改造选项题为“判定+依据库”模式',
+              start: 1, span: 1.2, effort: '6 人天', owner: '教学设计组',
+              deliverable: '需求规格说明书',
+              detail: '禁止原样搬运选择题泄底，将选项转为24项确认单的判定依据库，记忆性内容转入答辩题。'
+            },
+            {
+              id: 'p-12', cat: 'design', title: '编制碱洗+RTO基准场景13项缺陷/干扰脚本与4份工况台账',
+              start: 1.4, span: 1.4, effort: '8 人天', owner: '工艺/安全专家',
+              deliverable: '缺陷库与四份电子台账',
+              detail: '编写D1~D10、G1~G3及检修记录、设备台账、上次验收报告、CEMS校验记录，确保贴图/参数/台账三处一致。'
+            },
+            {
+              id: 'p-13', cat: 'design', title: '制定25个采分点（S/P/K类）规则与N1/N2/N3三证触发规范',
+              start: 2, span: 1, effort: '6 人天', owner: '考评规则组',
+              deliverable: '采分规则初稿（50分）',
+              detail: '拆解覆盖分与判定分，禁止按点击次数/停留时长计分；定义否定项三证（日志+截图+快照）。'
+            }
+          ]
+        },
+        {
+          phase: '阶段 2：三维/全景场景建模与仿真引擎（W3–W5 · 3周 · 60人天）',
+          items: [
+            {
+              id: 'p-21', cat: 'model', title: '构建碱洗+三室RTO装置模型（120m路径与5个快速传送点）',
+              start: 3, span: 2, effort: '22 人天', owner: '三维美术组',
+              deliverable: '三维/全景装置资源',
+              detail: '不含储罐区与厂界；设置中控室、塔底、塔顶平台、风机区、RTO框架5个传送点，缺陷发现≤2次点击。'
+            },
+            {
+              id: 'p-22', cat: 'model', title: '开发4大工艺动态机理模型与5类设备状态机',
+              start: 3.3, span: 2.3, effort: '24 人天', owner: '仿真引擎组',
+              deliverable: '工艺模型库与状态机',
+              detail: '步长≤1s、稳态偏差≤5%；支持泵/风机/阀门/仪表/联锁状态迁移及气源0.32MPa切换9s迟滞动态响应。'
+            },
+            {
+              id: 'p-23', cat: 'model', title: '实现缺陷属性化动态注入引擎与模型静态/动态验证',
+              start: 4.5, span: 1.5, effort: '14 人天', owner: '仿真引擎组',
+              deliverable: '场景包V1 & 验证记录',
+              detail: '缺陷作为设备属性注入而非死贴图，支持同类设备随机分布与合格读数±5%浮动。'
+            }
+          ]
+        },
+        {
+          phase: '阶段 3：软件调用、交互界面与评分考务开发（W5–W8 · 3周 · 70人天）',
+          items: [
+            {
+              id: 'p-31', cat: 'api', title: '软件调用1：实现仿真层与评分层标准化JSON事件流总线',
+              start: 5, span: 1.6, effort: '12 人天', owner: '架构/后端组',
+              deliverable: '事件流通信接口契约',
+              detail: '实现“场景负责变化、评分负责算分”解耦，所有交互动作生成带时间戳事件流。'
+            },
+            {
+              id: 'p-32', cat: 'api', title: '软件调用2：对接时钟冻结、断点续考与FileMaker/Data API题库成绩接口',
+              start: 5.5, span: 2, effort: '14 人天', owner: '接口集成组',
+              deliverable: 'FM/REST接口与续考服务',
+              detail: '实现WebViewer脚本桥接(FMExam/PerformScriptWithOption)、Data API读写、录音采集与≤5分钟断线续考同步。'
+            },
+            {
+              id: 'p-33', cat: 'dev', title: '交互开发：第一人称巡检动作、DCS画面与四页签验收工作台',
+              start: 6, span: 2.5, effort: '26 人天', owner: '前端交互组',
+              deliverable: '交互层与工作台V1',
+              detail: '实现阀门动作测试、取油样、测厚测振、确认单24项双向传送、缺陷登记、拍照取证关联位号坐标。'
+            },
+            {
+              id: 'p-34', cat: 'dev', title: '评分与考务开发：40+10分评分引擎、否定项强制锁卷与监考端',
+              start: 6.8, span: 2.2, effort: '18 人天', owner: '考务/后端组',
+              deliverable: '系统功能V1（含监考端）',
+              detail: '监考端按1:15屏蔽答案防提示，支持一键冻结/补时；触发N1/N2/N3自动锁卷并存证三件套。'
+            }
+          ]
+        },
+        {
+          phase: '阶段 4：题库封装与等难度变式建设（W9 · 1周 · 40人天）',
+          items: [
+            {
+              id: 'p-41', cat: 'bank', title: '完成V1/V2/V3三套等难度变式题包与每套≥10道答辩题库',
+              start: 9, span: 0.7, effort: '26 人天', owner: '命题专家组',
+              deliverable: 'V1/V2/V3加密题包',
+              detail: 'V1碱洗+RTO、V2活性炭+催化燃烧、V3湿式洗涤+生物滤池；均维持6重大+4一般+3干扰与50分结构。'
+            },
+            {
+              id: 'p-42', cat: 'bank', title: '执行“两编三审一试做”与14~22分钟耗时校准',
+              start: 9.3, span: 0.7, effort: '14 人天', owner: '审题与试做组',
+              deliverable: '题包V1入库签审单',
+              detail: '工艺/安全命题，3名专家审核标准/真实性/可算分性，1名试做人实测耗时须在14~22分钟区间。'
+            }
+          ]
+        },
+        {
+          phase: '阶段 5：标定测试与性能压测（W10–W11 · 2周 · 30人天）',
+          items: [
+            {
+              id: 'p-51', cat: 'test', title: '可考性验证：缺陷≥2种路径发现、合理操作路径≥3条试做比对',
+              start: 10, span: 1, effort: '8 人天', owner: 'QA与专家组',
+              deliverable: '路径开放性测试记录',
+              detail: '3名专家独立试做比对，验证无“只能靠猜”的缺陷且不因合理路径差异而扣分。'
+            },
+            {
+              id: 'p-52', cat: 'test', title: '30份作答样本 × 3名考评员双评标定（Kappa ≥ 0.75）',
+              start: 10, span: 1.5, effort: '12 人天', owner: '标定专家组',
+              deliverable: '评分一致性标定报告',
+              detail: '校准加权Kappa≥0.75、同卷偏差≤3分、极差≤5分，固化干扰项与处置意见争议口径。'
+            },
+            {
+              id: 'p-53', cat: 'test', title: '30路并发压测、20份答卷100%留痕抽查与断网断电演练',
+              start: 10.6, span: 1.2, effort: '10 人天', owner: '性能测试组',
+              deliverable: '并发与故障恢复测试报告',
+              detail: '实测响应≤200ms、加载≤60s、传送≤10s，断线断电≤5分钟恢复且已采分零丢失。'
+            }
+          ]
+        },
+        {
+          phase: '阶段 6：软硬件部署与安全加固（W11）',
+          items: [
+            {
+              id: 'p-61', cat: 'deploy', title: '部署考场局域网（1图形+2业务服务器+30终端+千兆双链路+UPS）',
+              start: 10.5, span: 1.3, effort: '实施交付', owner: '运维实施组',
+              deliverable: '考点机房硬件就绪',
+              detail: '断电UPS维持≥30分钟；若采用区域集中云渲染+瘦终端，保障单终端≥20Mbps、时延≤50ms。'
+            },
+            {
+              id: 'p-62', cat: 'deploy', title: '终端禁网/禁USB/禁截屏锁死与等保二级（GB/T 22239-2019）测评',
+              start: 11, span: 1, effort: '安全测评', owner: '安全合规组',
+              deliverable: '等保二级第三方测评报告',
+              detail: '作答数据实时上传不在本地留存；落实题库加密、抽题审计与命题/考评权限分离。'
+            }
+          ]
+        },
+        {
+          phase: '阶段 7：项目正式验收与交付（W11末）',
+          items: [
+            {
+              id: 'p-71', cat: 'accept', title: '对照表10八项验收指标完成最终签字验收与档案移交',
+              start: 11.4, span: 0.6, effort: '收官里程碑', owner: '甲乙双方/专家组',
+              deliverable: '终验报告 & 全套资产清单',
+              detail: '核验可考性、可信度、并发、加载、留痕、恢复、合规8项指标全部达标并归档。'
+            }
+          ]
+        }
+      ];
+
+      // 12 个月推广计划数据 (ticks: 1..12)
+      const ROLLOUT_TASKS = [
+        {
+          phase: '试点验证阶段（M1–M3）',
+          items: [
+            {
+              id: 'r-01', cat: 'accept', title: '1.1.1 启动前设备验收单题试点建设与标定交付（50分核心题）',
+              start: 1, span: 3, effort: '11周 / 220人天', owner: '全栈项目组',
+              deliverable: '公共底座 + 1.1.1题包V1',
+              detail: '沉淀可复用的场景引擎、确认单框架、缺陷登记、评分引擎与监考平台。'
+            }
+          ]
+        },
+        {
+          phase: '第一批推广：核心启动与事故处置（M3–M6）',
+          items: [
+            {
+              id: 'r-11', cat: 'model', title: '开发“原始启动”仿真题（50分）：复用碱洗+RTO场景摊薄建模成本',
+              start: 3.5, span: 2, effort: '60~80 人天', owner: '仿真与命题组',
+              deliverable: '原始启动题包',
+              detail: '与1.1.1共享碱洗+RTO联合装置，帮助考生形成启动前验收—启动中操作完整闭环。'
+            },
+            {
+              id: 'r-12', cat: 'dev', title: '开发“泄漏事故处置”仿真题（50分）并完成第一批双评标定',
+              start: 4.5, span: 2, effort: '60~80 人天', owner: '仿真与标定组',
+              deliverable: '第一批3道50分题上线',
+              detail: '覆盖系统启动与重大事故故障处理核心场景。'
+            }
+          ]
+        },
+        {
+          phase: '第二批推广：专项操作模块（M6–M9）',
+          items: [
+            {
+              id: 'r-21', cat: 'bank', title: '开发清洗吹扫置换、联锁检查、报警优化等 6 道 25 分专项题',
+              start: 6.2, span: 3.3, effort: '6×(60~80) 人天', owner: '各专项交付组',
+              deliverable: '第二批6道25分题上线',
+              detail: '增量仅需配置新装置局部模型、缺陷库与采分规则，高度复用引擎。'
+            }
+          ]
+        },
+        {
+          phase: '第三批推广：收尾模块与全面上线（M9–M12）',
+          items: [
+            {
+              id: 'r-31', cat: 'deploy', title: '开发系统停运、保护验收、事故后续处置等剩余 4 道实操题',
+              start: 9.2, span: 2.8, effort: '4×(60~80) 人天', owner: '各专项交付组',
+              deliverable: '全套13道技师实操题库',
+              detail: '完成技能操作80%权重机考全覆盖（管理改进与培训指导20%保留答辩与业绩评审）。'
+            }
+          ]
+        },
+        {
+          phase: '常态化考务运维与标准滚动维护（M4–M12 持续）',
+          items: [
+            {
+              id: 'r-41', cat: 'ops', title: '考场四类异常应急运维与连续场次防重抽卷机制巡检',
+              start: 4, span: 9, effort: '日常考务支持', owner: '考务运维组',
+              deliverable: '异常处置归档台账',
+              detail: '终端10min换机续考、断网缓存同步、模型异常冻结、身体不适封存；相邻两场禁止同变式。'
+            },
+            {
+              id: 'r-42', cat: 'ops', title: '年度标准有效性复核与 GB 30871 / HJ 75 / HJ 76 修订即时同步',
+              start: 4, span: 9, effort: '定期/即时维护', owner: '标准委员会',
+              deliverable: '题库版本号迭代日志',
+              detail: '国家或行业标准更新时不等年度复核，即时修订判定依据库与缺陷阈值。'
+            }
+          ]
+        }
+      ];
+
+      let currentView = 'pilot';
+      let currentCat = 'all';
+      let expandedIds = new Set();
+      let doneMap = loadDoneMap();
+
+      function loadDoneMap() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      }
+
+      function saveDoneMap() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(doneMap));
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function getCurrentGroups() {
+        return currentView === 'pilot' ? PILOT_TASKS : ROLLOUT_TASKS;
+      }
+
+      function getTickCount() {
+        return currentView === 'pilot' ? 11 : 12;
+      }
+
+      function getTickLabel(i) {
+        return currentView === 'pilot' ? `W${i}` : `M${i}`;
+      }
+
+      function renderFilterPills() {
+        const groups = getCurrentGroups();
+        const usedCats = new Set(['all']);
+        groups.forEach((g) => g.items.forEach((it) => usedCats.add(it.cat)));
+
+        const container = document.getElementById('filter-pills');
+        container.innerHTML = Array.from(usedCats).map((cat) => {
+          const meta = CATEGORY_META[cat] || { label: cat };
+          return `<button type="button" class="filter-pill ${currentCat === cat ? 'active' : ''}" data-cat="${cat}">${meta.label}</button>`;
+        }).join('');
+
+        container.querySelectorAll('.filter-pill').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            currentCat = btn.dataset.cat;
+            renderAll();
+          });
+        });
+      }
+
+      function updateKpiProgress() {
+        const groups = getCurrentGroups();
+        let total = 0;
+        let done = 0;
+        groups.forEach((g) => {
+          g.items.forEach((it) => {
+            if (currentCat === 'all' || it.cat === currentCat) {
+              total++;
+              if (doneMap[it.id]) done++;
+            }
+          });
+        });
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        document.getElementById('kpi-progress-text').textContent = `${done} / ${total}`;
+        document.getElementById('kpi-progress-pct').textContent = `完成率 ${pct}%`;
+        document.getElementById('kpi-progress-bar').style.width = `${pct}%`;
+      }
+
+      function renderTable() {
+        const table = document.getElementById('gantt-table');
+        const tickCount = getTickCount();
+        const groups = getCurrentGroups();
+
+        let headTicks = '';
+        for (let i = 1; i <= tickCount; i++) {
+          headTicks += `<th class="tick-col" style="width:46px;">${getTickLabel(i)}</th>`;
+        }
+
+        let bodyRows = '';
+        groups.forEach((group) => {
+          const visibleItems = group.items.filter((it) => currentCat === 'all' || it.cat === currentCat);
+          if (!visibleItems.length) return;
+
+          bodyRows += `
+            <tr class="phase-group-row">
+              <td colspan="${4 + tickCount}">${escapeHtml(group.phase)}</td>
+            </tr>
+          `;
+
+          visibleItems.forEach((it) => {
+            const catMeta = CATEGORY_META[it.cat] || { label: it.cat, cls: 'cat-ops', bar: 'bar-ops' };
+            const isDone = Boolean(doneMap[it.id]);
+            const isExpanded = expandedIds.has(it.id);
+
+            const leftPct = Math.max(0, ((it.start - 1) / tickCount) * 100);
+            const widthPct = Math.min(100 - leftPct, (it.span / tickCount) * 100);
+            const endTick = (it.start + it.span - 0.1).toFixed(1).replace(/\.0$/, '');
+            const rangeText = `${getTickLabel(Math.floor(it.start))}~${getTickLabel(Math.min(tickCount, Math.ceil(it.start + it.span - 0.1)))}`;
+
+            let slots = '';
+            for (let i = 1; i <= tickCount; i++) {
+              slots += '<div class="timeline-slot"></div>';
+            }
+
+            bodyRows += `
+              <tr class="task-row ${isDone ? 'completed' : ''}" data-id="${it.id}">
+                <td style="width:36px;text-align:center;">
+                  <input type="checkbox" class="task-check" data-check-id="${it.id}" ${isDone ? 'checked' : ''} title="标记任务完成">
+                </td>
+                <td style="width:340px;">
+                  <button type="button" class="task-title-btn" data-expand-id="${it.id}">
+                    <span class="task-title">${escapeHtml(it.title)}</span>
+                    <span class="task-detail-preview">${isExpanded ? '▾ 收起执行要点' : '▸ 点击查看执行要点与交付物'}</span>
+                  </button>
+                </td>
+                <td style="width:110px;">
+                  <span class="stage-badge ${catMeta.cls}">${escapeHtml(catMeta.label)}</span>
+                </td>
+                <td style="width:110px;color:#94a3b8;font-size:12px;">
+                  <div>${escapeHtml(it.effort)}</div>
+                  <div style="font-size:11px;">${escapeHtml(rangeText)}</div>
+                </td>
+                <td colspan="${tickCount}" class="timeline-cell">
+                  <div class="timeline-grid">
+                    ${slots}
+                    <div class="gantt-bar ${catMeta.bar}" style="left:${leftPct}%;width:${Math.max(widthPct, 4.5)}%;" title="${escapeHtml(it.title)} (${rangeText})">
+                      ${escapeHtml(it.deliverable)}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `;
+
+            if (isExpanded) {
+              bodyRows += `
+                <tr class="detail-drawer">
+                  <td colspan="${4 + tickCount}">
+                    <div><strong>执行细节：</strong>${escapeHtml(it.detail)}</div>
+                    <div class="detail-meta-grid">
+                      <div class="detail-box"><strong>责任角色</strong>${escapeHtml(it.owner)}</div>
+                      <div class="detail-box"><strong>核心交付物 / 验收口径</strong>${escapeHtml(it.deliverable)}</div>
+                      <div class="detail-box"><strong>估算投入 / 排期</strong>${escapeHtml(it.effort)}（${escapeHtml(rangeText)}，跨度 ${endTick}）</div>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }
+          });
+        });
+
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th style="width:36px;text-align:center;">完成</th>
+              <th style="width:340px;">任务名称（点击展开详情）</th>
+              <th style="width:110px;">阶段/类别</th>
+              <th style="width:110px;">工作量/时段</th>
+              ${headTicks}
+            </tr>
+          </thead>
+          <tbody>${bodyRows}</tbody>
+        `;
+
+        table.querySelectorAll('.task-check').forEach((cb) => {
+          cb.addEventListener('change', () => {
+            const id = cb.dataset.checkId;
+            if (cb.checked) doneMap[id] = true;
+            else delete doneMap[id];
+            saveDoneMap();
+            renderTable();
+            updateKpiProgress();
+          });
+        });
+
+        table.querySelectorAll('[data-expand-id]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.expandId;
+            if (expandedIds.has(id)) expandedIds.delete(id);
+            else expandedIds.add(id);
+            renderTable();
+          });
+        });
+
+        table.querySelectorAll('.gantt-bar').forEach((bar) => {
+          bar.addEventListener('click', () => {
+            const tr = bar.closest('tr');
+            const id = tr && tr.dataset.id;
+            if (!id) return;
+            if (expandedIds.has(id)) expandedIds.delete(id);
+            else expandedIds.add(id);
+            renderTable();
+          });
+        });
+      }
+
+      function renderAll() {
+        renderFilterPills();
+        renderTable();
+        updateKpiProgress();
+      }
+
+      function exportCsv() {
+        const rows = [['阶段分组', '任务ID', '类别', '任务名称', '排期起点', '持续跨度', '投入估算', '责任角色', '交付物', '执行要点', '是否完成']];
+        const unit = currentView === 'pilot' ? '周' : '月';
+        getCurrentGroups().forEach((g) => {
+          g.items.forEach((it) => {
+            if (currentCat !== 'all' && it.cat !== currentCat) return;
+            const catLabel = (CATEGORY_META[it.cat] && CATEGORY_META[it.cat].label) || it.cat;
+            rows.push([
+              g.phase,
+              it.id,
+              catLabel,
+              it.title,
+              getTickLabel(Math.floor(it.start)),
+              `${it.span}${unit}`,
+              it.effort,
+              it.owner,
+              it.deliverable,
+              it.detail,
+              doneMap[it.id] ? '已完成' : '未完成'
+            ]);
+          });
+        });
+
+        const csv = '\uFEFF' + rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wmpses-${currentView}-tasks.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      document.querySelectorAll('.view-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          currentView = tab.dataset.view;
+          currentCat = 'all';
+          document.querySelectorAll('.view-tab').forEach((t) => t.classList.toggle('active', t === tab));
+          renderAll();
+        });
+      });
+
+      document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
+      document.getElementById('btn-print').addEventListener('click', () => window.print());
+      document.getElementById('btn-reset-check').addEventListener('click', () => {
+        if (!confirm('确定清空所有任务完成勾选状态吗？')) return;
+        doneMap = {};
+        saveDoneMap();
+        renderAll();
+      });
+
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
