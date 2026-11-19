@@ -1965,6 +1965,49 @@
     }
   }
 
+  async function loadAndRenderLanHealthPanel() {
+    const panel = $('lan-health-panel');
+    if (!panel) return;
+    panel.innerHTML = '<div style="padding:10px 12px;border-radius:8px;background:#0f172a;border:1px solid rgba(56,189,248,0.22);font-size:12px;color:#94a3b8;">正在探测后台服务端口与局域网考场访问地址...</div>';
+    const health = await adapter.fetchServerHealth();
+    const currentPanel = $('lan-health-panel');
+    if (!currentPanel) return;
+    if (!health || !health.ok) {
+      currentPanel.innerHTML = `
+        <div style="padding:10px 12px;border-radius:8px;background:#0f172a;border:1px solid rgba(244,63,94,0.35);font-size:12px;color:#fda4af;">
+          <div><strong>⚠️ 未连接到 SQLite 后台服务</strong>（当前探测地址：<code>${escapeHtml((health && health.sqliteBase) || '')}</code>）</div>
+          <div style="margin-top:4px;color:#94a3b8;">请双击项目根目录 <code>启动SQLite后台服务.command</code> 或运行 <code>python3 server.py</code>；启动后支持端口自检与局域网多机访问。</div>
+        </div>
+      `;
+      return;
+    }
+
+    const lanUrls = Array.isArray(health.lanUrls) ? health.lanUrls : [];
+    const cleaned = Array.isArray(health.cleanedPids) && health.cleanedPids.length
+      ? ` · 本次已自动清理旧占用进程 PID: ${health.cleanedPids.join(', ')}`
+      : '';
+    const lanListHtml = lanUrls.length
+      ? lanUrls.map((u, idx) => `
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:6px;background:#162033;margin-top:5px;">
+            <code style="color:#38bdf8;font-size:12px;">${escapeHtml(u)}</code>
+            <span style="font-size:11px;color:#94a3b8;">局域网考生机入口 ${idx + 1}</span>
+          </div>
+        `).join('')
+      : '<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">未检测到活跃非回环局域网 IPv4（仅限本机访问）</div>';
+
+    currentPanel.innerHTML = `
+      <div style="padding:10px 12px;border-radius:8px;background:#0f172a;border:1px solid rgba(16,185,129,0.35);font-size:12px;color:#cbd5e1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+          <strong style="color:#34d399;">🟢 后台服务与局域网考场状态正常</strong>
+          <span style="font-size:11.5px;color:#94a3b8;">监听 <code>${escapeHtml(health.host || '0.0.0.0')}:${Number(health.port) || 8765}</code>${escapeHtml(cleaned)}</span>
+        </div>
+        <div style="font-size:12px;">教师本机地址：<code style="color:#fde68a;">${escapeHtml(health.localUrl || health.sqliteBase || '')}</code></div>
+        <div style="margin-top:6px;font-size:12px;color:#7dd3fc;">🌐 同网段考生机免配置访问地址（访问后前端自动同源直连数据库）：</div>
+        ${lanListHtml}
+      </div>
+    `;
+  }
+
   function openSettingsModal(initialTab) {
     if (!state.currentUser) {
       showToast('请先登录系统账号', 'warn');
@@ -1986,6 +2029,8 @@
       loadAndRenderSqliteTab();
     } else if (state.activeSettingsTab === 'bank') {
       loadUsersAndLogsPanel();
+    } else if (state.activeSettingsTab === 'fm') {
+      loadAndRenderLanHealthPanel();
     }
   }
 
@@ -2109,9 +2154,10 @@
           </select>
         </div>
         <div class="form-field">
-          <label>本地 SQLite 后台服务地址</label>
+          <label>本地 SQLite 后台服务地址（通过 HTTP/局域网访问时默认自动同源适配）</label>
           <input type="text" id="cfg-sqlite-url" class="form-control" value="${escapeHtml(cfg.sqliteApiUrl || 'http://127.0.0.1:8765')}">
         </div>
+        <div id="lan-health-panel" style="margin:10px 0 14px;"></div>
 
         <h4 style="margin:14px 0 8px;color:#7dd3fc;">1. FileMaker WebViewer 脚本名称映射（配套 XML 已生成在 filemaker_script/）</h4>
         <div class="form-grid">
@@ -2203,6 +2249,8 @@
           loadAndRenderSqliteTab();
         } else if (state.activeSettingsTab === 'bank') {
           loadUsersAndLogsPanel();
+        } else if (state.activeSettingsTab === 'fm') {
+          loadAndRenderLanHealthPanel();
         }
       });
     });
@@ -2263,6 +2311,7 @@
     if (pullBtn) {
       pullBtn.addEventListener('click', async () => {
         saveSettingsFromDom(true);
+        loadAndRenderLanHealthPanel();
         const res = await adapter.loadQuestionBank();
         state.bank = res.bank;
         $('data-source-badge').textContent = '· ' + res.source;

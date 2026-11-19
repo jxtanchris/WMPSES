@@ -303,21 +303,40 @@
     };
   }
 
+  function resolveDefaultSqliteUrl() {
+    try {
+      const loc = global.location;
+      if (loc && (loc.protocol === 'http:' || loc.protocol === 'https:') && loc.origin && loc.origin !== 'null') {
+        return String(loc.origin).replace(/\/+$/, '');
+      }
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_CONFIG.sqliteApiUrl;
+  }
+
   function loadConfig() {
+    const defaultSqlite = resolveDefaultSqliteUrl();
     try {
       const raw = global.localStorage.getItem(STORAGE_KEYS.CONFIG);
-      if (!raw) return deepClone(DEFAULT_CONFIG);
+      if (!raw) {
+        const fresh = deepClone(DEFAULT_CONFIG);
+        fresh.sqliteApiUrl = defaultSqlite;
+        return fresh;
+      }
       const parsed = safeParseJson(raw, {});
       return {
         sourceMode: parsed.sourceMode || DEFAULT_CONFIG.sourceMode,
-        sqliteApiUrl: parsed.sqliteApiUrl || DEFAULT_CONFIG.sqliteApiUrl,
+        sqliteApiUrl: getSqliteBase({ sqliteApiUrl: parsed.sqliteApiUrl || defaultSqlite }),
         fmScripts: Object.assign({}, DEFAULT_CONFIG.fmScripts, parsed.fmScripts || {}),
         dataApi: Object.assign({}, DEFAULT_CONFIG.dataApi, parsed.dataApi || {}),
         restApi: Object.assign({}, DEFAULT_CONFIG.restApi, parsed.restApi || {}),
         student: Object.assign({}, DEFAULT_CONFIG.student, parsed.student || {})
       };
     } catch (e) {
-      return deepClone(DEFAULT_CONFIG);
+      const fb = deepClone(DEFAULT_CONFIG);
+      fb.sqliteApiUrl = defaultSqlite;
+      return fb;
     }
   }
 
@@ -477,8 +496,20 @@
   }
 
   function getSqliteBase(cfg) {
-    const raw = (cfg && cfg.sqliteApiUrl) || DEFAULT_CONFIG.sqliteApiUrl;
-    return String(raw).replace(/\/+$/, '');
+    const fallbackUrl = resolveDefaultSqliteUrl();
+    const raw = (cfg && cfg.sqliteApiUrl) || '';
+    const trimmed = String(raw).trim().replace(/\/+$/, '');
+    if (!trimmed) return fallbackUrl;
+    try {
+      const loc = global.location;
+      const isHttpOrigin = loc && (loc.protocol === 'http:' || loc.protocol === 'https:') && loc.origin && loc.origin !== 'null';
+      if (isHttpOrigin && (trimmed === 'http://127.0.0.1:8765' || trimmed === 'http://localhost:8765')) {
+        return fallbackUrl;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return trimmed;
   }
 
   async function requestSqlite(cfg, path, options) {
@@ -584,6 +615,17 @@
         bank: this.resetDefaultBank(),
         message: '已恢复出厂默认题库（本地缓存）'
       };
+    },
+
+    fetchServerHealth: async function () {
+      const cfg = loadConfig();
+      const base = getSqliteBase(cfg);
+      try {
+        const res = await requestSqlite(cfg, '/api/health', { method: 'GET' });
+        return Object.assign({ sqliteBase: base }, res);
+      } catch (err) {
+        return { ok: false, sqliteBase: base, error: err.message };
+      }
     },
 
     fetchSqliteTables: async function () {
