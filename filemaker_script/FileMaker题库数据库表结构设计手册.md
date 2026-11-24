@@ -25,7 +25,10 @@ erDiagram
         number PassScore "合格分 (30)"
         number DurationMinutes "限时分钟 (30)"
         text Status "已启用/变式预留/已停用"
-        container ExamPicture "打热点用的装置全景底图"
+        container ExamPicture "2D打热点用的装置全景底图"
+        container ExamPicture3D "3D环绕/第一人称漫游等距天球全景底图"
+        text Scene3DModelName "真3D场景GLB文件名"
+        container Scene3DModel "可走动真3D场景模型 (.glb)"
     }
 
     WMPSES_设备热点 {
@@ -113,7 +116,8 @@ erDiagram
 | `Status` | 文本 | 值列表：`已启用`, `变式预留`, `已停用` | 状态控制 |
 | `Version` | 文本 | 默认 `"1.0.0"` | 题包版本号 |
 | `UpdatedAt` | 文本 / 时间戳 | 修改日期自动输入 | 更新日期 |
-| `ExamPicture` | 容器 | — | 存储用于打热点的装置全景底图 |
+| `ExamPicture` | 容器 | — | 存储用于 2D 打热点的装置全景底图 |
+| `ExamPicture3D` | 容器 | — | 存储 3D 环绕与第一人称漫游等距天球全景底图 (人工手工生成并入库) |
 | `c_ActualScoreSum` | 计算（数字） | `Sum ( WMPSES_习题库_按试卷::Score )` | 实时核对各题分值之和是否等于 50 分 |
 | `c_FullBankJSON` | 计算（文本） | 见第四节公式 3 | 实时聚合整套题库 JSON 供 WebViewer 加载 |
 
@@ -303,6 +307,17 @@ Let ( [
     "data:" & mime & ";base64," & Base64EncodeRFC ( 4648 ; ExamPicture ) ;
     ""
   ) ;
+  fn3d = Lower ( GetContainerAttribute ( ExamPicture3D ; "filename" ) ) ;
+  mime3d = Case (
+    PatternCount ( fn3d ; ".png" ) > 0 ; "image/png" ;
+    PatternCount ( fn3d ; ".webp" ) > 0 ; "image/webp" ;
+    "image/jpeg"
+  ) ;
+  pic3dDataUri = If (
+    not IsEmpty ( ExamPicture3D ) ;
+    "data:" & mime3d & ";base64," & Base64EncodeRFC ( 4648 ; ExamPicture3D ) ;
+    ""
+  ) ;
   meta = JSONSetElement ( "{}" ;
     ["id" ; pk_ExamID ; JSONString] ;
     ["title" ; Title ; JSONString] ;
@@ -313,7 +328,8 @@ Let ( [
     ["durationMinutes" ; GetAsNumber ( DurationMinutes ) ; JSONNumber] ;
     ["version" ; Version ; JSONString] ;
     ["updatedAt" ; GetAsText ( UpdatedAt ) ; JSONString] ;
-    ["examPicture" ; picDataUri ; JSONString]
+    ["examPicture" ; picDataUri ; JSONString] ;
+    ["examPicture3d" ; pic3dDataUri ; JSONString]
   ) ;
   cnt = Count ( WMPSES_设备热点::pk_HotspotID ) ;
   hsArr = While (

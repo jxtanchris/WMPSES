@@ -12,19 +12,88 @@ import ipaddress
 import json
 import os
 import re
+import secrets
 import signal
 import socket
 import subprocess
+import threading
 import time
 import urllib.parse
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from db import db_manager
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+
+SESSION_TTL_SECONDS = 12 * 60 * 60
+AUTH_SESSIONS: Dict[str, Dict[str, Any]] = {}
+AUTH_SESSIONS_LOCK = threading.Lock()
+
+ALL_AUTH_ROLES: Set[str] = {"考生", "监考员", "考评员", "审题专家", "命题教师", "系统管理员"}
+EXAM_SUBMIT_ROLES: Set[str] = {"考生", "审题专家", "命题教师", "系统管理员"}
+STAFF_VIEW_ROLES: Set[str] = {"监考员", "考评员", "审题专家", "命题教师", "系统管理员"}
+GRADING_ROLES: Set[str] = {"考评员", "审题专家", "命题教师", "系统管理员"}
+EDITOR_ROLES: Set[str] = {"审题专家", "命题教师", "系统管理员"}
+ADMIN_DANGER_ROLES: Set[str] = {"命题教师", "系统管理员"}
+
+
+def _sanitize_user(user: Dict[str, Any]) -> Dict[str, Any]:
+    """返回去除密码哈希的安全用户对象。"""
+    return {k: v for k, v in user.items() if k != "Password"}
+
+
+def _sanitize_public_user(user: Dict[str, Any]) -> Dict[str, Any]:
+    """未登录或普通考生仅可见用于登录页快捷选择的最小公开字段。"""
+    return {
+        "pk_UserID": user.get("pk_UserID", ""),
+        "UserCode": user.get("UserCode", ""),
+        "FullName": user.get("FullName", ""),
+        "RoleType": user.get("RoleType", "考生"),
+        "Department": user.get("Department", ""),
+    }
+
+
+def _create_session(user: Dict[str, Any]) -> str:
+    token = secrets.token_urlsafe(32)
+    now = time.time()
+    with AUTH_SESSIONS_LOCK:
+        # 顺带清理过期会话
+        expired = [k for k, v in AUTH_SESSIONS.items() if v.get("expiresAt", 0) <= now]
+        for k in expired:
+            AUTH_SESSIONS.pop(k, None)
+        AUTH_SESSIONS[token] = {
+            "userId": str(user.get("pk_UserID") or ""),
+            "userCode": str(user.get("UserCode") or ""),
+            "fullName": str(user.get("FullName") or ""),
+            "role": str(user.get("RoleType") or "考生"),
+            "expiresAt": now + SESSION_TTL_SECONDS,
+        }
+    return token
+
+
+def _get_session(token: str) -> Optional[Dict[str, Any]]:
+    if not token:
+        return None
+    now = time.time()
+    with AUTH_SESSIONS_LOCK:
+        sess = AUTH_SESSIONS.get(token)
+        if not sess:
+            return None
+        if sess.get("expiresAt", 0) <= now:
+            AUTH_SESSIONS.pop(token, None)
+            return None
+        sess["expiresAt"] = now + SESSION_TTL_SECONDS
+        return dict(sess)
+
+
+def _revoke_session(token: str) -> None:
+    if not token:
+        return
+    with AUTH_SESSIONS_LOCK:
+        AUTH_SESSIONS.pop(token, None)
 
 RUNTIME_INFO: Dict[str, Any] = {
     "host": "0.0.0.0",
@@ -197,8 +266,9 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
 
     def end_headers(self) -> None:
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Model-Name, X-Operator-Name, X-User-Id")
+        self.send_header("Access-Control-Expose-Headers", "X-Model-Name")
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
@@ -220,6 +290,26 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
             return {}
         raw = self.rfile.read(length)
         return json.loads(raw.decode("utf-8"))
+
+    def _get_bearer_token(self) -> str:
+        auth = str(self.headers.get("Authorization") or "").strip()
+        if auth.lower().startswith("bearer "):
+            return auth[7:].strip()
+        return ""
+
+    def _get_current_session(self) -> Optional[Dict[str, Any]]:
+        return _get_session(self._get_bearer_token())
+
+    def _require_roles(self, allowed_roles: Set[str]) -> Optional[Dict[str, Any]]:
+        sess = self._get_current_session()
+        if not sess:
+            self._send_json(HTTPStatus.UNAUTHORIZED, {"ok": False, "error": "未登录或登录会话已失效，请重新登录"})
+            return None
+        role = str(sess.get("role") or "考生")
+        if role not in allowed_roles:
+            self._send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": f"当前角色「{role}」无权执行此操作"})
+            return None
+        return sess
 
     def do_GET(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
@@ -259,10 +349,74 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
             return
 
+        if path == "/api/scenes":
+            try:
+                scenes = db_manager.list_exam_scenes()
+                self._send_json(HTTPStatus.OK, {"ok": True, "scenes": scenes})
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/scene-model":
+            qs = urllib.parse.parse_qs(parsed.query)
+            exam_id = (qs.get("examId") or ["WMPSES-1.1.1-V1"])[0]
+            try:
+                model = db_manager.get_scene_3d_model(exam_id=exam_id)
+                if not model:
+                    self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "当前试卷尚未上传自定义 GLB 3D 模型"})
+                    return
+                raw = model["data"]
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "model/gltf-binary")
+                self.send_header("Content-Length", str(len(raw)))
+                self.send_header("X-Model-Name", urllib.parse.quote(model["name"]))
+                self.end_headers()
+                self.wfile.write(raw)
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
         if path == "/api/tables":
+            if not self._require_roles(STAFF_VIEW_ROLES):
+                return
             try:
                 summary = db_manager.get_tables_summary()
+                tables = summary.get("tables")
+                if isinstance(tables, dict) and isinstance(tables.get("WMPSES_用户人员"), list):
+                    tables["WMPSES_用户人员"] = [
+                        {**row, "Password": "****** (SHA-256已加密)"} if isinstance(row, dict) and "Password" in row else row
+                        for row in tables["WMPSES_用户人员"]
+                    ]
                 self._send_json(HTTPStatus.OK, {"ok": True, **summary})
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/results":
+            if not self._require_roles(STAFF_VIEW_ROLES):
+                return
+            qs = urllib.parse.parse_qs(parsed.query)
+            user_id = (qs.get("userId") or [None])[0]
+            exam_id = (qs.get("examId") or [None])[0]
+            limit = int((qs.get("limit") or ["200"])[0] or "200")
+            try:
+                results = db_manager.get_exam_results(user_id=user_id, exam_id=exam_id, limit=limit)
+                self._send_json(HTTPStatus.OK, {"ok": True, "results": results})
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/results/detail":
+            if not self._require_roles(STAFF_VIEW_ROLES):
+                return
+            qs = urllib.parse.parse_qs(parsed.query)
+            result_id = (qs.get("resultId") or [""])[0]
+            try:
+                detail = db_manager.get_exam_result_detail(result_id)
+                if not detail:
+                    self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "未找到对应考卷记录"})
+                    return
+                self._send_json(HTTPStatus.OK, {"ok": True, **detail})
             except Exception as exc:
                 self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
             return
@@ -271,10 +425,21 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
             qs = urllib.parse.parse_qs(parsed.query)
             role = (qs.get("role") or [None])[0]
             exam_id = (qs.get("examId") or ["WMPSES-1.1.1-V1"])[0]
+            sess = self._get_current_session()
             try:
                 users = db_manager.get_users(role_type=role)
-                logs = db_manager.get_change_logs(exam_id=exam_id)
-                self._send_json(HTTPStatus.OK, {"ok": True, "users": users, "changeLogs": logs})
+                if sess and sess.get("role") in STAFF_VIEW_ROLES:
+                    logs = db_manager.get_change_logs(exam_id=exam_id)
+                    self._send_json(
+                        HTTPStatus.OK,
+                        {"ok": True, "users": [_sanitize_user(u) for u in users], "changeLogs": logs},
+                    )
+                else:
+                    # 未登录或考生仅获取登录页快捷选择所需的脱敏公开信息，不暴露密码哈希、手机号及审计日志
+                    self._send_json(
+                        HTTPStatus.OK,
+                        {"ok": True, "users": [_sanitize_public_user(u) for u in users], "changeLogs": []},
+                    )
             except Exception as exc:
                 self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
             return
@@ -298,16 +463,125 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
 
+        # 原始二进制上传 GLB 模型（避免 10~80MB 文件经过 JSON Base64 膨胀）
+        if path == "/api/scene-model":
+            sess = self._require_roles(EDITOR_ROLES)
+            if not sess:
+                return
+            qs = urllib.parse.parse_qs(parsed.query)
+            exam_id = (qs.get("examId") or ["WMPSES-1.1.1-V1"])[0]
+            raw_name = (qs.get("name") or [self.headers.get("X-Model-Name") or "scene.glb"])[0]
+            file_name = urllib.parse.unquote(raw_name)
+            user_id = sess["userId"]
+            operator_name = f"{sess['fullName']} ({sess['role']})"
+            try:
+                length = int(self.headers.get("Content-Length") or "0")
+                if length <= 0 or length > 150 * 1024 * 1024:
+                    self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "GLB 文件大小无效（限制 1B ~ 150MB）"})
+                    return
+                raw_bytes = self.rfile.read(length)
+                res = db_manager.save_scene_3d_model(
+                    exam_id=exam_id,
+                    file_name=file_name,
+                    data_bytes=raw_bytes,
+                    change_meta={"userId": user_id, "operatorName": operator_name},
+                )
+                self._send_json(HTTPStatus.OK, {"ok": True, "message": f"GLB 模型「{res['modelName']}」已存入 SQLite 数据库", **res})
+            except Exception as exc:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
+            return
+
         try:
             body = self._read_json_body()
         except Exception as exc:
             self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": f"无效 JSON: {exc}"})
             return
 
+        if path == "/api/auth/login":
+            try:
+                identifier = str(body.get("username") or body.get("userCode") or body.get("id") or "").strip()
+                password = str(body.get("password") or "")
+                res = db_manager.authenticate_user(identifier, password)
+                if res.get("ok") and isinstance(res.get("user"), dict):
+                    token = _create_session(res["user"])
+                    res = {**res, "user": _sanitize_user(res["user"]), "token": token}
+                self._send_json(HTTPStatus.OK, res)
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/auth/logout":
+            _revoke_session(self._get_bearer_token())
+            self._send_json(HTTPStatus.OK, {"ok": True, "message": "已注销登录会话"})
+            return
+
+        if path == "/api/auth/password":
+            sess = self._require_roles(ALL_AUTH_ROLES)
+            if not sess:
+                return
+            try:
+                # 强制仅允许修改当前会话本人的密码，防止篡改 userId 越权改密
+                user_id = sess["userId"]
+                old_pwd = str(body.get("oldPassword") or "")
+                new_pwd = str(body.get("newPassword") or "")
+                res = db_manager.change_user_password(user_id, old_pwd, new_pwd)
+                if res.get("ok") and isinstance(res.get("user"), dict):
+                    res = {**res, "user": _sanitize_user(res["user"])}
+                self._send_json(HTTPStatus.OK, res)
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/scenes":
+            sess = self._require_roles(EDITOR_ROLES)
+            if not sess:
+                return
+            try:
+                scene_payload = body.get("scene") if isinstance(body, dict) and "scene" in body else body
+                change_meta = dict(body.get("changeMeta") or {}) if isinstance(body, dict) else {}
+                change_meta.setdefault("userId", sess["userId"])
+                change_meta.setdefault("operatorName", f"{sess['fullName']} ({sess['role']})")
+                res = db_manager.save_exam_scene(scene_payload, change_meta=change_meta)
+                self._send_json(HTTPStatus.OK, {"ok": True, "message": "试卷场景已保存至 SQLite 数据库", **res})
+            except Exception as exc:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/scenes/delete":
+            if not self._require_roles(ADMIN_DANGER_ROLES):
+                return
+            try:
+                exam_id = str(body.get("examId") or body.get("id") or "").strip()
+                res = db_manager.delete_exam_scene(exam_id)
+                self._send_json(HTTPStatus.OK, {"ok": True, "message": f"已删除试卷场景 {exam_id}", **res})
+            except Exception as exc:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/scene-model/clear":
+            sess = self._require_roles(EDITOR_ROLES)
+            if not sess:
+                return
+            try:
+                exam_id = str(body.get("examId") or "WMPSES-1.1.1-V1")
+                change_meta = dict(body.get("changeMeta") or {}) if isinstance(body, dict) else {}
+                change_meta.setdefault("userId", sess["userId"])
+                change_meta.setdefault("operatorName", f"{sess['fullName']} ({sess['role']})")
+                res = db_manager.clear_scene_3d_model(exam_id=exam_id, change_meta=change_meta)
+                self._send_json(HTTPStatus.OK, {"ok": True, "message": "已清除自定义 GLB 3D 模型", **res})
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
         if path == "/api/bank":
+            sess = self._require_roles(EDITOR_ROLES)
+            if not sess:
+                return
             try:
                 bank_payload = body.get("bank") if isinstance(body, dict) and "bank" in body else body
-                change_meta = body.get("changeMeta") if isinstance(body, dict) else None
+                change_meta = dict(body.get("changeMeta") or {}) if isinstance(body, dict) else {}
+                change_meta.setdefault("userId", sess["userId"])
+                change_meta.setdefault("operatorName", f"{sess['fullName']} ({sess['role']})")
                 res = db_manager.save_question_bank(bank_payload, change_meta=change_meta)
                 self._send_json(
                     HTTPStatus.OK,
@@ -324,16 +598,47 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
             return
 
         if path == "/api/users":
+            sess = self._require_roles(EDITOR_ROLES)
+            if not sess:
+                return
             try:
+                target_role = str(body.get("roleType") or body.get("RoleType") or "考生").strip()
+                if target_role == "系统管理员" and sess["role"] != "系统管理员":
+                    self._send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "仅「系统管理员」可创建或授予系统管理员角色"})
+                    return
+                target_uid = str(body.get("pk_UserID") or body.get("id") or "").strip()
+                if target_uid and sess["role"] != "系统管理员":
+                    existing_users = db_manager.get_users()
+                    existing_target = next((u for u in existing_users if u.get("pk_UserID") == target_uid), None)
+                    if existing_target and existing_target.get("RoleType") == "系统管理员":
+                        self._send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "无权修改「系统管理员」账号信息"})
+                        return
                 res = db_manager.save_user(body)
+                if isinstance(res.get("user"), dict):
+                    res = {**res, "user": _sanitize_user(res["user"])}
                 self._send_json(HTTPStatus.OK, {"ok": True, **res})
             except Exception as exc:
                 self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
             return
 
         if path == "/api/users/delete":
+            sess = self._require_roles(ADMIN_DANGER_ROLES)
+            if not sess:
+                return
             try:
-                uid = str(body.get("id") or body.get("pk_UserID") or "")
+                uid = str(body.get("id") or body.get("pk_UserID") or "").strip()
+                if not uid:
+                    self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "缺少待删除人员 ID"})
+                    return
+                if uid == sess["userId"]:
+                    self._send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "禁止删除当前正在登录的本人账号"})
+                    return
+                if sess["role"] != "系统管理员":
+                    existing_users = db_manager.get_users()
+                    existing_target = next((u for u in existing_users if u.get("pk_UserID") == uid), None)
+                    if existing_target and existing_target.get("RoleType") == "系统管理员":
+                        self._send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "仅「系统管理员」可删除系统管理员账号"})
+                        return
                 res = db_manager.delete_user(uid)
                 self._send_json(HTTPStatus.OK, res)
             except Exception as exc:
@@ -341,6 +646,8 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
             return
 
         if path == "/api/templates":
+            if not self._require_roles(EDITOR_ROLES):
+                return
             try:
                 res = db_manager.save_widget_template(body)
                 self._send_json(HTTPStatus.OK, res)
@@ -349,6 +656,8 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
             return
 
         if path == "/api/templates/delete":
+            if not self._require_roles(EDITOR_ROLES):
+                return
             try:
                 key = str(body.get("id") or body.get("code") or "")
                 res = db_manager.delete_widget_template(key)
@@ -357,28 +666,9 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
             return
 
-        if path == "/api/auth/login":
-            try:
-                identifier = str(body.get("username") or body.get("userCode") or body.get("id") or "").strip()
-                password = str(body.get("password") or "")
-                res = db_manager.authenticate_user(identifier, password)
-                self._send_json(HTTPStatus.OK, res)
-            except Exception as exc:
-                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
-            return
-
-        if path == "/api/auth/password":
-            try:
-                user_id = str(body.get("userId") or body.get("id") or "").strip()
-                old_pwd = str(body.get("oldPassword") or "")
-                new_pwd = str(body.get("newPassword") or "")
-                res = db_manager.change_user_password(user_id, old_pwd, new_pwd)
-                self._send_json(HTTPStatus.OK, res)
-            except Exception as exc:
-                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
-            return
-
         if path == "/api/bank/reset":
+            if not self._require_roles(ADMIN_DANGER_ROLES):
+                return
             try:
                 counts = db_manager.init_db(reset=True)
                 bank = db_manager.get_question_bank()
@@ -396,8 +686,17 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
             return
 
         if path == "/api/results":
+            sess = self._require_roles(EXAM_SUBMIT_ROLES)
+            if not sess:
+                return
             try:
-                res = db_manager.save_exam_result(body)
+                payload = dict(body) if isinstance(body, dict) else {}
+                if sess["role"] == "考生":
+                    # 考生交卷强制绑定当前登录本人，防止代考/篡改交卷人身份
+                    payload["userId"] = sess["userId"]
+                    payload["studentName"] = sess["fullName"]
+                    payload["examineeId"] = sess["userCode"]
+                res = db_manager.save_exam_result(payload)
                 self._send_json(
                     HTTPStatus.OK,
                     {
@@ -406,6 +705,29 @@ class WMPSESRequestHandler(SimpleHTTPRequestHandler):
                         **res,
                     },
                 )
+            except Exception as exc:
+                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
+            return
+
+        if path == "/api/results/grade":
+            sess = self._require_roles(GRADING_ROLES)
+            if not sess:
+                return
+            try:
+                result_id = str(body.get("resultId") or "").strip()
+                grades = body.get("grades") if isinstance(body, dict) else []
+                res = db_manager.grade_exam_result(
+                    result_id=result_id,
+                    grades=grades,
+                    reviewer_info={
+                        "userId": sess["userId"],
+                        "fullName": sess["fullName"],
+                        "reviewerName": f"{sess['fullName']} ({sess['role']})",
+                    },
+                )
+                self._send_json(HTTPStatus.OK, res)
+            except ValueError as exc:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
             except Exception as exc:
                 self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": str(exc)})
             return

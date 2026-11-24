@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
   <title>工业废气治理工实操模拟仿真考试系统（1.1.1 设备验收）</title>
-  <link rel="stylesheet" href="css/styles.css?v=20261119e">
+  <link rel="stylesheet" href="css/styles.css?v=20261123c">
 </head>
 <body>
   <header class="topbar">
@@ -17,6 +18,7 @@
           <button type="button" class="student-pill" id="btn-student-badge" title="点击设置考生信息与 FileMaker 对接">
             👤 <span id="student-name-display">现场考生</span>
           </button>
+          <select id="examinee-scene-select" class="form-control" title="选择报考级别与考试场景" style="display:none;width:auto;max-width:260px;padding:3px 8px;font-size:12px;height:26px;margin-left:6px;background:rgba(15,23,42,0.85);color:#7dd3fc;border-color:rgba(56,189,248,0.4);"></select>
           <span id="data-source-badge" style="color:#94a3b8;">· 本地离线就绪</span>
         </div>
       </div>
@@ -37,6 +39,7 @@
       </div>
       <button type="button" class="btn btn-success" id="btn-submit-exam">📊 查看汇总 / 交卷</button>
       <button type="button" class="btn btn-ghost" id="btn-open-docs">📋 台账与验收方案</button>
+      <button type="button" class="btn btn-ghost" id="btn-open-scenes" title="浏览与自定义试卷场景，配置2D底图、3D全景底图与GLB真3D模型">🗂️ 试卷场景</button>
       <button type="button" class="btn btn-ghost" id="btn-reset-exam">🔄 重置</button>
       <button type="button" class="btn btn-ghost" id="btn-open-settings">⚙️ 数据库 / 题库</button>
       <button type="button" class="btn btn-ghost" id="btn-open-password" title="修改当前登录用户的密码">🔑 修改密码</button>
@@ -53,10 +56,21 @@
       </div>
       <div class="edit-banner-actions">
         <button type="button" class="btn btn-warning btn-sm" id="btn-toggle-place-mode">➕ 在图上新增热点</button>
-        <label class="btn btn-primary btn-sm" style="cursor:pointer;" title="上传新装置图并存入数据库 WMPSES_试卷场景.ExamPicture 字段">
-          🖼️ 更换场景底图 (ExamPicture)
+        <button type="button" class="btn btn-primary btn-sm" id="btn-open-questions-bank" title="不点图集中浏览、筛选、新增、编辑或 CSV 批量导入全部习题">📝 习题总表</button>
+        <label class="btn btn-primary btn-sm" style="cursor:pointer;" title="上传 2D 平面全景底图并存入数据库 WMPSES_试卷场景.ExamPicture 字段">
+          🖼️ 更换 2D 底图
           <input type="file" id="input-exam-picture" accept="image/*" style="display:none;">
         </label>
+        <label class="btn btn-info btn-sm" style="cursor:pointer;" title="上传人工生成的 360°/3D 渲染图并存入数据库 WMPSES_试卷场景.ExamPicture3D 字段">
+          🌐 更换 3D 底图
+          <input type="file" id="input-exam-picture-3d" accept="image/*" style="display:none;">
+        </label>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-exam-picture-3d" title="清除自定义 3D 底图，恢复默认数字孪生程序化背景" style="display:none;">✕ 清除 3D 底图</button>
+        <label class="btn btn-purple btn-sm" style="cursor:pointer;" title="上传团队 A 交付的可走动真 3D 场景模型 (.glb) 并存入数据库 WMPSES_试卷场景.Scene3DModelBLOB">
+          📦 上传 3D 模型 (.glb)
+          <input type="file" id="input-scene-glb" accept=".glb,model/gltf-binary" style="display:none;">
+        </label>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-scene-glb" title="清除自定义 GLB 3D 模型，恢复默认孪生场景" style="display:none;">✕ 清除 3D 模型</button>
         <button type="button" class="btn btn-success btn-sm" id="btn-save-bank">💾 保存并同步题库</button>
         <button type="button" class="btn btn-danger btn-sm" id="btn-restore-default">↩️ 恢复出厂题库</button>
       </div>
@@ -76,10 +90,55 @@
         </div>
       </div>
 
+      <div class="scene-3d-toolbar" id="scene-3d-toolbar" aria-label="3D场景视角与快速传送控制">
+        <div class="scene-toolbar-group" role="group" aria-label="视角模式切换">
+          <button type="button" class="btn btn-sm scene-view-btn active" id="btn-view-3d-orbit" data-view="3d-orbit">🧊 3D 环绕视图</button>
+          <button type="button" class="btn btn-sm scene-view-btn" id="btn-view-3d-fps" data-view="3d-fps">🚶 第一人称漫游</button>
+          <button type="button" class="btn btn-sm scene-view-btn" id="btn-view-2d" data-view="2d">🖼️ 2D 平面全景</button>
+        </div>
+
+        <div class="scene-toolbar-group scene-teleport-group" id="scene-teleport-group" role="group" aria-label="装置区域快速传送">
+          <span class="scene-toolbar-label">快速传送：</span>
+          <button type="button" class="btn btn-ghost btn-sm btn-teleport-preset active" data-preset="overview">🌐 全景总览</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-teleport-preset" data-preset="scrubber_top">① 塔顶平台</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-teleport-preset" data-preset="scrubber_bottom">② 塔底区</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-teleport-preset" data-preset="fan_cooling">③ 风机/冷却水</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-teleport-preset" data-preset="rto_frame">④ RTO框架</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-teleport-preset" data-preset="stack_plc">⑤ 排气筒/中控室</button>
+        </div>
+
+        <div class="scene-toolbar-group" id="scene-3d-aux-group">
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-toggle-3d-mesh" title="切换是否在 3D 底图上方叠加显示程序化孪生设备模型与连管">🧊 孪生模型: 叠加</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-toggle-3d-flow">💨 工艺流向: 开</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-reset-3d-cam">🧭 视角复位</button>
+        </div>
+      </div>
+
       <div class="panorama-viewport">
-        <div class="panorama-stage" id="panorama-stage">
+        <div class="panorama-stage is-3d" id="panorama-stage">
+          <canvas id="plant-glb-canvas" class="plant-3d-canvas plant-glb-canvas" aria-hidden="true"></canvas>
+          <canvas id="plant-3d-canvas" class="plant-3d-canvas" aria-label="碱洗预处理与三室RTO联合装置3D仿真场景"></canvas>
           <img id="panorama-img" class="panorama-img" alt="碱洗预处理与三室RTO联合装置全景图">
           <div class="hotspot-layer" id="hotspot-layer"></div>
+          <div class="fps-hud-overlay" id="fps-hud-overlay" aria-hidden="true">
+            <div class="fps-crosshair" aria-hidden="true"></div>
+            <div class="fps-hud-status" id="fps-hud-coords">🚶 第一人称巡检 · 位置 (1.5, -17.5) · 标高 1.8m ｜ W/A/S/D 行走 · Q/E 升降 · 拖拽环顾</div>
+            <div class="fps-dpad" aria-label="第一人称虚拟移动方向键">
+              <div class="fps-dpad-row">
+                <button type="button" class="fps-dpad-btn" id="fps-btn-up" title="升高平台视角 (E)">▲ 升</button>
+                <button type="button" class="fps-dpad-btn" id="fps-btn-forward" title="向前走 (W/↑)">↑ 前进</button>
+                <button type="button" class="fps-dpad-btn" id="fps-btn-down" title="降低平台视角 (Q)">▼ 降</button>
+              </div>
+              <div class="fps-dpad-row">
+                <button type="button" class="fps-dpad-btn" id="fps-btn-left" title="向左横移 (A/←)">← 左移</button>
+                <button type="button" class="fps-dpad-btn" id="fps-btn-back" title="向后退 (S/↓)">↓ 后退</button>
+                <button type="button" class="fps-dpad-btn" id="fps-btn-right" title="向右横移 (D/→)">→ 右移</button>
+              </div>
+            </div>
+          </div>
+          <div class="scene-3d-corner-tip" id="scene-3d-corner-tip">
+            左键拖拽旋转 · 右键/Shift+左键平移 · 滚轮缩放 · 点击热点查看设备
+          </div>
         </div>
       </div>
 
@@ -88,32 +147,30 @@
     </section>
   </main>
 
-  <!-- 1. 部位仿真工况与答题弹窗 -->
-  <div class="modal-backdrop" id="question-modal" role="dialog" aria-modal="true" aria-labelledby="qm-title">
-    <div class="modal-dialog wide">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <span class="modal-code-badge" id="qm-code">A-101A</span>
-          <h2 class="modal-title" id="qm-title">设备部位名称</h2>
-          <span class="modal-category" id="qm-category">验收方面</span>
-        </div>
-        <button type="button" class="modal-close" data-close="question-modal" aria-label="关闭弹窗">✕</button>
+  <!-- 1. 部位仿真工况与答题弹窗（原生 <dialog> 模态弹窗） -->
+  <dialog class="native-modal wide" id="question-modal" closedby="any" aria-labelledby="qm-title">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <span class="modal-code-badge" id="qm-code">A-101A</span>
+        <h1 class="modal-title" id="qm-title">设备部位名称</h1>
+        <span class="modal-category" id="qm-category">验收方面</span>
       </div>
-      <div class="modal-body">
-        <div class="sim-widget-box" id="visual-widget-container"></div>
-        <div id="sim-simulator-panel" style="margin-bottom:14px;"></div>
-        <div class="question-list" id="question-list-container"></div>
-      </div>
-      <div class="modal-footer">
-        <div id="qm-progress-text" style="color:#94a3b8;font-size:12.5px;">本部位完成进度：0 / 2</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button type="button" class="btn btn-ghost" id="btn-prev-hotspot">← 上一部位</button>
-          <button type="button" class="btn btn-primary" id="btn-next-hotspot">下一部位 →</button>
-          <button type="button" class="btn btn-ghost" data-close="question-modal">关闭</button>
-        </div>
+      <button type="button" class="modal-close" data-close="question-modal" aria-label="关闭弹窗" autofocus>✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sim-widget-box" id="visual-widget-container"></div>
+      <div id="sim-simulator-panel" style="margin-bottom:14px;"></div>
+      <div class="question-list" id="question-list-container"></div>
+    </div>
+    <div class="modal-footer">
+      <div id="qm-progress-text" style="color:#94a3b8;font-size:12.5px;">本部位完成进度：0 / 2</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-ghost" id="btn-prev-hotspot">← 上一部位</button>
+        <button type="button" class="btn btn-primary" id="btn-next-hotspot">下一部位 →</button>
+        <button type="button" class="btn btn-ghost" data-close="question-modal">关闭</button>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- 2. 考试交卷与练习汇总成绩单弹窗 -->
   <div class="modal-backdrop" id="report-modal" role="dialog" aria-modal="true" aria-labelledby="rm-title">
@@ -197,56 +254,109 @@
     </div>
   </div>
 
-  <!-- 6. 系统统一登录与角色切换弹窗 -->
-  <div class="modal-backdrop" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="lm-title">
-    <div class="modal-dialog wide">
+  <!-- 6. 正式系统身份认证登录模块（刷新强制重登 + 已有会话确认） -->
+  <div class="modal-backdrop auth-gate" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="lm-title">
+    <div class="modal-dialog login-dialog">
       <div class="modal-header">
         <div class="modal-title-group">
-          <span class="modal-code-badge">统一认证</span>
-          <h2 class="modal-title" id="lm-title">系统登录与角色权限切换（WMPSES_用户人员）</h2>
+          <span class="modal-code-badge">🔐 身份认证中心</span>
+          <h2 class="modal-title" id="lm-title">WMPSES 系统安全登录</h2>
         </div>
         <button type="button" class="modal-close" id="btn-close-login-modal" data-close="login-modal" aria-label="关闭登录">✕</button>
       </div>
       <div class="modal-body">
         <div id="login-current-banner" style="padding:10px 12px;border-radius:8px;background:#162033;border:1px solid rgba(56,189,248,0.28);margin-bottom:12px;font-size:12.5px;"></div>
 
-        <div style="font-size:12px;color:#cbd5e1;margin-bottom:10px;">
-          💡 所有人员账号密码统一存储于 <code>WMPSES_用户人员.Password</code>（<strong>SHA-256 加密存储</strong>，所有预设账号初始密码均为 <code>123456</code>）。不同角色登录后将自动展示对应的操作模式与顶部功能按钮。
-        </div>
-
-        <div style="margin-bottom:12px;">
-          <div style="font-size:12px;font-weight:700;color:#7dd3fc;margin-bottom:6px;">⚡ 示范账号快捷填入（点击一键填入账号及默认密码 123456）</div>
-          <div id="login-quick-users" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;"></div>
-        </div>
-
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="login-username">账号（考号 / 工号 / 姓名）</label>
-            <input type="text" id="login-username" class="form-control" placeholder="如 ZK202611001 或 TC-GY-01">
+        <!-- 检测到已有 Session 时的强制二次确认区 -->
+        <div id="login-session-confirm-box" class="session-warning-box" style="display:none;" role="alertdialog" aria-labelledby="session-warn-title">
+          <div id="session-warn-title" style="font-size:14px;font-weight:700;color:#fca5a5;margin-bottom:8px;">
+            ⚠️ 检测到当前存在已有登录会话（Session）
           </div>
-          <div class="form-field">
-            <label for="login-password">登录密码（预设 123456）</label>
-            <input type="password" id="login-password" class="form-control" placeholder="请输入密码（默认 123456）">
+          <div id="login-session-detail" style="font-size:12.5px;color:#e2e8f0;line-height:1.65;margin-bottom:10px;"></div>
+          <div style="padding:8px 10px;border-radius:7px;background:rgba(239,68,68,0.14);border:1px solid rgba(248,113,113,0.4);color:#fecaca;font-size:12px;line-height:1.6;margin-bottom:12px;">
+            <strong>重要提醒：</strong>系统安全策略要求每次刷新页面强制重新登录。<strong>确认重新登录将立即清除当前会话及所有未保存的练习、答题与考试信息</strong>，且无法恢复。是否确认重新登录？
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+            <button type="button" class="btn btn-ghost" id="btn-abort-relogin">取消，保留当前会话</button>
+            <button type="button" class="btn btn-danger" id="btn-confirm-relogin">⚠️ 确认重新登录（清除现有信息）</button>
           </div>
         </div>
-        <div id="login-error-tip" style="color:#fda4af;font-size:12.5px;min-height:18px;margin-bottom:8px;"></div>
 
-        <div id="login-role-matrix-tip" style="padding:10px 12px;border-radius:8px;background:#0f172a;border:1px solid rgba(148,163,184,0.22);font-size:12px;color:#cbd5e1;">
-          <div style="font-weight:700;color:#fde68a;margin-bottom:6px;">🛡️ 各角色可见功能按钮权限矩阵</div>
-          <div style="line-height:1.7;">
-            · <strong>考生</strong>：仅开放「练习演示」「正式考试」「交卷汇总」「只读台账与验收方案」「重置」「修改密码」「切换账号」；隐藏教师标点与数据库/题库管理。<br>
-            · <strong>命题教师 / 系统管理员</strong>：开放全部工作模式、标点编辑工具条、数据库/题库与规则配置（全部 4 个标签页）及人员管理。<br>
-            · <strong>审题专家</strong>：开放「练习演示」「教师编辑/标点」「只读/审定台账」「数据库/题库」，隐藏「正式考试」「重置」及出厂恢复/删人等高危操作。<br>
-            · <strong>考评员</strong>：开放「练习演示」「正式考试」「只读台账」「重置」及数据中心（仅题库/考生信息与 SQLite 预览），隐藏「教师编辑/标点」「否定项规则修改」。<br>
-            · <strong>监考员</strong>：开放「练习演示」「正式考试」「重置」及数据中心（仅考生名册切换与 SQLite 预览），隐藏「教师编辑/标点」「台账方案」。
-          </div>
+        <!-- 正式账号密码表单区 -->
+        <div id="login-form-section">
+          <form id="login-form">
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="login-username">账号（考号 / 工号 / 姓名）</label>
+                <input
+                  type="text"
+                  id="login-username"
+                  name="username"
+                  class="form-control"
+                  autocomplete="username"
+                  autocapitalize="off"
+                  autocorrect="off"
+                  spellcheck="false"
+                  enterkeyhint="next"
+                  required
+                  data-error="login-username-error"
+                  placeholder="请输入考号、工号或姓名"
+                >
+                <div id="login-username-error" class="field-error-msg">
+                  <span role="img" aria-label="错误">⚠️</span> 请输入考号、工号或姓名。
+                </div>
+              </div>
+              <div class="form-field">
+                <label for="login-password">登录密码</label>
+                <input
+                  type="password"
+                  id="login-password"
+                  name="password"
+                  class="form-control"
+                  autocomplete="current-password"
+                  enterkeyhint="done"
+                  required
+                  data-error="login-password-error"
+                  placeholder="请输入登录密码"
+                >
+                <div id="login-password-error" class="field-error-msg">
+                  <span role="img" aria-label="错误">⚠️</span> 请输入登录密码。
+                </div>
+              </div>
+            </div>
+            <div class="form-field" style="margin-top:10px;">
+              <label for="login-scene-select">📚 报考级别 / 考试场景（考生可自由选择已启用的考核级别）</label>
+              <select id="login-scene-select" class="form-control">
+                <option value="WMPSES-1.1.1-V1">正在加载已启用的考试场景...</option>
+              </select>
+            </div>
+            <div id="login-error-tip" role="alert" style="color:#fda4af;font-size:12.5px;min-height:18px;margin-bottom:8px;"></div>
+          </form>
+
+          <details class="login-aux-details">
+            <summary>🧪 考场测试 / 示范账号参考与角色权限说明（点击展开）</summary>
+            <div style="margin-top:10px;">
+              <div style="font-size:12px;color:#cbd5e1;margin-bottom:8px;">
+                💡 账号密码存储于 <code>WMPSES_用户人员.Password</code>（SHA-256 加密，示范账号初始密码 <code>123456</code>）。点击下方账号仅填入账号，需自行输入密码验证登录：
+              </div>
+              <div id="login-quick-users" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:10px;"></div>
+              <div id="login-role-matrix-tip" style="padding:10px 12px;border-radius:8px;background:#0f172a;border:1px solid rgba(148,163,184,0.22);font-size:12px;color:#cbd5e1;">
+                <div style="font-weight:700;color:#fde68a;margin-bottom:6px;">🛡️ 各角色权限范围</div>
+                <div style="line-height:1.7;">
+                  · <strong>考生</strong>：练习演示、正式考试（交卷后即封闭答卷）、只读台账、修改密码。<br>
+                  · <strong>监考员 / 考评员</strong>：考生成绩表查询、题库与 SQLite 数据预览、装置热点演示（不含练习与正式考试作答模式）。<br>
+                  · <strong>命题教师 / 系统管理员</strong>：全部工作模式、标点编辑、否定项规则与人员管理。
+                </div>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" id="login-modal-footer">
         <button type="button" class="btn btn-ghost" id="btn-logout-user">退出当前登录</button>
         <div style="display:flex;gap:8px;">
-          <button type="button" class="btn btn-ghost" id="btn-cancel-login" data-close="login-modal">暂不切换</button>
-          <button type="button" class="btn btn-success" id="btn-do-login">🔐 验证并登录</button>
+          <button type="button" class="btn btn-ghost" id="btn-cancel-login" data-close="login-modal">取消</button>
+          <button type="submit" form="login-form" class="btn btn-success" id="btn-do-login">🔐 验证并登录</button>
         </div>
       </div>
     </div>
@@ -265,25 +375,70 @@
       <div class="modal-body">
         <div id="pwd-user-summary" style="padding:10px 12px;border-radius:8px;background:#162033;border:1px solid rgba(56,189,248,0.25);margin-bottom:10px;font-size:12.5px;"></div>
         <div id="pwd-hash-preview" style="font-size:11.5px;color:#94a3b8;margin-bottom:12px;word-break:break-all;"></div>
-        <div class="form-field">
-          <label for="pwd-old">原密码</label>
-          <input type="password" id="pwd-old" class="form-control" placeholder="请输入当前密码（未改过则为 123456）">
-        </div>
-        <div class="form-field">
-          <label for="pwd-new">新密码（至少 4 位）</label>
-          <input type="password" id="pwd-new" class="form-control" placeholder="请输入新密码">
-        </div>
-        <div class="form-field">
-          <label for="pwd-confirm">确认新密码</label>
-          <input type="password" id="pwd-confirm" class="form-control" placeholder="请再次输入新密码">
-        </div>
-        <div id="pwd-error-tip" style="color:#fda4af;font-size:12.5px;min-height:18px;"></div>
+        <form id="password-form">
+          <div class="form-field">
+            <label for="pwd-old">原密码</label>
+            <input
+              type="password"
+              id="pwd-old"
+              name="current-password"
+              class="form-control"
+              autocomplete="current-password"
+              enterkeyhint="next"
+              required
+              data-error="pwd-old-error"
+              placeholder="请输入当前密码（未改过则为 123456）"
+            >
+            <div id="pwd-old-error" class="field-error-msg">
+              <span role="img" aria-label="错误">⚠️</span> 请输入当前原密码。
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="pwd-new">新密码</label>
+            <span id="pwd-new-hint" class="field-hint">至少 4 位字符，提交后将自动以 SHA-256 加密保存。</span>
+            <input
+              type="password"
+              id="pwd-new"
+              name="new-password"
+              class="form-control"
+              autocomplete="new-password"
+              enterkeyhint="next"
+              required
+              minlength="4"
+              aria-describedby="pwd-new-hint"
+              data-error="pwd-new-error"
+              placeholder="请输入新密码"
+            >
+            <div id="pwd-new-error" class="field-error-msg">
+              <span role="img" aria-label="错误">⚠️</span> 新密码长度不能少于 4 位。
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="pwd-confirm">确认新密码</label>
+            <input
+              type="password"
+              id="pwd-confirm"
+              name="confirm-password"
+              class="form-control"
+              autocomplete="new-password"
+              enterkeyhint="done"
+              required
+              minlength="4"
+              data-error="pwd-confirm-error"
+              placeholder="请再次输入新密码"
+            >
+            <div id="pwd-confirm-error" class="field-error-msg">
+              <span role="img" aria-label="错误">⚠️</span> 请确保两次输入的新密码一致（至少 4 位）。
+            </div>
+          </div>
+          <div id="pwd-error-tip" role="alert" style="color:#fda4af;font-size:12.5px;min-height:18px;"></div>
+        </form>
       </div>
       <div class="modal-footer">
         <span style="font-size:12px;color:#94a3b8;">提交后自动 SHA-256 加密写入 SQLite 与 CSV</span>
         <div style="display:flex;gap:8px;">
           <button type="button" class="btn btn-ghost" data-close="password-modal">取消</button>
-          <button type="button" class="btn btn-success" id="btn-do-change-pwd">✅ 确认修改密码</button>
+          <button type="submit" form="password-form" class="btn btn-success" id="btn-do-change-pwd">✅ 确认修改密码</button>
         </div>
       </div>
     </div>
@@ -384,12 +539,94 @@
     </div>
   </div>
 
+  <!-- 弹窗 9：试卷场景浏览与自定义配置工作台（2D底图 / 3D全景底图 / GLB模型） -->
+  <div class="modal-backdrop" id="scenes-modal" role="dialog" aria-modal="true" aria-labelledby="scm-title">
+    <div class="modal-dialog" style="max-width: 1180px;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="scm-title">🗂️ 试卷场景浏览与自定义工作台</h2>
+          <div class="modal-subtitle">浏览全部试卷场景，自定义试卷参数，并为每个场景独立配置 2D 底图、3D 全景底图与可走动 GLB 3D 模型</div>
+        </div>
+        <button type="button" class="modal-close" data-close="scenes-modal" aria-label="关闭">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px;">
+        <div class="scenes-layout">
+          <aside class="scenes-sidebar">
+            <div class="scenes-sidebar-head">
+              <strong>全部试卷场景 (<span id="scenes-count-badge">0</span>)</strong>
+              <button type="button" class="btn btn-primary btn-sm" id="btn-scene-new">➕ 新建场景</button>
+            </div>
+            <div class="scenes-list" id="scenes-list"></div>
+          </aside>
+          <section class="scenes-editor" id="scenes-editor-pane"></section>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <div style="font-size: 12px; color: #94a3b8;">
+          💡 每个试卷场景均可独立设置 2D 平面底图、3D 全景底图（2:1）或 .glb 真 3D 模型，全部持久化至数据库。
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn btn-danger btn-sm" id="btn-scene-delete" style="display:none;">🗑️ 删除此场景</button>
+          <button type="button" class="btn btn-ghost" data-close="scenes-modal">关闭</button>
+          <button type="button" class="btn btn-success" id="btn-scene-save">💾 保存场景配置</button>
+          <button type="button" class="btn btn-primary" id="btn-scene-activate">▶ 保存并进入此场景</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗 10：考评员手工阅卷工作台（文字简答题人工打分与盲评） -->
+  <div class="modal-backdrop" id="grading-modal" role="dialog" aria-modal="true" aria-labelledby="gm-title">
+    <div class="modal-dialog" style="max-width: 980px;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="gm-title">✍️ 考评员手工阅卷工作台</h2>
+          <div class="modal-subtitle" id="gm-subtitle">仅对文字简答题进行手工给分与评语录入，客观题自动判分结果只读锁定</div>
+        </div>
+        <button type="button" class="modal-close" data-close="grading-modal" aria-label="关闭阅卷工作台">✕</button>
+      </div>
+      <div class="modal-body" id="grading-modal-body" style="padding: 16px 20px;"></div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <div id="gm-footer-summary" style="font-size: 12.5px; color: #94a3b8;">
+          提交后将自动汇总客观分 + 主观分并重新核定合格状态
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn btn-ghost" data-close="grading-modal">取消关闭</button>
+          <button type="button" class="btn btn-success" id="btn-submit-grading">💾 提交手工阅卷打分</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗 11：单题集中新增/编辑弹窗（来自习题总表，支持跨部位迁移与全部题型） -->
+  <div class="modal-backdrop" id="question-item-modal" role="dialog" aria-modal="true" aria-labelledby="qim-title">
+    <div class="modal-dialog" style="max-width: 780px;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="qim-title">📝 新增 / 编辑习题</h2>
+          <div class="modal-subtitle">无需点击场景热点，直接选择所属设备部位并录入或修改试题，保存后实时同步 SQLite</div>
+        </div>
+        <button type="button" class="modal-close" data-close="question-item-modal" aria-label="关闭">✕</button>
+      </div>
+      <div class="modal-body" id="question-item-modal-body" style="padding: 16px 20px;"></div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <span style="font-size: 12px; color: #94a3b8;">💡 支持单选、多选、判断及文字简答题（考评员手工阅卷）</span>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn btn-ghost" data-close="question-item-modal">取消</button>
+          <button type="button" class="btn btn-success" id="btn-save-qitem">💾 保存题目到题库</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
-  <script src="js/plant-image-data.js?v=20261119e"></script>
-  <script src="js/question-bank.js?v=20261119e"></script>
-  <script src="js/visual-widgets.js?v=20261119e"></script>
-  <script src="js/fm-adapter.js?v=20261119e"></script>
-  <script src="js/app.js?v=20261119e"></script>
+  <script src="js/plant-image-data.js?v=20261124a"></script>
+  <script src="js/question-bank.js?v=20261124a"></script>
+  <script src="js/visual-widgets.js?v=20261124a"></script>
+  <script src="js/glb-renderer.js?v=20261124a"></script>
+  <script src="js/scene-3d.js?v=20261124a"></script>
+  <script src="js/fm-adapter.js?v=20261124a"></script>
+  <script src="js/app.js?v=20261124a"></script>
 </body>
 </html>

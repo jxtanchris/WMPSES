@@ -41,6 +41,17 @@
     not IsEmpty ( WMPSES_试卷场景::ExamPicture ) ;
     "data:" & mime & ";base64," & Base64EncodeRFC ( 4648 ; WMPSES_试卷场景::ExamPicture ) ;
     ""
+  ) ;
+  fn3d = Lower ( GetContainerAttribute ( WMPSES_试卷场景::ExamPicture3D ; "filename" ) ) ;
+  mime3d = Case (
+    PatternCount ( fn3d ; ".png" ) > 0 ; "image/png" ;
+    PatternCount ( fn3d ; ".webp" ) > 0 ; "image/webp" ;
+    "image/jpeg"
+  ) ;
+  pic3dDataUri = If (
+    not IsEmpty ( WMPSES_试卷场景::ExamPicture3D ) ;
+    "data:" & mime3d & ";base64," & Base64EncodeRFC ( 4648 ; WMPSES_试卷场景::ExamPicture3D ) ;
+    ""
   )
 ] ;
   JSONSetElement ( "{}" ;
@@ -53,7 +64,8 @@
     [ "durationMinutes" ; GetAsNumber ( WMPSES_试卷场景::DurationMinutes ) ; JSONNumber ] ;
     [ "version" ; WMPSES_试卷场景::Version ; JSONString ] ;
     [ "updatedAt" ; GetAsText ( WMPSES_试卷场景::UpdatedAt ) ; JSONString ] ;
-    [ "examPicture" ; picDataUri ; JSONString ]
+    [ "examPicture" ; picDataUri ; JSONString ] ;
+    [ "examPicture3d" ; pic3dDataUri ; JSONString ]
   )
 )]]></Calculation>
       </Value>

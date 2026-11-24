@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WMPSES RTO Plant</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer@4.0.0/dist/model-viewer.min.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 50% 18%, #eef4f8 0%, #d6e0e8 48%, #b7c4cf 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .stage {
+      position: relative;
+      width: min(96vw, 1600px);
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 8%, #f7fafc 0%, #dbe5ec 52%, #bcc9d4 100%);
+      box-shadow: 0 30px 80px rgba(32, 48, 62, 0.28), 0 4px 14px rgba(32, 48, 62, 0.16);
+    }
+    model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+    #hint {
+      position: absolute; left: 16px; bottom: 14px;
+      font-size: 13px; color: #40515f;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 8px 12px; border-radius: 8px;
+      backdrop-filter: blur(6px); pointer-events: none;
+    }
+    @media (max-width: 700px) {
+      .stage { width: 100vw; border-radius: 0; }
+      #hint { font-size: 11px; left: 10px; bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <model-viewer
+      src="./WMPSES_RTO_Plant_web.glb"
+      alt="WMPSES 碱洗塔 + 三室 RTO + 烟囱"
+      camera-controls
+      auto-rotate
+      auto-rotate-delay="2500"
+      rotation-per-second="8deg"
+      environment-image="neutral"
+      exposure="1.0"
+      shadow-intensity="1"
+      shadow-softness="0.8"
+      camera-orbit="0deg 75deg 165m"
+      camera-target="-3.5m 12.5m 0m"
+      min-camera-orbit="auto auto 20m"
+      max-camera-orbit="auto auto 260m">
+    </model-viewer>
+    <div id="hint">拖拽旋转 · 滚轮缩放 · 右键平移</div>
+  </main>
+  <script>
+    const mv = document.querySelector('model-viewer');
+    let lastAR = 0;
+    function fitCamera() {
+      const ar = mv.clientWidth / Math.max(1, mv.clientHeight);
+      if (Math.abs(ar - lastAR) < 0.05) return;
+      lastAR = ar;
+      const radius = ar >= 1.6 ? 85 : ar >= 1.2 ? 105 : ar >= 0.95 ? 135 : 165;
+      mv.setAttribute('camera-target', '-3.5m 12.5m 0m');
+      mv.setAttribute('camera-orbit', `0deg 75deg ${radius}m`);
+    }
+    mv.addEventListener('load', fitCamera);
+    window.addEventListener('resize', fitCamera);
+  </script>
+</body>
+</html>

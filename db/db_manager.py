@@ -57,11 +57,14 @@ TABLE_NAMES = [
 
 
 def get_connection(db_path: Path = DB_PATH) -> sqlite3.Connection:
-    """获取开启外键约束的 SQLite 数据库连接。"""
+    """获取开启外键约束与 WAL 并发模式的 SQLite 数据库连接。"""
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
+    conn = sqlite3.connect(str(db_path), timeout=15.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA synchronous = NORMAL;")
+    conn.execute("PRAGMA busy_timeout = 10000;")
     return conn
 
 
@@ -91,12 +94,37 @@ def _ensure_schema_migrations(conn: sqlite3.Connection) -> None:
     exam_cols = {r["name"] for r in conn.execute('PRAGMA table_info("WMPSES_试卷场景")').fetchall()}
     if "ExamPicture" not in exam_cols:
         conn.execute('ALTER TABLE "WMPSES_试卷场景" ADD COLUMN "ExamPicture" TEXT NOT NULL DEFAULT \'\'')
+    if "ExamPicture3D" not in exam_cols:
+        conn.execute('ALTER TABLE "WMPSES_试卷场景" ADD COLUMN "ExamPicture3D" TEXT NOT NULL DEFAULT \'\'')
+    if "Scene3DModelName" not in exam_cols:
+        conn.execute('ALTER TABLE "WMPSES_试卷场景" ADD COLUMN "Scene3DModelName" TEXT NOT NULL DEFAULT \'\'')
+    if "Scene3DModelBLOB" not in exam_cols:
+        conn.execute('ALTER TABLE "WMPSES_试卷场景" ADD COLUMN "Scene3DModelBLOB" BLOB')
     hs_cols = {r["name"] for r in conn.execute('PRAGMA table_info("WMPSES_设备热点")').fetchall()}
     if "WidgetParamsJSON" not in hs_cols:
         conn.execute('ALTER TABLE "WMPSES_设备热点" ADD COLUMN "WidgetParamsJSON" TEXT NOT NULL DEFAULT \'{}\'')
     res_cols = {r["name"] for r in conn.execute('PRAGMA table_info("WMPSES_考试记录")').fetchall()}
     if "fk_UserID" not in res_cols:
         conn.execute('ALTER TABLE "WMPSES_考试记录" ADD COLUMN "fk_UserID" TEXT NOT NULL DEFAULT \'\'')
+    if "ObjectiveScore" not in res_cols:
+        conn.execute('ALTER TABLE "WMPSES_考试记录" ADD COLUMN "ObjectiveScore" INTEGER NOT NULL DEFAULT 0')
+    if "SubjectiveScore" not in res_cols:
+        conn.execute('ALTER TABLE "WMPSES_考试记录" ADD COLUMN "SubjectiveScore" INTEGER NOT NULL DEFAULT 0')
+    if "ReviewStatus" not in res_cols:
+        conn.execute('ALTER TABLE "WMPSES_考试记录" ADD COLUMN "ReviewStatus" TEXT NOT NULL DEFAULT \'自动已评\'')
+    if "ReviewerID" not in res_cols:
+        conn.execute('ALTER TABLE "WMPSES_考试记录" ADD COLUMN "ReviewerID" TEXT NOT NULL DEFAULT \'\'')
+    if "ReviewerName" not in res_cols:
+        conn.execute('ALTER TABLE "WMPSES_考试记录" ADD COLUMN "ReviewerName" TEXT NOT NULL DEFAULT \'\'')
+    if "ReviewedAt" not in res_cols:
+        conn.execute('ALTER TABLE "WMPSES_考试记录" ADD COLUMN "ReviewedAt" TEXT NOT NULL DEFAULT \'\'')
+    det_cols = {r["name"] for r in conn.execute('PRAGMA table_info("WMPSES_作答明细")').fetchall()}
+    if "QuestionType" not in det_cols:
+        conn.execute('ALTER TABLE "WMPSES_作答明细" ADD COLUMN "QuestionType" TEXT NOT NULL DEFAULT \'single\'')
+    if "MaxScore" not in det_cols:
+        conn.execute('ALTER TABLE "WMPSES_作答明细" ADD COLUMN "MaxScore" INTEGER NOT NULL DEFAULT 0')
+    if "ReviewComment" not in det_cols:
+        conn.execute('ALTER TABLE "WMPSES_作答明细" ADD COLUMN "ReviewComment" TEXT NOT NULL DEFAULT \'\'')
     user_cols = {r["name"] for r in conn.execute('PRAGMA table_info("WMPSES_用户人员")').fetchall()}
     if "Password" not in user_cols:
         conn.execute(
@@ -106,6 +134,56 @@ def _ensure_schema_migrations(conn: sqlite3.Connection) -> None:
         'UPDATE "WMPSES_用户人员" SET "Password" = ? WHERE "Password" = \'\' OR "Password" IS NULL',
         (DEFAULT_PASSWORD_HASH,),
     )
+    # 平滑迁移 WMPSES_习题库：将 fk_HotspotID 放宽为可空（支持独立题库池，删除热点时置空而非级联删题）
+    q_info = conn.execute('PRAGMA table_info("WMPSES_习题库")').fetchall()
+    fk_hs_col = next((c for c in q_info if c["name"] == "fk_HotspotID"), None)
+    if fk_hs_col is not None and int(fk_hs_col["notnull"] or 0) == 1:
+        conn.execute("PRAGMA foreign_keys = OFF")
+        conn.execute(
+            """
+            CREATE TABLE "WMPSES_习题库__migrated" (
+                "pk_QuestionID"        TEXT PRIMARY KEY NOT NULL,
+                "fk_HotspotID"         TEXT DEFAULT NULL,
+                "fk_ExamID"            TEXT NOT NULL,
+                "SortOrder"            INTEGER NOT NULL DEFAULT 1,
+                "DefectCode"           TEXT NOT NULL DEFAULT '',
+                "DefectLevel"          TEXT NOT NULL DEFAULT 'general',
+                "IsMajorDefect"        INTEGER NOT NULL DEFAULT 0,
+                "IsCriticalConclusion" INTEGER NOT NULL DEFAULT 0,
+                "QuestionType"         TEXT NOT NULL DEFAULT 'single',
+                "Score"                INTEGER NOT NULL DEFAULT 2,
+                "QuestionTitle"        TEXT NOT NULL,
+                "OptionA"              TEXT NOT NULL DEFAULT '',
+                "OptionB"              TEXT NOT NULL DEFAULT '',
+                "OptionC"              TEXT NOT NULL DEFAULT '',
+                "OptionD"              TEXT NOT NULL DEFAULT '',
+                "OptionE"              TEXT NOT NULL DEFAULT '',
+                "AnswerKeys"           TEXT NOT NULL DEFAULT 'A',
+                "ReferenceStandard"    TEXT NOT NULL DEFAULT '',
+                "Explanation"          TEXT NOT NULL DEFAULT '',
+                FOREIGN KEY ("fk_HotspotID") REFERENCES "WMPSES_设备热点"("pk_HotspotID") ON DELETE SET NULL,
+                FOREIGN KEY ("fk_ExamID") REFERENCES "WMPSES_试卷场景"("pk_ExamID") ON DELETE CASCADE
+            )
+            """
+        )
+        conn.execute(
+            """
+            INSERT INTO "WMPSES_习题库__migrated"
+            SELECT
+                "pk_QuestionID",
+                NULLIF("fk_HotspotID", ''),
+                "fk_ExamID", "SortOrder", "DefectCode", "DefectLevel",
+                "IsMajorDefect", "IsCriticalConclusion", "QuestionType", "Score",
+                "QuestionTitle", "OptionA", "OptionB", "OptionC", "OptionD", "OptionE",
+                "AnswerKeys", "ReferenceStandard", "Explanation"
+            FROM "WMPSES_习题库"
+            """
+        )
+        conn.execute('DROP TABLE "WMPSES_习题库"')
+        conn.execute('ALTER TABLE "WMPSES_习题库__migrated" RENAME TO "WMPSES_习题库"')
+        conn.execute('CREATE INDEX IF NOT EXISTS "idx_questions_hotspot_order" ON "WMPSES_习题库" ("fk_HotspotID", "SortOrder")')
+        conn.execute('CREATE INDEX IF NOT EXISTS "idx_questions_exam" ON "WMPSES_习题库" ("fk_ExamID")')
+        conn.execute("PRAGMA foreign_keys = ON")
 
 
 def _import_seed_csv(conn: sqlite3.Connection) -> None:
@@ -124,12 +202,13 @@ def _import_seed_csv(conn: sqlite3.Connection) -> None:
     if exam_csv.exists():
         for row in _read_csv_rows(exam_csv):
             pic_val = row.get("ExamPicture") or (default_pic if row["pk_ExamID"] == "WMPSES-1.1.1-V1" else "")
+            pic_3d_val = row.get("ExamPicture3D") or ""
             conn.execute(
                 """
                 INSERT INTO "WMPSES_试卷场景" (
                     "pk_ExamID", "Title", "Subtitle", "ExamCode", "VariantCode",
-                    "TotalScore", "PassScore", "DurationMinutes", "Status", "Version", "UpdatedAt", "ExamPicture"
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    "TotalScore", "PassScore", "DurationMinutes", "Status", "Version", "UpdatedAt", "ExamPicture", "ExamPicture3D"
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT("pk_ExamID") DO UPDATE SET
                     "Title"=excluded."Title",
                     "Subtitle"=excluded."Subtitle",
@@ -141,7 +220,8 @@ def _import_seed_csv(conn: sqlite3.Connection) -> None:
                     "Status"=excluded."Status",
                     "Version"=excluded."Version",
                     "UpdatedAt"=excluded."UpdatedAt",
-                    "ExamPicture"=CASE WHEN excluded."ExamPicture" != '' THEN excluded."ExamPicture" ELSE "WMPSES_试卷场景"."ExamPicture" END
+                    "ExamPicture"=CASE WHEN excluded."ExamPicture" != '' THEN excluded."ExamPicture" ELSE "WMPSES_试卷场景"."ExamPicture" END,
+                    "ExamPicture3D"=CASE WHEN excluded."ExamPicture3D" != '' THEN excluded."ExamPicture3D" ELSE "WMPSES_试卷场景"."ExamPicture3D" END
                 """,
                 (
                     row["pk_ExamID"],
@@ -156,6 +236,7 @@ def _import_seed_csv(conn: sqlite3.Connection) -> None:
                     row["Version"] or "1.0.0",
                     row["UpdatedAt"] or datetime.date.today().isoformat(),
                     pic_val,
+                    pic_3d_val,
                 ),
             )
 
@@ -626,6 +707,8 @@ def _upsert_design_tables_in_tx(conn: sqlite3.Connection, exam_id: str, bank: Di
                 f'DELETE FROM "WMPSES_验收规范与确认单" WHERE "fk_ExamID" = ? AND "pk_CheckItemID" NOT IN ({ph})',
                 [exam_id, *keep_chk_ids],
             )
+        else:
+            conn.execute('DELETE FROM "WMPSES_验收规范与确认单" WHERE "fk_ExamID" = ?', (exam_id,))
         for idx, item in enumerate(checklist_items):
             cid = str(item.get("id") or f"CHK-{idx + 1:02d}")
             conn.execute(
@@ -670,6 +753,8 @@ def _upsert_design_tables_in_tx(conn: sqlite3.Connection, exam_id: str, bank: Di
                 f'DELETE FROM "WMPSES_工况资料与引用标准" WHERE "fk_ExamID" = ? AND "pk_DocID" NOT IN ({ph})',
                 [exam_id, *keep_doc_ids],
             )
+        else:
+            conn.execute('DELETE FROM "WMPSES_工况资料与引用标准" WHERE "fk_ExamID" = ?', (exam_id,))
         for idx, doc in enumerate(scenario_docs):
             did = str(doc.get("id") or f"DOC-{idx + 1:02d}")
             conn.execute(
@@ -973,6 +1058,8 @@ def get_question_bank(exam_id: str = "WMPSES-1.1.1-V1", db_path: Path = DB_PATH)
         ).fetchall()
 
         q_by_hs: Dict[str, List[Dict[str, Any]]] = {}
+        unassigned_questions: List[Dict[str, Any]] = []
+        valid_hs_ids = {hr["pk_HotspotID"] for hr in hotspot_rows}
         for qr in question_rows:
             options = []
             for key_letter in ("A", "B", "C", "D", "E"):
@@ -984,21 +1071,26 @@ def get_question_bank(exam_id: str = "WMPSES-1.1.1-V1", db_path: Path = DB_PATH)
                 for ans in str(qr["AnswerKeys"] or "").replace("，", ",").split(",")
                 if ans.strip()
             ]
+            q_type = qr["QuestionType"] or "single"
             q_obj = {
                 "id": qr["pk_QuestionID"],
                 "defectCode": qr["DefectCode"] or "",
                 "defectLevel": qr["DefectLevel"] or "general",
                 "isMajorDefect": bool(qr["IsMajorDefect"]),
                 "isCriticalConclusion": bool(qr["IsCriticalConclusion"]),
-                "type": qr["QuestionType"] or "single",
+                "type": q_type,
                 "score": int(qr["Score"] or 2),
                 "title": qr["QuestionTitle"],
                 "options": options,
-                "answer": answers or ["A"],
+                "answer": [] if q_type == "short_answer" else (answers or ["A"]),
                 "referenceStandard": qr["ReferenceStandard"] or "",
                 "explanation": qr["Explanation"] or "",
             }
-            q_by_hs.setdefault(qr["fk_HotspotID"], []).append(q_obj)
+            fk_hs = qr["fk_HotspotID"]
+            if fk_hs and fk_hs in valid_hs_ids:
+                q_by_hs.setdefault(fk_hs, []).append(q_obj)
+            else:
+                unassigned_questions.append(q_obj)
 
         hotspots = []
         for hr in hotspot_rows:
@@ -1079,6 +1171,10 @@ def get_question_bank(exam_id: str = "WMPSES-1.1.1-V1", db_path: Path = DB_PATH)
         exam_picture = exam_row["ExamPicture"] if "ExamPicture" in exam_row.keys() else ""
         if not exam_picture:
             exam_picture = _get_default_exam_picture_data_uri()
+        exam_picture_3d = exam_row["ExamPicture3D"] if "ExamPicture3D" in exam_row.keys() else ""
+        model_name = exam_row["Scene3DModelName"] if "Scene3DModelName" in exam_row.keys() else ""
+        model_blob = exam_row["Scene3DModelBLOB"] if "Scene3DModelBLOB" in exam_row.keys() else None
+        model_size = len(model_blob) if model_blob else 0
         return {
             "meta": {
                 "id": actual_exam_id,
@@ -1091,8 +1187,13 @@ def get_question_bank(exam_id: str = "WMPSES-1.1.1-V1", db_path: Path = DB_PATH)
                 "version": exam_row["Version"] or "1.0.0",
                 "updatedAt": exam_row["UpdatedAt"] or datetime.date.today().isoformat(),
                 "examPicture": exam_picture,
+                "examPicture3d": exam_picture_3d,
+                "hasScene3dModel": model_size > 0,
+                "scene3dModelName": model_name or "",
+                "scene3dModelSize": model_size,
             },
             "hotspots": hotspots,
+            "unassignedQuestions": unassigned_questions,
             "vetoRules": veto_rules,
             "checklistItems": checklist_items,
             "scenarioDocs": scenario_docs,
@@ -1108,13 +1209,15 @@ def _upsert_bank_in_tx(conn: sqlite3.Connection, bank: Dict[str, Any]) -> str:
     calc_total = sum(int(q.get("score") or 2) for hs in hotspots for q in (hs.get("questions") or []))
 
     exam_picture = str(meta.get("examPicture") or "")
+    exam_picture_3d = str(meta.get("examPicture3d") or meta.get("examPicture3D") or "")
+    clear_3d = int(1 if meta.get("clearExamPicture3d") else 0)
 
     conn.execute(
         """
         INSERT INTO "WMPSES_试卷场景" (
             "pk_ExamID", "Title", "Subtitle", "ExamCode", "VariantCode",
-            "TotalScore", "PassScore", "DurationMinutes", "Status", "Version", "UpdatedAt", "ExamPicture"
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            "TotalScore", "PassScore", "DurationMinutes", "Status", "Version", "UpdatedAt", "ExamPicture", "ExamPicture3D"
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT("pk_ExamID") DO UPDATE SET
             "Title"=excluded."Title",
             "Subtitle"=excluded."Subtitle",
@@ -1124,7 +1227,12 @@ def _upsert_bank_in_tx(conn: sqlite3.Connection, bank: Dict[str, Any]) -> str:
             "DurationMinutes"=excluded."DurationMinutes",
             "Version"=excluded."Version",
             "UpdatedAt"=excluded."UpdatedAt",
-            "ExamPicture"=CASE WHEN excluded."ExamPicture" != '' THEN excluded."ExamPicture" ELSE "WMPSES_试卷场景"."ExamPicture" END
+            "ExamPicture"=CASE WHEN excluded."ExamPicture" != '' THEN excluded."ExamPicture" ELSE "WMPSES_试卷场景"."ExamPicture" END,
+            "ExamPicture3D"=CASE
+                WHEN ? = 1 THEN ''
+                WHEN excluded."ExamPicture3D" != '' THEN excluded."ExamPicture3D"
+                ELSE "WMPSES_试卷场景"."ExamPicture3D"
+            END
         """,
         (
             exam_id,
@@ -1139,6 +1247,8 @@ def _upsert_bank_in_tx(conn: sqlite3.Connection, bank: Dict[str, Any]) -> str:
             meta.get("version") or "1.0.0",
             today_str,
             exam_picture,
+            exam_picture_3d,
+            clear_3d,
         ),
     )
 
@@ -1265,6 +1375,63 @@ def _upsert_bank_in_tx(conn: sqlite3.Connection, bank: Dict[str, Any]) -> str:
                     q.get("explanation") or "",
                 ),
             )
+
+    for u_idx, q in enumerate(bank.get("unassignedQuestions") or []):
+        q_id = str(q.get("id") or f"pool-q{u_idx + 1}")
+        q_type = str(q.get("type") or "single")
+        opt_map = {str(o.get("key") or ""): str(o.get("text") or "") for o in (q.get("options") or [])}
+        ans_str = "" if q_type == "short_answer" else ",".join(str(a) for a in (q.get("answer") or ["A"]))
+        defect_level = str(q.get("defectLevel") or "general")
+        conn.execute(
+            """
+            INSERT INTO "WMPSES_习题库" (
+                "pk_QuestionID", "fk_HotspotID", "fk_ExamID", "SortOrder",
+                "DefectCode", "DefectLevel", "IsMajorDefect", "IsCriticalConclusion",
+                "QuestionType", "Score", "QuestionTitle",
+                "OptionA", "OptionB", "OptionC", "OptionD", "OptionE",
+                "AnswerKeys", "ReferenceStandard", "Explanation"
+            ) VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT("pk_QuestionID") DO UPDATE SET
+                "fk_HotspotID"=NULL,
+                "fk_ExamID"=excluded."fk_ExamID",
+                "SortOrder"=excluded."SortOrder",
+                "DefectCode"=excluded."DefectCode",
+                "DefectLevel"=excluded."DefectLevel",
+                "IsMajorDefect"=excluded."IsMajorDefect",
+                "IsCriticalConclusion"=excluded."IsCriticalConclusion",
+                "QuestionType"=excluded."QuestionType",
+                "Score"=excluded."Score",
+                "QuestionTitle"=excluded."QuestionTitle",
+                "OptionA"=excluded."OptionA",
+                "OptionB"=excluded."OptionB",
+                "OptionC"=excluded."OptionC",
+                "OptionD"=excluded."OptionD",
+                "OptionE"=excluded."OptionE",
+                "AnswerKeys"=excluded."AnswerKeys",
+                "ReferenceStandard"=excluded."ReferenceStandard",
+                "Explanation"=excluded."Explanation"
+            """,
+            (
+                q_id,
+                exam_id,
+                u_idx + 1,
+                q.get("defectCode") or "",
+                defect_level,
+                1 if (q.get("isMajorDefect") or defect_level == "major") else 0,
+                1 if (q.get("isCriticalConclusion") or defect_level == "critical") else 0,
+                q_type,
+                int(q.get("score") or 2),
+                q.get("title") or "请输入题目内容",
+                opt_map.get("A", ""),
+                opt_map.get("B", ""),
+                opt_map.get("C", ""),
+                opt_map.get("D", ""),
+                opt_map.get("E", ""),
+                ans_str,
+                q.get("referenceStandard") or "",
+                q.get("explanation") or "",
+            ),
+        )
 
     _upsert_design_tables_in_tx(conn, exam_id, bank)
     return exam_id
@@ -1601,25 +1768,73 @@ def save_exam_result(result: Dict[str, Any], db_path: Path = DB_PATH) -> Dict[st
             ).fetchone()
         fk_exam_id = row["pk_ExamID"] if row else "WMPSES-1.1.1-V1"
 
+        fk_user_id = str(result.get("userId") or "").strip()
+        examinee_name = str(result.get("studentName") or "").strip()
+        examinee_id = str(result.get("examineeId") or "").strip()
+
+        # 若缺少 fk_UserID，尝试按考号或姓名从 WMPSES_用户人员 表自动补齐关联
+        user_row = None
+        if fk_user_id:
+            user_row = conn.execute(
+                'SELECT "pk_UserID", "UserCode", "FullName" FROM "WMPSES_用户人员" WHERE "pk_UserID" = ?',
+                (fk_user_id,),
+            ).fetchone()
+        if user_row is None and examinee_id:
+            user_row = conn.execute(
+                'SELECT "pk_UserID", "UserCode", "FullName" FROM "WMPSES_用户人员" WHERE "UserCode" = ?',
+                (examinee_id,),
+            ).fetchone()
+        if user_row is None and examinee_name:
+            user_row = conn.execute(
+                'SELECT "pk_UserID", "UserCode", "FullName" FROM "WMPSES_用户人员" WHERE "FullName" = ? LIMIT 1',
+                (examinee_name,),
+            ).fetchone()
+        if user_row is not None:
+            fk_user_id = fk_user_id or user_row["pk_UserID"]
+            examinee_name = examinee_name or user_row["FullName"]
+            examinee_id = examinee_id or user_row["UserCode"]
+
+        details_list = list(result.get("details") or [])
+        has_subjective = any(str(d.get("questionType") or d.get("type") or "single") == "short_answer" for d in details_list)
+        objective_score = sum(
+            int(d.get("earned") or 0)
+            for d in details_list
+            if str(d.get("questionType") or d.get("type") or "single") != "short_answer"
+        )
+        subjective_score = sum(
+            int(d.get("earned") or 0)
+            for d in details_list
+            if str(d.get("questionType") or d.get("type") or "single") == "short_answer"
+        )
+        review_status = str(result.get("reviewStatus") or ("待阅卷" if has_subjective else "自动已评"))
+        pass_status = "待阅卷" if review_status == "待阅卷" else ("合格" if result.get("passed") else "不合格")
+
         conn.execute(
             """
             INSERT INTO "WMPSES_考试记录" (
                 "pk_ResultID", "fk_ExamID", "fk_UserID", "ExamineeName", "ExamineeID", "ExamMode",
-                "Score", "TotalScore", "Accuracy", "PassStatus",
+                "Score", "ObjectiveScore", "SubjectiveScore", "TotalScore", "Accuracy", "PassStatus",
+                "ReviewStatus", "ReviewerID", "ReviewerName", "ReviewedAt",
                 "VetoTriggered", "VetoReason", "DurationSeconds", "SubmittedAt", "ResultDetailJSON"
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 result_id,
                 fk_exam_id,
-                str(result.get("userId") or ""),
-                result.get("studentName") or "现场考生",
-                result.get("examineeId") or "",
+                fk_user_id,
+                examinee_name or "现场考生",
+                examinee_id,
                 result.get("mode") or "exam",
                 int(result.get("effectiveScore") if result.get("effectiveScore") is not None else (result.get("earnedScore") or 0)),
+                int(objective_score),
+                int(subjective_score),
                 int(result.get("totalScore") or 50),
                 int(result.get("accuracy") or 0),
-                "合格" if result.get("passed") else "不合格",
+                pass_status,
+                review_status,
+                "",
+                "",
+                "",
                 1 if result.get("vetoTriggered") else 0,
                 result.get("vetoReason") or "",
                 int(result.get("durationSeconds") or 0),
@@ -1628,30 +1843,309 @@ def save_exam_result(result: Dict[str, Any], db_path: Path = DB_PATH) -> Dict[st
             ),
         )
 
-        for d in result.get("details") or []:
-            user_ans = ",".join(str(x) for x in (d.get("userAnswer") or []))
+        for d in details_list:
+            q_type = str(d.get("questionType") or d.get("type") or "single")
+            raw_user_ans = d.get("userAnswer")
+            if q_type == "short_answer":
+                if isinstance(raw_user_ans, list):
+                    user_ans = str(raw_user_ans[0] if raw_user_ans else "")
+                else:
+                    user_ans = str(raw_user_ans or "")
+            else:
+                user_ans = ",".join(str(x) for x in (raw_user_ans or []))
             corr_ans = ",".join(str(x) for x in (d.get("correctAnswer") or []))
             conn.execute(
                 """
                 INSERT INTO "WMPSES_作答明细" (
-                    "pk_DetailID", "fk_ResultID", "fk_QuestionID", "HotspotCode", "DefectCode",
-                    "UserAnswer", "CorrectAnswer", "IsCorrect", "EarnedScore"
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    "pk_DetailID", "fk_ResultID", "fk_QuestionID", "QuestionType", "MaxScore",
+                    "HotspotCode", "DefectCode",
+                    "UserAnswer", "CorrectAnswer", "IsCorrect", "EarnedScore", "ReviewComment"
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     str(uuid.uuid4()),
                     result_id,
                     str(d.get("questionId") or ""),
+                    q_type,
+                    int(d.get("score") or 0),
                     str(d.get("hotspotCode") or ""),
                     str(d.get("defectCode") or ""),
                     user_ans,
                     corr_ans,
                     1 if d.get("isCorrect") else 0,
                     int(d.get("earned") or 0),
+                    str(d.get("reviewComment") or ""),
                 ),
             )
         counts = get_table_counts(conn)
-    return {"ok": True, "resultId": result_id, "counts": counts}
+    return {"ok": True, "resultId": result_id, "reviewStatus": review_status, "counts": counts}
+
+
+def get_exam_results(
+    user_id: Optional[str] = None,
+    exam_id: Optional[str] = None,
+    limit: int = 200,
+    db_path: Path = DB_PATH,
+) -> List[Dict[str, Any]]:
+    """查询考生成绩列表（关联用户人员与试卷信息），供监考员、考评员与教师查看。"""
+    init_db(reset=False, db_path=db_path)
+    clauses: List[str] = []
+    params: List[Any] = []
+    if user_id:
+        clauses.append('r."fk_UserID" = ?')
+        params.append(str(user_id).strip())
+    if exam_id:
+        clauses.append('r."fk_ExamID" = ?')
+        params.append(str(exam_id).strip())
+    where_sql = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+    safe_limit = max(1, min(int(limit or 200), 1000))
+    params.append(safe_limit)
+
+    with get_connection(db_path) as conn:
+        rows = conn.execute(
+            f"""
+            SELECT
+                r."pk_ResultID",
+                r."fk_ExamID",
+                r."fk_UserID",
+                r."ExamineeName",
+                r."ExamineeID",
+                r."ExamMode",
+                r."Score",
+                r."ObjectiveScore",
+                r."SubjectiveScore",
+                r."TotalScore",
+                r."Accuracy",
+                r."PassStatus",
+                r."ReviewStatus",
+                r."ReviewerID",
+                r."ReviewerName",
+                r."ReviewedAt",
+                r."VetoTriggered",
+                r."VetoReason",
+                r."DurationSeconds",
+                r."SubmittedAt",
+                COALESCE(u."Department", '') AS "Department",
+                COALESCE(u."RoleType", '考生') AS "RoleType",
+                COALESCE(u."BatchNo", '') AS "BatchNo",
+                COALESCE(e."Title", r."fk_ExamID") AS "ExamTitle",
+                (SELECT COUNT(1) FROM "WMPSES_作答明细" d WHERE d."fk_ResultID" = r."pk_ResultID" AND d."QuestionType" = 'short_answer') AS "SubjectiveCount"
+            FROM "WMPSES_考试记录" r
+            LEFT JOIN "WMPSES_用户人员" u ON u."pk_UserID" = r."fk_UserID"
+            LEFT JOIN "WMPSES_试卷场景" e ON e."pk_ExamID" = r."fk_ExamID"
+            {where_sql}
+            ORDER BY r."SubmittedAt" DESC, r.rowid DESC
+            LIMIT ?
+            """,
+            params,
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_exam_result_detail(result_id: str, db_path: Path = DB_PATH) -> Optional[Dict[str, Any]]:
+    """查询单份考卷主记录与逐题作答明细（关联题干与评分要点），供考评员手工阅卷。"""
+    init_db(reset=False, db_path=db_path)
+    rid = str(result_id or "").strip()
+    if not rid:
+        return None
+    with get_connection(db_path) as conn:
+        row = conn.execute(
+            """
+            SELECT
+                r.*,
+                COALESCE(u."Department", '') AS "Department",
+                COALESCE(e."Title", r."fk_ExamID") AS "ExamTitle",
+                COALESCE(e."PassScore", 30) AS "PassScore"
+            FROM "WMPSES_考试记录" r
+            LEFT JOIN "WMPSES_用户人员" u ON u."pk_UserID" = r."fk_UserID"
+            LEFT JOIN "WMPSES_试卷场景" e ON e."pk_ExamID" = r."fk_ExamID"
+            WHERE r."pk_ResultID" = ?
+            """,
+            (rid,),
+        ).fetchone()
+        if row is None:
+            return None
+        record = dict(row)
+        raw_json = {}
+        try:
+            raw_json = json.loads(record.get("ResultDetailJSON") or "{}")
+        except Exception:
+            raw_json = {}
+        json_detail_map = {
+            str(item.get("questionId") or ""): item
+            for item in (raw_json.get("details") or [])
+            if isinstance(item, dict)
+        }
+        detail_rows = conn.execute(
+            """
+            SELECT
+                d.*,
+                COALESCE(q."QuestionTitle", '') AS "QuestionTitle",
+                COALESCE(q."Explanation", '') AS "Explanation",
+                COALESCE(q."ReferenceStandard", '') AS "ReferenceStandard",
+                COALESCE(q."Score", d."MaxScore") AS "QuestionScore",
+                COALESCE(h."DeviceName", '') AS "HotspotName"
+            FROM "WMPSES_作答明细" d
+            LEFT JOIN "WMPSES_习题库" q ON q."pk_QuestionID" = d."fk_QuestionID"
+            LEFT JOIN "WMPSES_设备热点" h ON h."pk_HotspotID" = q."fk_HotspotID"
+            WHERE d."fk_ResultID" = ?
+            ORDER BY d.rowid ASC
+            """,
+            (rid,),
+        ).fetchall()
+        details: List[Dict[str, Any]] = []
+        for dr in detail_rows:
+            item = dict(dr)
+            snap = json_detail_map.get(str(item.get("fk_QuestionID") or "")) or {}
+            if not item.get("QuestionTitle"):
+                item["QuestionTitle"] = snap.get("title", "")
+            if not item.get("Explanation"):
+                item["Explanation"] = snap.get("explanation", "")
+            if not item.get("ReferenceStandard"):
+                item["ReferenceStandard"] = snap.get("referenceStandard", "")
+            if not item.get("HotspotName"):
+                item["HotspotName"] = snap.get("hotspotName", "")
+            if not item.get("MaxScore"):
+                item["MaxScore"] = int(item.get("QuestionScore") or snap.get("score") or 0)
+            details.append(item)
+        record.pop("ResultDetailJSON", None)
+        return {"result": record, "details": details}
+
+
+def grade_exam_result(
+    result_id: str,
+    grades: List[Dict[str, Any]],
+    reviewer_info: Dict[str, Any],
+    db_path: Path = DB_PATH,
+) -> Dict[str, Any]:
+    """考评员对单份答卷的文字简答题（short_answer）进行手工打分，严格禁止篡改客观题自动判分结果。"""
+    init_db(reset=False, db_path=db_path)
+    rid = str(result_id or "").strip()
+    if not rid:
+        raise ValueError("缺少答卷 ID (resultId)")
+    if not isinstance(grades, list) or not grades:
+        raise ValueError("请提供至少一条主观题评分数据")
+
+    grade_map: Dict[str, Dict[str, Any]] = {}
+    for g in grades:
+        if not isinstance(g, dict):
+            continue
+        key = str(g.get("detailId") or g.get("questionId") or "").strip()
+        if key:
+            grade_map[key] = g
+
+    now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    reviewer_id = str(reviewer_info.get("userId") or "")
+    reviewer_name = str(reviewer_info.get("reviewerName") or reviewer_info.get("fullName") or "考评员")
+
+    with get_connection(db_path) as conn:
+        rec = conn.execute(
+            """
+            SELECT r.*, COALESCE(e."PassScore", 30) AS "PassScore"
+            FROM "WMPSES_考试记录" r
+            LEFT JOIN "WMPSES_试卷场景" e ON e."pk_ExamID" = r."fk_ExamID"
+            WHERE r."pk_ResultID" = ?
+            """,
+            (rid,),
+        ).fetchone()
+        if rec is None:
+            raise ValueError(f"未找到答卷记录 {rid}")
+
+        detail_rows = conn.execute(
+            'SELECT * FROM "WMPSES_作答明细" WHERE "fk_ResultID" = ? ORDER BY rowid ASC',
+            (rid,),
+        ).fetchall()
+        subjective_rows = [d for d in detail_rows if d["QuestionType"] == "short_answer"]
+        if not subjective_rows:
+            raise ValueError("该答卷不含文字简答题，无需手工阅卷")
+
+        for d in detail_rows:
+            did = str(d["pk_DetailID"])
+            qid = str(d["fk_QuestionID"])
+            incoming = grade_map.get(did) or grade_map.get(qid)
+            if not incoming:
+                continue
+            if d["QuestionType"] != "short_answer":
+                raise ValueError(f"禁止人工修改客观题「{qid}」的自动判分结果")
+            max_score = int(d["MaxScore"] or 0)
+            if max_score <= 0:
+                q_row = conn.execute('SELECT "Score" FROM "WMPSES_习题库" WHERE "pk_QuestionID" = ?', (qid,)).fetchone()
+                max_score = int(q_row["Score"]) if q_row else 10
+            try:
+                score_val = int(round(float(incoming.get("score", 0))))
+            except (TypeError, ValueError):
+                raise ValueError(f"题目「{qid}」得分格式无效")
+            if score_val < 0 or score_val > max_score:
+                raise ValueError(f"题目「{qid}」得分必须在 0 ~ {max_score} 之间")
+            comment = str(incoming.get("comment") or "").strip()
+            is_correct = 1 if (max_score > 0 and score_val >= max_score * 0.6) else 0
+            conn.execute(
+                """
+                UPDATE "WMPSES_作答明细"
+                SET "EarnedScore" = ?, "IsCorrect" = ?, "ReviewComment" = ?
+                WHERE "pk_DetailID" = ?
+                """,
+                (score_val, is_correct, comment, did),
+            )
+
+        updated_details = conn.execute(
+            'SELECT * FROM "WMPSES_作答明细" WHERE "fk_ResultID" = ? ORDER BY rowid ASC',
+            (rid,),
+        ).fetchall()
+        obj_score = sum(int(d["EarnedScore"] or 0) for d in updated_details if d["QuestionType"] != "short_answer")
+        subj_score = sum(int(d["EarnedScore"] or 0) for d in updated_details if d["QuestionType"] == "short_answer")
+        total_cnt = len(updated_details)
+        correct_cnt = sum(1 for d in updated_details if int(d["IsCorrect"] or 0) == 1)
+        accuracy = int(round((correct_cnt / total_cnt) * 100)) if total_cnt > 0 else 0
+
+        raw_json = {}
+        try:
+            raw_json = json.loads(rec["ResultDetailJSON"] or "{}")
+        except Exception:
+            raw_json = {}
+        has_zero_penalty = bool(raw_json.get("hasZeroPenalty")) or (
+            int(rec["VetoTriggered"] or 0) == 1 and int(rec["Score"] or 0) == 0 and obj_score > 0
+        )
+        effective_score = 0 if has_zero_penalty else (obj_score + subj_score)
+        pass_score = int(rec["PassScore"] or 30)
+        passed = (effective_score >= pass_score) and (not has_zero_penalty)
+        pass_status = "合格" if passed else "不合格"
+
+        raw_json["objectiveScore"] = obj_score
+        raw_json["subjectiveScore"] = subj_score
+        raw_json["earnedScore"] = obj_score + subj_score
+        raw_json["effectiveScore"] = effective_score
+        raw_json["accuracy"] = accuracy
+        raw_json["passed"] = passed
+        raw_json["reviewStatus"] = "已阅卷"
+        raw_json["reviewerId"] = reviewer_id
+        raw_json["reviewerName"] = reviewer_name
+        raw_json["reviewedAt"] = now_ts
+
+        conn.execute(
+            """
+            UPDATE "WMPSES_考试记录"
+            SET "Score" = ?, "ObjectiveScore" = ?, "SubjectiveScore" = ?,
+                "Accuracy" = ?, "PassStatus" = ?, "ReviewStatus" = '已阅卷',
+                "ReviewerID" = ?, "ReviewerName" = ?, "ReviewedAt" = ?,
+                "ResultDetailJSON" = ?
+            WHERE "pk_ResultID" = ?
+            """,
+            (
+                effective_score,
+                obj_score,
+                subj_score,
+                accuracy,
+                pass_status,
+                reviewer_id,
+                reviewer_name,
+                now_ts,
+                json.dumps(raw_json, ensure_ascii=False),
+                rid,
+            ),
+        )
+    detail_bundle = get_exam_result_detail(rid, db_path=db_path)
+    return {"ok": True, "message": "手工阅卷打分已保存并重新核算总分", **(detail_bundle or {})}
 
 
 def get_tables_summary(db_path: Path = DB_PATH) -> Dict[str, Any]:
@@ -1668,6 +2162,16 @@ def get_tables_summary(db_path: Path = DB_PATH) -> Dict[str, Any]:
                 d["ExamPicture"] = f"{pic[:40]}... ({len(pic)} chars)"
             elif not pic:
                 d["ExamPicture"] = "(空)"
+            pic3d = str(d.get("ExamPicture3D") or "")
+            if len(pic3d) > 80:
+                d["ExamPicture3D"] = f"{pic3d[:40]}... ({len(pic3d)} chars)"
+            elif not pic3d:
+                d["ExamPicture3D"] = "(空)"
+            blob = d.get("Scene3DModelBLOB")
+            if blob:
+                d["Scene3DModelBLOB"] = f"[GLB 二进制模型 · {len(blob) / 1024:.1f} KB]"
+            else:
+                d["Scene3DModelBLOB"] = "(空)"
             exam_list.append(d)
         tables["WMPSES_试卷场景"] = exam_list
         tables["WMPSES_设备热点"] = [
@@ -1716,6 +2220,328 @@ def get_tables_summary(db_path: Path = DB_PATH) -> Dict[str, Any]:
         "counts": counts,
         "tables": tables,
     }
+
+
+def get_scene_3d_model(
+    exam_id: str = "WMPSES-1.1.1-V1",
+    db_path: Path = DB_PATH,
+) -> Optional[Dict[str, Any]]:
+    """读取 WMPSES_试卷场景 表中存储的 3D 模型二进制 (.glb)。"""
+    init_db(reset=False, db_path=db_path)
+    with get_connection(db_path) as conn:
+        row = conn.execute(
+            'SELECT "Scene3DModelName", "Scene3DModelBLOB" FROM "WMPSES_试卷场景" WHERE "pk_ExamID" = ?',
+            (exam_id,),
+        ).fetchone()
+        if not row or not row["Scene3DModelBLOB"]:
+            return None
+        blob = bytes(row["Scene3DModelBLOB"])
+        return {
+            "examId": exam_id,
+            "name": str(row["Scene3DModelName"] or "scene.glb"),
+            "data": blob,
+            "size": len(blob),
+        }
+
+
+def save_scene_3d_model(
+    exam_id: str,
+    file_name: str,
+    data_bytes: bytes,
+    change_meta: Optional[Dict[str, Any]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Any]:
+    """将团队 A 交付的 .glb 3D 模型二进制直接持久化到 WMPSES_试卷场景.Scene3DModelBLOB 并写入审计日志。"""
+    init_db(reset=False, db_path=db_path)
+    if not data_bytes or len(data_bytes) < 20 or data_bytes[:4] != b"glTF":
+        raise ValueError("无效的 GLB 模型文件（缺少 glTF 2.0 二进制文件头）")
+    safe_name = (file_name or "scene.glb").strip()[:180]
+    cm = change_meta or {}
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with get_connection(db_path) as conn:
+        conn.execute(
+            'UPDATE "WMPSES_试卷场景" SET "Scene3DModelName" = ?, "Scene3DModelBLOB" = ?, "UpdatedAt" = ? WHERE "pk_ExamID" = ?',
+            (safe_name, sqlite3.Binary(data_bytes), datetime.date.today().isoformat(), exam_id),
+        )
+        hs_count = conn.execute(
+            'SELECT COUNT(*) AS c FROM "WMPSES_设备热点" WHERE "fk_ExamID" = ?', (exam_id,)
+        ).fetchone()["c"]
+        q_row = conn.execute(
+            'SELECT COUNT(*) AS c, COALESCE(SUM("Score"), 50) AS s FROM "WMPSES_习题库" WHERE "fk_ExamID" = ?',
+            (exam_id,),
+        ).fetchone()
+        conn.execute(
+            """
+            INSERT INTO "WMPSES_题库变更日志" (
+                "pk_LogID", "fk_ExamID", "fk_UserID", "OperatorName", "ActionType",
+                "VersionAfter", "HotspotCount", "QuestionCount", "TotalScore", "ChangeSummary", "ChangedAt"
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                f"LOG-{uuid.uuid4().hex[:10].upper()}",
+                exam_id,
+                str(cm.get("userId") or "USR-TC-001"),
+                str(cm.get("operatorName") or "教师/管理员"),
+                "上传3D模型(GLB)",
+                "1.0.0",
+                int(hs_count),
+                int(q_row["c"]),
+                int(q_row["s"]),
+                f"上传可走动真 3D 场景模型「{safe_name}」({len(data_bytes) / 1024:.1f} KB) 并写入 SQLite BLOB",
+                now_str,
+            ),
+        )
+    logs = get_change_logs(exam_id=exam_id, db_path=db_path)
+    return {
+        "examId": exam_id,
+        "modelName": safe_name,
+        "sizeBytes": len(data_bytes),
+        "changeLogs": logs,
+    }
+
+
+def clear_scene_3d_model(
+    exam_id: str = "WMPSES-1.1.1-V1",
+    change_meta: Optional[Dict[str, Any]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Any]:
+    """清除 WMPSES_试卷场景 中的自定义 GLB 模型，恢复默认程序化数字孪生或全景底图。"""
+    init_db(reset=False, db_path=db_path)
+    cm = change_meta or {}
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with get_connection(db_path) as conn:
+        conn.execute(
+            'UPDATE "WMPSES_试卷场景" SET "Scene3DModelName" = \'\', "Scene3DModelBLOB" = NULL, "UpdatedAt" = ? WHERE "pk_ExamID" = ?',
+            (datetime.date.today().isoformat(), exam_id),
+        )
+        hs_count = conn.execute(
+            'SELECT COUNT(*) AS c FROM "WMPSES_设备热点" WHERE "fk_ExamID" = ?', (exam_id,)
+        ).fetchone()["c"]
+        q_row = conn.execute(
+            'SELECT COUNT(*) AS c, COALESCE(SUM("Score"), 50) AS s FROM "WMPSES_习题库" WHERE "fk_ExamID" = ?',
+            (exam_id,),
+        ).fetchone()
+        conn.execute(
+            """
+            INSERT INTO "WMPSES_题库变更日志" (
+                "pk_LogID", "fk_ExamID", "fk_UserID", "OperatorName", "ActionType",
+                "VersionAfter", "HotspotCount", "QuestionCount", "TotalScore", "ChangeSummary", "ChangedAt"
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                f"LOG-{uuid.uuid4().hex[:10].upper()}",
+                exam_id,
+                str(cm.get("userId") or "USR-TC-001"),
+                str(cm.get("operatorName") or "教师/管理员"),
+                "清除3D模型(GLB)",
+                "1.0.0",
+                int(hs_count),
+                int(q_row["c"]),
+                int(q_row["s"]),
+                "已清除自定义 GLB 3D 场景模型，恢复默认孪生场景",
+                now_str,
+            ),
+        )
+    logs = get_change_logs(exam_id=exam_id, db_path=db_path)
+    return {"examId": exam_id, "changeLogs": logs}
+
+
+def list_exam_scenes(db_path: Path = DB_PATH) -> List[Dict[str, Any]]:
+    """查询 WMPSES_试卷场景 全部试卷场景及热点/习题/底图/3D模型统计。"""
+    init_db(reset=False, db_path=db_path)
+    with get_connection(db_path) as conn:
+        rows = conn.execute('SELECT * FROM "WMPSES_试卷场景" ORDER BY rowid ASC').fetchall()
+        scenes: List[Dict[str, Any]] = []
+        for r in rows:
+            eid = r["pk_ExamID"]
+            hs_cnt = conn.execute(
+                'SELECT COUNT(*) AS c FROM "WMPSES_设备热点" WHERE "fk_ExamID" = ?', (eid,)
+            ).fetchone()["c"]
+            q_row = conn.execute(
+                'SELECT COUNT(*) AS c, COALESCE(SUM("Score"), 0) AS s FROM "WMPSES_习题库" WHERE "fk_ExamID" = ?',
+                (eid,),
+            ).fetchone()
+            pic2d = str(r["ExamPicture"] or "")
+            pic3d = str(r["ExamPicture3D"] or "") if "ExamPicture3D" in r.keys() else ""
+            model_name = str(r["Scene3DModelName"] or "") if "Scene3DModelName" in r.keys() else ""
+            model_blob = r["Scene3DModelBLOB"] if "Scene3DModelBLOB" in r.keys() else None
+            model_size = len(model_blob) if model_blob else 0
+            scenes.append(
+                {
+                    "id": eid,
+                    "title": r["Title"] or "",
+                    "subtitle": r["Subtitle"] or "",
+                    "examCode": r["ExamCode"] or "",
+                    "variantCode": r["VariantCode"] or "V1",
+                    "totalScore": int(r["TotalScore"] or 50),
+                    "passScore": int(r["PassScore"] or 30),
+                    "durationMinutes": int(r["DurationMinutes"] or 30),
+                    "status": r["Status"] or "已启用",
+                    "version": r["Version"] or "1.0.0",
+                    "updatedAt": r["UpdatedAt"] or "",
+                    "hotspotCount": int(hs_cnt),
+                    "questionCount": int(q_row["c"]),
+                    "actualTotalScore": int(q_row["s"]),
+                    "hasExamPicture": bool(pic2d),
+                    "examPicture": pic2d,
+                    "hasExamPicture3d": bool(pic3d),
+                    "examPicture3d": pic3d,
+                    "hasScene3dModel": model_size > 0,
+                    "scene3dModelName": model_name,
+                    "scene3dModelSize": model_size,
+                    "isBuiltin": eid == "WMPSES-1.1.1-V1",
+                }
+            )
+        return scenes
+
+
+def save_exam_scene(
+    scene_data: Dict[str, Any],
+    change_meta: Optional[Dict[str, Any]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Any]:
+    """新建或更新试卷场景（含基础配置、2D底图与3D全景底图），可选克隆基准卷热点与规则。"""
+    init_db(reset=False, db_path=db_path)
+    exam_id = str(scene_data.get("id") or scene_data.get("pk_ExamID") or "").strip()
+    if not exam_id:
+        exam_id = f"WMPSES-CUSTOM-{uuid.uuid4().hex[:6].upper()}"
+    title = str(scene_data.get("title") or "").strip() or "工业废气治理工实操模拟仿真考试系统"
+    subtitle = str(scene_data.get("subtitle") or "").strip()
+    exam_code = str(scene_data.get("examCode") or "6-28-02-05 / 1.1.1").strip()
+    variant_code = str(scene_data.get("variantCode") or "V1").strip()
+    total_score = max(1, int(scene_data.get("totalScore") or 50))
+    pass_score = max(0, int(scene_data.get("passScore") or 30))
+    duration_minutes = max(1, int(scene_data.get("durationMinutes") or 30))
+    status = str(scene_data.get("status") or "已启用").strip()
+    version = str(scene_data.get("version") or "1.0.0").strip()
+    today_str = datetime.date.today().isoformat()
+
+    pic2d = str(scene_data.get("examPicture") or "")
+    clear_2d = 1 if scene_data.get("clearExamPicture") else 0
+    pic3d = str(scene_data.get("examPicture3d") or scene_data.get("examPicture3D") or "")
+    clear_3d = 1 if scene_data.get("clearExamPicture3d") else 0
+    clone_from = str(scene_data.get("cloneFromExamId") or "").strip()
+
+    cm = change_meta or {}
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with get_connection(db_path) as conn:
+        existed = conn.execute(
+            'SELECT "pk_ExamID" FROM "WMPSES_试卷场景" WHERE "pk_ExamID" = ?', (exam_id,)
+        ).fetchone() is not None
+
+        conn.execute(
+            """
+            INSERT INTO "WMPSES_试卷场景" (
+                "pk_ExamID", "Title", "Subtitle", "ExamCode", "VariantCode",
+                "TotalScore", "PassScore", "DurationMinutes", "Status", "Version", "UpdatedAt",
+                "ExamPicture", "ExamPicture3D"
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT("pk_ExamID") DO UPDATE SET
+                "Title"=excluded."Title",
+                "Subtitle"=excluded."Subtitle",
+                "ExamCode"=excluded."ExamCode",
+                "VariantCode"=excluded."VariantCode",
+                "TotalScore"=excluded."TotalScore",
+                "PassScore"=excluded."PassScore",
+                "DurationMinutes"=excluded."DurationMinutes",
+                "Status"=excluded."Status",
+                "Version"=excluded."Version",
+                "UpdatedAt"=excluded."UpdatedAt",
+                "ExamPicture"=CASE
+                    WHEN ? = 1 THEN ''
+                    WHEN excluded."ExamPicture" != '' THEN excluded."ExamPicture"
+                    ELSE "WMPSES_试卷场景"."ExamPicture"
+                END,
+                "ExamPicture3D"=CASE
+                    WHEN ? = 1 THEN ''
+                    WHEN excluded."ExamPicture3D" != '' THEN excluded."ExamPicture3D"
+                    ELSE "WMPSES_试卷场景"."ExamPicture3D"
+                END
+            """,
+            (
+                exam_id, title, subtitle, exam_code, variant_code,
+                total_score, pass_score, duration_minutes, status, version, today_str,
+                "" if clear_2d else pic2d,
+                "" if clear_3d else pic3d,
+                clear_2d, clear_3d,
+            ),
+        )
+
+        # 如果是新建场景且勾选了克隆，复制源试卷的否定项规则（以及可选热点框架）
+        if (not existed) and clone_from:
+            rules = conn.execute(
+                'SELECT * FROM "WMPSES_否定项规则" WHERE "fk_ExamID" = ? ORDER BY "SortOrder" ASC',
+                (clone_from,),
+            ).fetchall()
+            for r in rules:
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO "WMPSES_否定项规则" (
+                        "pk_RuleID", "fk_ExamID", "SortOrder", "RuleCode", "RuleName",
+                        "ConditionType", "ThresholdValue", "TargetRef", "PenaltyAction", "IsEnabled", "AlertMessage"
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        f"{exam_id}-{r['RuleCode']}", exam_id, r["SortOrder"], r["RuleCode"], r["RuleName"],
+                        r["ConditionType"], r["ThresholdValue"], r["TargetRef"], r["PenaltyAction"],
+                        r["IsEnabled"], r["AlertMessage"],
+                    ),
+                )
+
+        hs_cnt = conn.execute(
+            'SELECT COUNT(*) AS c FROM "WMPSES_设备热点" WHERE "fk_ExamID" = ?', (exam_id,)
+        ).fetchone()["c"]
+        q_row = conn.execute(
+            'SELECT COUNT(*) AS c, COALESCE(SUM("Score"), 0) AS s FROM "WMPSES_习题库" WHERE "fk_ExamID" = ?',
+            (exam_id,),
+        ).fetchone()
+        action_label = "编辑试卷场景" if existed else "新建试卷场景"
+        conn.execute(
+            """
+            INSERT INTO "WMPSES_题库变更日志" (
+                "pk_LogID", "fk_ExamID", "fk_UserID", "OperatorName", "ActionType",
+                "VersionAfter", "HotspotCount", "QuestionCount", "TotalScore", "ChangeSummary", "ChangedAt"
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                f"LOG-{uuid.uuid4().hex[:10].upper()}",
+                exam_id,
+                str(cm.get("userId") or "USR-TC-001"),
+                str(cm.get("operatorName") or "教师/管理员"),
+                action_label,
+                version,
+                int(hs_cnt),
+                int(q_row["c"]),
+                int(q_row["s"] or total_score),
+                f"{action_label}「{subtitle or title}」({exam_id})",
+                now_str,
+            ),
+        )
+        export_tables_to_seed_csv(conn)
+
+    scenes = list_exam_scenes(db_path=db_path)
+    current_scene = next((s for s in scenes if s["id"] == exam_id), None)
+    return {
+        "scene": current_scene,
+        "scenes": scenes,
+        "changeLogs": get_change_logs(exam_id=exam_id, db_path=db_path),
+    }
+
+
+def delete_exam_scene(
+    exam_id: str,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Any]:
+    """删除自定义试卷场景（保护主基准卷 WMPSES-1.1.1-V1 不被误删）。"""
+    init_db(reset=False, db_path=db_path)
+    eid = str(exam_id or "").strip()
+    if not eid or eid == "WMPSES-1.1.1-V1":
+        raise ValueError("主基准试卷 WMPSES-1.1.1-V1 受保护，不可删除")
+    with get_connection(db_path) as conn:
+        conn.execute('DELETE FROM "WMPSES_试卷场景" WHERE "pk_ExamID" = ?', (eid,))
+        export_tables_to_seed_csv(conn)
+    return {"deletedId": eid, "scenes": list_exam_scenes(db_path=db_path)}
 
 
 def main() -> None:

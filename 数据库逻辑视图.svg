@@ -1,0 +1,1391 @@
+<svg font-family="Arial Unicode MS" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3400 2020" width="3400" height="2020">
+  <defs>
+    <!-- 背景渐变 -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070e1b"/>
+      <stop offset="50%" stop-color="#0a1527"/>
+      <stop offset="100%" stop-color="#060b14"/>
+    </linearGradient>
+
+    <!-- 卡片玻璃拟态投影 -->
+    <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+
+    <!-- 顶栏发光 -->
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.2"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  
+
+  <!-- 全局背景 -->
+  <rect width="3400" height="2020" fill="url(#bgGrad)"/>
+
+  <!-- 顶部装饰格线 -->
+  <g opacity="0.12" stroke="#38bdf8" stroke-width="1">
+    <line x1="0" y1="0" x2="0" y2="2020"/>
+    <line x1="100" y1="0" x2="100" y2="2020"/>
+    <line x1="200" y1="0" x2="200" y2="2020"/>
+    <line x1="300" y1="0" x2="300" y2="2020"/>
+    <line x1="400" y1="0" x2="400" y2="2020"/>
+    <line x1="500" y1="0" x2="500" y2="2020"/>
+    <line x1="600" y1="0" x2="600" y2="2020"/>
+    <line x1="700" y1="0" x2="700" y2="2020"/>
+    <line x1="800" y1="0" x2="800" y2="2020"/>
+    <line x1="900" y1="0" x2="900" y2="2020"/>
+    <line x1="1000" y1="0" x2="1000" y2="2020"/>
+    <line x1="1100" y1="0" x2="1100" y2="2020"/>
+    <line x1="1200" y1="0" x2="1200" y2="2020"/>
+    <line x1="1300" y1="0" x2="1300" y2="2020"/>
+    <line x1="1400" y1="0" x2="1400" y2="2020"/>
+    <line x1="1500" y1="0" x2="1500" y2="2020"/>
+    <line x1="1600" y1="0" x2="1600" y2="2020"/>
+    <line x1="1700" y1="0" x2="1700" y2="2020"/>
+    <line x1="1800" y1="0" x2="1800" y2="2020"/>
+    <line x1="1900" y1="0" x2="1900" y2="2020"/>
+    <line x1="2000" y1="0" x2="2000" y2="2020"/>
+    <line x1="2100" y1="0" x2="2100" y2="2020"/>
+    <line x1="2200" y1="0" x2="2200" y2="2020"/>
+    <line x1="2300" y1="0" x2="2300" y2="2020"/>
+    <line x1="2400" y1="0" x2="2400" y2="2020"/>
+    <line x1="2500" y1="0" x2="2500" y2="2020"/>
+    <line x1="2600" y1="0" x2="2600" y2="2020"/>
+    <line x1="2700" y1="0" x2="2700" y2="2020"/>
+    <line x1="2800" y1="0" x2="2800" y2="2020"/>
+    <line x1="2900" y1="0" x2="2900" y2="2020"/>
+    <line x1="3000" y1="0" x2="3000" y2="2020"/>
+    <line x1="3100" y1="0" x2="3100" y2="2020"/>
+    <line x1="3200" y1="0" x2="3200" y2="2020"/>
+    <line x1="3300" y1="0" x2="3300" y2="2020"/>
+    <line x1="0" y1="0" x2="3400" y2="0"/>
+    <line x1="0" y1="100" x2="3400" y2="100"/>
+    <line x1="0" y1="200" x2="3400" y2="200"/>
+    <line x1="0" y1="300" x2="3400" y2="300"/>
+    <line x1="0" y1="400" x2="3400" y2="400"/>
+    <line x1="0" y1="500" x2="3400" y2="500"/>
+    <line x1="0" y1="600" x2="3400" y2="600"/>
+    <line x1="0" y1="700" x2="3400" y2="700"/>
+    <line x1="0" y1="800" x2="3400" y2="800"/>
+    <line x1="0" y1="900" x2="3400" y2="900"/>
+    <line x1="0" y1="1000" x2="3400" y2="1000"/>
+    <line x1="0" y1="1100" x2="3400" y2="1100"/>
+    <line x1="0" y1="1200" x2="3400" y2="1200"/>
+    <line x1="0" y1="1300" x2="3400" y2="1300"/>
+    <line x1="0" y1="1400" x2="3400" y2="1400"/>
+    <line x1="0" y1="1500" x2="3400" y2="1500"/>
+    <line x1="0" y1="1600" x2="3400" y2="1600"/>
+    <line x1="0" y1="1700" x2="3400" y2="1700"/>
+    <line x1="0" y1="1800" x2="3400" y2="1800"/>
+    <line x1="0" y1="1900" x2="3400" y2="1900"/>
+    <line x1="0" y1="2000" x2="3400" y2="2000"/>
+  </g>
+
+  <!-- 顶栏横幅 -->
+  <rect x="60" y="36" width="3280" height="110" rx="14" fill="#0f172a" fill-opacity="0.85" stroke="#334155" stroke-width="1.5" filter="url(#cardShadow)"/>
+  <rect x="60" y="36" width="3280" height="110" rx="14" fill="url(#headerGrad)"/>
+
+  <g>
+    <text x="96" y="82" font-size="32" font-weight="bold" fill="#f8fafc">WMPSES 工业废气治理工实操模拟仿真考试系统 · 数据库全局逻辑视图</text>
+    <text x="96" y="118" font-size="15" fill="#94a3b8">SQLite 3 (db/wmpses.db) 与 FileMaker Pro 1:1 双轨对齐关系表结构、主外键拓扑体系与全字段数据字典</text>
+
+    <!-- 顶栏统计徽章 -->
+    <g transform="translate(2560, 56)">
+      <rect x="0" y="0" width="130" height="34" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
+      <text x="65" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#38bdf8">11 核心关系表</text>
+
+      <rect x="145" y="0" width="130" height="34" rx="8" fill="#1e293b" stroke="#2dd4bf" stroke-width="1"/>
+      <text x="210" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#2dd4bf">136 个标准列定义</text>
+
+      <rect x="290" y="0" width="130" height="34" rx="8" fill="#1e293b" stroke="#fbbf24" stroke-width="1"/>
+      <text x="355" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#fbbf24">4 大业务域驱动</text>
+
+      <rect x="435" y="0" width="130" height="34" rx="8" fill="#1e293b" stroke="#a855f7" stroke-width="1"/>
+      <text x="500" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#a855f7">2D/3D双轨全景图</text>
+
+      <rect x="580" y="0" width="130" height="34" rx="8" fill="#1e293b" stroke="#ec4899" stroke-width="1"/>
+      <text x="645" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#ec4899">级联 CASCADE 完整性</text>
+    </g>
+  </g>
+
+  <!-- 表卡片: WMPSES_试卷场景 -->
+  <g transform="translate(60, 190)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="465" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#38bdf8" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#38bdf8"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#38bdf8">域 1 · 核心试卷场景与热点题库</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_试卷场景</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T01_ExamScene</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">试卷主档案、满分/合格线/考试时长及 2D/3D 双轨场景全景图 Base64</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_ExamID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_ExamID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">试卷唯一标识代码 (默认基准卷: WMPSES-1.1.1-V1)</text>
+    <!-- 行 2: Title -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 必填</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#f1f5f9">Title</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">系统主标题: 工业废气治理工（二级/技师）实操仿真系统</text>
+    <!-- 行 3: Subtitle -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 常规</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#f1f5f9">Subtitle</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">考核点副标题: 1.1.1 系统启动前设备验收（预处理+RTO）</text>
+    <!-- 行 4: ExamCode -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 代码</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">ExamCode</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">职业技能标准鉴定代码 (6-28-02-05 / 1.1.1)</text>
+    <!-- 行 5: VariantCode -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 代码</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">VariantCode</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">考卷变式代号 (V1 主基准卷 / V2 吸附脱附 / V3 湿法洗涤)</text>
+    <!-- 行 6: TotalScore -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 分值</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">TotalScore</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">考核总满分 (固定 50 分，由 15 道子题权重和驱动)</text>
+    <!-- 行 7: PassScore -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 阈值</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">PassScore</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">及格合格基准分数线 (默认 30 分)</text>
+    <!-- 行 8: DurationMinutes -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 计时</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">DurationMinutes</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">考试限时分钟 (默认 30 分钟，倒计时联动一票否决)</text>
+    <!-- 行 9: Status -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 枚举</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">Status</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">试卷状态: 已启用 / 变式预留 / 已停用 / 草稿</text>
+    <!-- 行 10: Version -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 版本</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">Version</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">题包语义化版本号 (默认 1.0.0)</text>
+    <!-- 行 11: UpdatedAt -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 审计</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">UpdatedAt</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">最后修改与入库日期 (YYYY-MM-DD)</text>
+    <!-- 行 12: ExamPicture -->
+    <rect x="12" y="401" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="405" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="417" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 底图</text>
+    <text x="80" y="418" font-size="12.5" font-weight="bold" fill="#f1f5f9">ExamPicture</text>
+    <text x="240" y="418" font-size="11.5" fill="#cbd5e1">TEXT (Base64)</text>
+    <text x="440" y="418" font-size="11.5" fill="#94a3b8">2D 平面设备全景底图 DataURI / Base64 (可热替换)</text>
+    <!-- 行 13: ExamPicture3D -->
+    <rect x="12" y="428" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="432" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="444" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 3D</text>
+    <text x="80" y="445" font-size="12.5" font-weight="bold" fill="#f1f5f9">ExamPicture3D</text>
+    <text x="240" y="445" font-size="11.5" fill="#cbd5e1">TEXT (Base64)</text>
+    <text x="440" y="445" font-size="11.5" fill="#94a3b8">3D环绕/第一人称漫游等距天球全景图 Base64 (可热替换)</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_设备热点 -->
+  <g transform="translate(60, 700)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="411" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#38bdf8" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#38bdf8"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#38bdf8">域 1 · 核心试卷场景与热点题库</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_设备热点</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T02_Hotspot</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">全景图 8 大关键设备交互热点、2D/3D坐标定位与仪表模板关联</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_HotspotID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_HotspotID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">热点唯一标识 (如 hs-scrubber-top, hs-induced-fan)</text>
+    <!-- 行 2: fk_ExamID -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_ExamID</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT FK</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">所属试卷 ID -&gt; WMPSES_试卷场景.pk_ExamID (级联删除)</text>
+    <!-- 行 3: SortOrder -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 排序</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#f1f5f9">SortOrder</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">考场巡检与界面 Dock 展示顺序 (1 ~ 8)</text>
+    <!-- 行 4: DeviceCode -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 位号</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">DeviceCode</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">工业设备位号 (如 A-101A, B-101, W-101, R-101, M-101)</text>
+    <!-- 行 5: DeviceName -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 名称</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">DeviceName</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">设备部位中文名称 (如 碱洗塔上部与塔顶平台)</text>
+    <!-- 行 6: Category -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 分类</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">Category</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">设备验收归类 (本体外观/现场仪表/驱动电机/阀门管组)</text>
+    <!-- 行 7: CoordX -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 坐标</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">CoordX</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">REAL</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">2D 平面全景底图 X 轴百分比坐标 (0.0% ~ 100.0%)</text>
+    <!-- 行 8: CoordY -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 坐标</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">CoordY</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">REAL</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">2D 平面全景底图 Y 轴百分比坐标 (0.0% ~ 100.0%)</text>
+    <!-- 行 9: WidgetType -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 模板</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">WidgetType</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">关联的工况卡片模板代号 (-&gt; WMPSES_工况卡片模板)</text>
+    <!-- 行 10: SceneSummary -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 隐患</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">SceneSummary</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">现场巡检表象、隐患缺陷与仪表状态描述快照</text>
+    <!-- 行 11: WidgetParamsJSON -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 参数</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">WidgetParamsJSON</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT (JSON)</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">现场仪表仿真参数与 3D 空间坐标 {_pos3d: {x,y,z}}</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_习题库 -->
+  <g transform="translate(60, 1180)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="627" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#38bdf8" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#38bdf8"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#38bdf8">域 1 · 核心试卷场景与热点题库</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_习题库</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T03_QuestionBank</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">8 大热点绑定的 15 道现场验收习题、缺陷等级与规范条款解析</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_QuestionID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_QuestionID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">题目唯一编号 (如 Q101-01 ~ Q108-01)</text>
+    <!-- 行 2: fk_HotspotID -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_HotspotID</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT FK</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">所属热点 -&gt; WMPSES_设备热点.pk_HotspotID (级联删除)</text>
+    <!-- 行 3: fk_ExamID -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_ExamID</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT FK</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">冗余试卷外键 -&gt; WMPSES_试卷场景.pk_ExamID (级联删除)</text>
+    <!-- 行 4: SortOrder -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 顺序</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">SortOrder</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">该热点下的出题顺序 (1 ~ 2 题)</text>
+    <!-- 行 5: DefectCode -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 缺陷</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">DefectCode</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">现场缺陷项代码编号 (D1 ~ D12)</text>
+    <!-- 行 6: DefectLevel -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 级别</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">DefectLevel</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">缺陷定级: general (一般) / major (重大，关联 N2-B)</text>
+    <!-- 行 7: IsMajorDefect -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 标记</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">IsMajorDefect</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">是否重大隐患 (0=否, 1=是，漏判累计触发否定项)</text>
+    <!-- 行 8: IsCriticalConclusion -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 标记</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">IsCriticalConclusion</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">是否总结论题 (0=否, 1=是，答错直接一票否决 N2-A)</text>
+    <!-- 行 9: QuestionType -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 题型</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">QuestionType</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">题目类型: single (单选) / multiple (多选) / judge (判断)</text>
+    <!-- 行 10: Score -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 分值</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">Score</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">该题考核分值 (单题 2 ~ 5 分，卷面累计 50 分)</text>
+    <!-- 行 11: QuestionTitle -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 题干</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">QuestionTitle</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">题目背景陈述、隐患现象与验收核查设问</text>
+    <!-- 行 12: OptionA -->
+    <rect x="12" y="401" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="405" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="417" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 选项</text>
+    <text x="80" y="418" font-size="12.5" font-weight="bold" fill="#f1f5f9">OptionA</text>
+    <text x="240" y="418" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="418" font-size="11.5" fill="#94a3b8">待选答案 A 选项内容</text>
+    <!-- 行 13: OptionB -->
+    <rect x="12" y="428" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="432" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="444" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 选项</text>
+    <text x="80" y="445" font-size="12.5" font-weight="bold" fill="#f1f5f9">OptionB</text>
+    <text x="240" y="445" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="445" font-size="11.5" fill="#94a3b8">待选答案 B 选项内容</text>
+    <!-- 行 14: OptionC -->
+    <rect x="12" y="455" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="459" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="471" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 选项</text>
+    <text x="80" y="472" font-size="12.5" font-weight="bold" fill="#f1f5f9">OptionC</text>
+    <text x="240" y="472" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="472" font-size="11.5" fill="#94a3b8">待选答案 C 选项内容</text>
+    <!-- 行 15: OptionD -->
+    <rect x="12" y="482" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="486" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="498" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 选项</text>
+    <text x="80" y="499" font-size="12.5" font-weight="bold" fill="#f1f5f9">OptionD</text>
+    <text x="240" y="499" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="499" font-size="11.5" fill="#94a3b8">待选答案 D 选项内容</text>
+    <!-- 行 16: OptionE -->
+    <rect x="12" y="509" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="513" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="525" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 选项</text>
+    <text x="80" y="526" font-size="12.5" font-weight="bold" fill="#f1f5f9">OptionE</text>
+    <text x="240" y="526" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="526" font-size="11.5" fill="#94a3b8">待选答案 E 选项内容 (多选题备用选项)</text>
+    <!-- 行 17: AnswerKeys -->
+    <rect x="12" y="536" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="540" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="552" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 答案</text>
+    <text x="80" y="553" font-size="12.5" font-weight="bold" fill="#f1f5f9">AnswerKeys</text>
+    <text x="240" y="553" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="553" font-size="11.5" fill="#94a3b8">正确选项答案组合 (如 A, B, AB, ABCD)</text>
+    <!-- 行 18: ReferenceStandard -->
+    <rect x="12" y="563" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="567" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="579" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 标准</text>
+    <text x="80" y="580" font-size="12.5" font-weight="bold" fill="#f1f5f9">ReferenceStandard</text>
+    <text x="240" y="580" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="580" font-size="11.5" fill="#94a3b8">引用的国家/行业标准与安全规程条款 (如 GB 50058)</text>
+    <!-- 行 19: Explanation -->
+    <rect x="12" y="590" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="594" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="606" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 解析</text>
+    <text x="80" y="607" font-size="12.5" font-weight="bold" fill="#f1f5f9">Explanation</text>
+    <text x="240" y="607" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="607" font-size="11.5" fill="#94a3b8">专家标准考评解析、现场处置规范与采分依据</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_工况卡片模板 -->
+  <g transform="translate(890, 190)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="492" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#2dd4bf" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#2dd4bf"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#2dd4bf">域 2 · 工况卡片模板与现场仿真</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_工况卡片模板</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T04_WidgetTemplate</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">SVG 动态工业仪表组件配置、面板布局与滑块参数定义元数据</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_TemplateID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_TemplateID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK NOT NULL</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">模板主键 (如 TPL-01)</text>
+    <!-- 行 2: TemplateCode -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 代号</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#f1f5f9">TemplateCode</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">模板代号，与 设备热点.WidgetType 逻辑绑定 (如 scrubber_top)</text>
+    <!-- 行 3: TemplateName -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 名称</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#f1f5f9">TemplateName</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">模板显示名称 (如 碱洗塔上部（防腐脱落+压力表过期标签）)</text>
+    <!-- 行 4: IsBuiltin -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 系统</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">IsBuiltin</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">INTEGER DEFAULT 0</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">是否系统内置模板 (1=内置不可删, 0=教师自定义)</text>
+    <!-- 行 5: LeftPanelType -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 左面板</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">LeftPanelType</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;gauge_dial&#x27;</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">左侧特写面板组件类型 (cert_nameplate / gauge_dial ...)</text>
+    <!-- 行 6: LeftPanelTitle -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 左面板</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">LeftPanelTitle</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">左侧面板标题 (如 现场外观特写·喷淋层上方塔壁)</text>
+    <!-- 行 7: LeftPanelCode -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 左面板</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">LeftPanelCode</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">左侧面板仪表/部位位号 (如 T-101-W01)</text>
+    <!-- 行 8: RightPanelType -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 右面板</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">RightPanelType</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;dcs_interlock&#x27;</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">右侧面板组件类型 (gauge_dial / dcs_interlock ...)</text>
+    <!-- 行 9: RightPanelTitle -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 右面板</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">RightPanelTitle</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">右侧面板标题 (如 塔顶仪表与检定标签放大)</text>
+    <!-- 行 10: RightPanelCode -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 右面板</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">RightPanelCode</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">右侧面板仪表位号 (如 PI-101)</text>
+    <!-- 行 11: ParamSchemaJSON -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 参数</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">ParamSchemaJSON</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT (JSON) DEFAULT &#x27;[]&#x27;</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">可调仿真参数定义数组 [{key,label,min,max,step,unit}]</text>
+    <!-- 行 12: CustomImageBase64 -->
+    <rect x="12" y="401" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="405" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="417" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 图片</text>
+    <text x="80" y="418" font-size="12.5" font-weight="bold" fill="#f1f5f9">CustomImageBase64</text>
+    <text x="240" y="418" font-size="11.5" fill="#cbd5e1">TEXT (Base64) DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="418" font-size="11.5" fill="#94a3b8">教师自定义上传的特写图片 Base64</text>
+    <!-- 行 13: SortOrder -->
+    <rect x="12" y="428" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="432" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="444" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 排序</text>
+    <text x="80" y="445" font-size="12.5" font-weight="bold" fill="#f1f5f9">SortOrder</text>
+    <text x="240" y="445" font-size="11.5" fill="#cbd5e1">INTEGER DEFAULT 10</text>
+    <text x="440" y="445" font-size="11.5" fill="#94a3b8">模板库列表排序</text>
+    <!-- 行 14: UpdatedAt -->
+    <rect x="12" y="455" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="459" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="471" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 时间</text>
+    <text x="80" y="472" font-size="12.5" font-weight="bold" fill="#f1f5f9">UpdatedAt</text>
+    <text x="240" y="472" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT now</text>
+    <text x="440" y="472" font-size="11.5" fill="#94a3b8">最后更新时间 (YYYY-MM-DD HH:MM:SS)</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_否定项规则 -->
+  <g transform="translate(890, 700)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="411" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#fbbf24" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#fbbf24"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#fbbf24">域 3 · 表驱动否定项与规范参考</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_否定项规则</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T05_VetoRule</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">表驱动一票否决安全红线与重大缺陷漏判自动仲裁逻辑配置</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_RuleID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_RuleID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK NOT NULL</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">规则主键 (N1 / N2A / N2B / N3)</text>
+    <!-- 行 2: fk_ExamID -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_ExamID</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT FK NOT NULL</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">所属试卷 -&gt; WMPSES_试卷场景.pk_ExamID (CASCADE)</text>
+    <!-- 行 3: SortOrder -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 优先级</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#f1f5f9">SortOrder</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">INTEGER DEFAULT 1</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">交卷仲裁执行顺序</text>
+    <!-- 行 4: RuleCode -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 代号</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">RuleCode</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">否定项代号 (N1 / N2-A / N2-B / N3)</text>
+    <!-- 行 5: RuleName -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 名称</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">RuleName</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">规则名称 (如 操作超时未提交)</text>
+    <!-- 行 6: ConditionType -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 枚举</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">ConditionType</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">OVERTIME / CONCLUSION_WRONG / MAJOR_MISS_COUNT / QUESTION_WRONG</text>
+    <!-- 行 7: ThresholdValue -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 阈值</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">ThresholdValue</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">REAL DEFAULT 1</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">判定阈值 (如 超时 25 分钟、漏判 ≥2 项)</text>
+    <!-- 行 8: TargetRef -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 目标</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">TargetRef</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">作用目标引用 (如 durationMinutes 或 题目ID)</text>
+    <!-- 行 9: PenaltyAction -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 动作</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">PenaltyAction</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;ZERO_SCORE&#x27;</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">ZERO_SCORE (本题 0 分) / WARN_ONLY (仅告警)</text>
+    <!-- 行 10: IsEnabled -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 开关</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">IsEnabled</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">INTEGER DEFAULT 1</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">是否启用 (1=启用, 0=停用)</text>
+    <!-- 行 11: AlertMessage -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 提示</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">AlertMessage</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">触发时在成绩单显示的提示文案</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_验收规范与确认单 -->
+  <g transform="translate(890, 1130)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="411" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#fbbf24" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#fbbf24"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#fbbf24">域 3 · 表驱动否定项与规范参考</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_验收规范与确认单</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T06_Checklist</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">6 大核查方面、24 项标准验收确认单内容与判定标准条目</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_CheckItemID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_CheckItemID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK NOT NULL</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">核查项主键 (CHK-01 ~ CHK-24)</text>
+    <!-- 行 2: fk_ExamID -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_ExamID</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT FK NOT NULL</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">所属试卷 -&gt; WMPSES_试卷场景.pk_ExamID (CASCADE)</text>
+    <!-- 行 3: fk_HotspotID -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_HotspotID</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">逻辑关联热点 (点击“前往”直达，如 hs-scrubber-top)</text>
+    <!-- 行 4: ItemNo -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 序号</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">ItemNo</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">INTEGER DEFAULT 1</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">确认单条目序号 (1 ~ 24)</text>
+    <!-- 行 5: AspectName -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 方面</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">AspectName</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">六大验收方面 (如 设备本体外观)</text>
+    <!-- 行 6: CheckItemName -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 核查项</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">CheckItemName</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">核查项目名称 (如 塔体与管道防腐层)</text>
+    <!-- 行 7: InteractionWay -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 交互</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">InteractionWay</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">仿真交互方式 (如 环绕巡视、内壁特写与测厚核对)</text>
+    <!-- 行 8: StandardBasis -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 依据</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">StandardBasis</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">合格判定依据 (如 测厚不低于设计值的 90%)</text>
+    <!-- 行 9: SceneStatus -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 现状</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">SceneStatus</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">现场实际工况描述 (如 防腐层起皮脱落约 0.3m²)</text>
+    <!-- 行 10: StandardConclusion -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 结论</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">StandardConclusion</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;合格&#x27;</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">标准结论 (合格 / 不合格（一般）/ 不合格（重大）)</text>
+    <!-- 行 11: RelatedDefectCode -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 缺陷</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">RelatedDefectCode</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">关联缺陷代码 (D1 ~ D12)</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_工况资料与引用标准 -->
+  <g transform="translate(890, 1560)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="357" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#fbbf24" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#fbbf24"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#fbbf24">域 3 · 表驱动否定项与规范参考</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_工况资料与引用标准</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T07_ScenarioDoc</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">4 份真实车间运行台账、设计文件与 14 部附录 C 国家标准库</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_DocID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_DocID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK NOT NULL</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">资料主键 (DOC-TZ-xx 台账 / DOC-STD-xx 标准)</text>
+    <!-- 行 2: fk_ExamID -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_ExamID</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT FK NOT NULL</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">所属试卷 -&gt; WMPSES_试卷场景.pk_ExamID (CASCADE)</text>
+    <!-- 行 3: DocCategory -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 分类</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#f1f5f9">DocCategory</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">工况台账 / 引用标准</text>
+    <!-- 行 4: SortOrder -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 排序</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">SortOrder</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">INTEGER DEFAULT 1</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">弹窗列表排序</text>
+    <!-- 行 5: DocCode -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 编号</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">DocCode</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">文件编号或标准号 (如 DOC-JX-2026-11 / GB 50058)</text>
+    <!-- 行 6: DocTitle -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 标题</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">DocTitle</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">资料标题 (如 本次大修检修记录（碱洗＋三室RTO）)</text>
+    <!-- 行 7: DeptOrCategory -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 部门</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">DeptOrCategory</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">编制部门或标准类别 (如 设备检修部)</text>
+    <!-- 行 8: ContentSummary -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 摘要</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">ContentSummary</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">内容摘要 / 关键条款</text>
+    <!-- 行 9: RelatedHotspotCode -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 关联</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">RelatedHotspotCode</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">关联设备位号 (如 A-101A / B-101 / V-101)</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_考试记录 -->
+  <g transform="translate(1720, 190)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="519" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#4ade80" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#4ade80"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#4ade80">域 4 · 考务成绩与逐题作答明细</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_考试记录</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T08_ExamResult</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">考生每次正式交卷的主档案、实得分数、合格状态与否定项记录</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_ResultID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_ResultID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">考试成绩主记录编号 (如 RES-20261120-XXXX)</text>
+    <!-- 行 2: fk_ExamID -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_ExamID</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT FK</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">所考卷面外键 -&gt; WMPSES_试卷场景.pk_ExamID (级联删除)</text>
+    <!-- 行 3: ExamineeName -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 姓名</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#f1f5f9">ExamineeName</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">现场考生真实姓名 (如 张建国、李志强)</text>
+    <!-- 行 4: ExamineeID -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 准考证</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">ExamineeID</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">考生准考证号 / 学员工号 (如 EXAM-2026-088)</text>
+    <!-- 行 5: ExamMode -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 模式</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">ExamMode</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">作答模式: exam (正式实操鉴定) / practice (练习演示)</text>
+    <!-- 行 6: Score -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 得分</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">Score</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">INTEGER NOT NULL</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">最终实操核算得分 (0 ~ 50 分，触发否定项直接为 0)</text>
+    <!-- 行 7: TotalScore -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 满分</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">TotalScore</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">INTEGER NOT NULL</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">考卷基准总分 (50 分)</text>
+    <!-- 行 8: Accuracy -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 正确率</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">Accuracy</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">考生整体作答正确率百分比 (0% ~ 100%)</text>
+    <!-- 行 9: PassStatus -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 合格</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">PassStatus</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">最终考评结论: 合格 / 不合格 / 违纪</text>
+    <!-- 行 10: VetoTriggered -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 否决</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">VetoTriggered</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">是否触发一票否决 (0=正常计分, 1=触发否定项判定)</text>
+    <!-- 行 11: VetoReason -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 原因</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">VetoReason</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">触发否定项原因详细描述 (如 答错关键总结论题)</text>
+    <!-- 行 12: DurationSeconds -->
+    <rect x="12" y="401" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="405" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="417" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 耗时</text>
+    <text x="80" y="418" font-size="12.5" font-weight="bold" fill="#f1f5f9">DurationSeconds</text>
+    <text x="240" y="418" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="418" font-size="11.5" fill="#94a3b8">实操答题总耗时秒数</text>
+    <!-- 行 13: SubmittedAt -->
+    <rect x="12" y="428" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="432" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="444" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 提交</text>
+    <text x="80" y="445" font-size="12.5" font-weight="bold" fill="#f1f5f9">SubmittedAt</text>
+    <text x="240" y="445" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="445" font-size="11.5" fill="#94a3b8">交卷时间戳 (YYYY-MM-DD HH:MM:SS)</text>
+    <!-- 行 14: ResultDetailJSON -->
+    <rect x="12" y="455" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="459" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="471" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 快照</text>
+    <text x="80" y="472" font-size="12.5" font-weight="bold" fill="#f1f5f9">ResultDetailJSON</text>
+    <text x="240" y="472" font-size="11.5" fill="#cbd5e1">TEXT (JSON)</text>
+    <text x="440" y="472" font-size="11.5" fill="#94a3b8">交卷时逐题作答、分值与雷达图分析完整 JSON 快照</text>
+    <!-- 行 15: fk_UserID -->
+    <rect x="12" y="482" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="486" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="498" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="499" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_UserID</text>
+    <text x="240" y="499" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="499" font-size="11.5" fill="#94a3b8">逻辑关联考生 -&gt; WMPSES_用户人员.pk_UserID</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_作答明细 -->
+  <g transform="translate(1720, 740)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="357" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#4ade80" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#4ade80"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#4ade80">域 4 · 考务成绩与逐题作答明细</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_作答明细</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T09_ResultDetail</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">单次交卷下逐题作答的选项比对、正误标记与单题实得分数</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_DetailID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_DetailID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK NOT NULL</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">明细主键 (UUID)</text>
+    <!-- 行 2: fk_ResultID -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_ResultID</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT FK NOT NULL</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">所属交卷记录 -&gt; WMPSES_考试记录.pk_ResultID (CASCADE)</text>
+    <!-- 行 3: fk_QuestionID -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_QuestionID</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">逻辑关联习题 -&gt; WMPSES_习题库.pk_QuestionID (如 q-d1)</text>
+    <!-- 行 4: HotspotCode -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 位号</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">HotspotCode</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">题目所属设备位号快照 (如 A-101A)</text>
+    <!-- 行 5: DefectCode -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 缺陷</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">DefectCode</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">题目缺陷代码快照 (如 D1)</text>
+    <!-- 行 6: UserAnswer -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 考生答</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">UserAnswer</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">考生提交答案 (如 B / AB)</text>
+    <!-- 行 7: CorrectAnswer -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 标准答</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">CorrectAnswer</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">标准答案快照 (如 C)</text>
+    <!-- 行 8: IsCorrect -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 正误</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">IsCorrect</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">INTEGER DEFAULT 0</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">是否完全正确 (1=对, 0=错/漏选)</text>
+    <!-- 行 9: EarnedScore -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 得分</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">EarnedScore</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">INTEGER DEFAULT 0</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">本题实得分</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_用户人员 -->
+  <g transform="translate(2550, 190)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="465" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#a855f7" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#a855f7"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#a855f7">域 4 (续) · 人员认证与变更审计</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_用户人员</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T10_UserAccount</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">考生、命题教师、考评员与管理员账号统一认证与权限管理</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_UserID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_UserID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK NOT NULL</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">人员主键 (如 USR-EX-001 / USR-TC-001)</text>
+    <!-- 行 2: UserCode -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 账号</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#f1f5f9">UserCode</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">登录账号 / 准考证号 / 工号 (如 ZK202611001)</text>
+    <!-- 行 3: FullName -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 姓名</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#f1f5f9">FullName</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT NOT NULL</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">真实姓名 (如 张建国)</text>
+    <!-- 行 4: RoleType -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 角色</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">RoleType</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;考生&#x27;</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">考生 / 命题教师 / 审题专家 / 考评员 / 监考员 / 系统管理员</text>
+    <!-- 行 5: Department -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 部门</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">Department</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">单位部门 (如 涂装一车间RTO运行班)</text>
+    <!-- 行 6: SkillLevel -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 等级</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">SkillLevel</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">报考/持证等级 (如 二级/技师)</text>
+    <!-- 行 7: Specialty -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 专业</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">Specialty</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">专业方向 (如 工业废气治理)</text>
+    <!-- 行 8: CertificateNo -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 证书</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">CertificateNo</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">资格证书编号</text>
+    <!-- 行 9: BatchNo -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 批次</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">BatchNo</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">考试批次 (如 2026-11-第一批)</text>
+    <!-- 行 10: Phone -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 电话</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">Phone</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;&#x27;</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">联系电话</text>
+    <!-- 行 11: Status -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 状态</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">Status</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT &#x27;正常&#x27;</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">正常 / 停用</text>
+    <!-- 行 12: CreatedAt -->
+    <rect x="12" y="401" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="405" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="417" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 时间</text>
+    <text x="80" y="418" font-size="12.5" font-weight="bold" fill="#f1f5f9">CreatedAt</text>
+    <text x="240" y="418" font-size="11.5" fill="#cbd5e1">TEXT DEFAULT now</text>
+    <text x="440" y="418" font-size="11.5" fill="#94a3b8">建档时间</text>
+    <!-- 行 13: Password -->
+    <rect x="12" y="428" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="432" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="444" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 密码</text>
+    <text x="80" y="445" font-size="12.5" font-weight="bold" fill="#f1f5f9">Password</text>
+    <text x="240" y="445" font-size="11.5" fill="#cbd5e1">TEXT (SHA-256)</text>
+    <text x="440" y="445" font-size="11.5" fill="#94a3b8">SHA-256 哈希密码 (初始 123456)</text>
+  </g>
+
+  <!-- 表卡片: WMPSES_题库变更日志 -->
+  <g transform="translate(2550, 680)">
+    <!-- 卡片外框与背景 -->
+    <rect width="790" height="411" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#334155" stroke-width="1.2" filter="url(#cardShadow)"/>
+
+    <!-- 表头背景 -->
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 72 L 0 72 Z" fill="#1e293b" fill-opacity="0.85"/>
+    <line x1="0" y1="72" x2="790" y2="72" stroke="#a855f7" stroke-opacity="0.45" stroke-width="1.5"/>
+
+    <!-- 业务域标签条 -->
+    <rect x="18" y="12" width="6" height="48" rx="3" fill="#a855f7"/>
+    <text x="34" y="27" font-size="12" font-weight="bold" fill="#a855f7">域 4 (续) · 人员认证与变更审计</text>
+    <text x="34" y="48" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES_题库变更日志</text>
+    <text x="770" y="48" text-anchor="end" font-size="12" fill="#64748b">T11_ChangeLog</text>
+    <text x="34" y="65" font-size="12" fill="#94a3b8">命题教师标点微调、改题、调参数与换底图全程可追溯审计留痕</text>
+
+    <!-- 列标题栏 -->
+    <rect x="12" y="76" width="766" height="24" rx="4" fill="#182234"/>
+    <text x="24" y="92" font-size="11" font-weight="bold" fill="#64748b">约束</text>
+    <text x="80" y="92" font-size="11" font-weight="bold" fill="#64748b">列名 (FIELD NAME)</text>
+    <text x="240" y="92" font-size="11" font-weight="bold" fill="#64748b">数据类型与默认值</text>
+    <text x="440" y="92" font-size="11" font-weight="bold" fill="#64748b">字段详细语义与业务说明</text>
+    <!-- 行 1: pk_LogID -->
+    <rect x="12" y="104" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="108" width="50" height="17" rx="3" fill="#eab308" fill-opacity="0.18" stroke="#eab308" stroke-width="0.8"/>
+    <text x="45" y="120" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+    <text x="80" y="121" font-size="12.5" font-weight="bold" fill="#fef08a">pk_LogID</text>
+    <text x="240" y="121" font-size="11.5" fill="#cbd5e1">TEXT PK</text>
+    <text x="440" y="121" font-size="11.5" fill="#94a3b8">变更流水号 (如 LOG-20261120-XXXX)</text>
+    <!-- 行 2: fk_ExamID -->
+    <rect x="12" y="131" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="135" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="147" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="148" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_ExamID</text>
+    <text x="240" y="148" font-size="11.5" fill="#cbd5e1">TEXT FK</text>
+    <text x="440" y="148" font-size="11.5" fill="#94a3b8">所属试卷外键 -&gt; WMPSES_试卷场景.pk_ExamID (级联删除)</text>
+    <!-- 行 3: fk_UserID -->
+    <rect x="12" y="158" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="162" width="50" height="17" rx="3" fill="#38bdf8" fill-opacity="0.18" stroke="#38bdf8" stroke-width="0.8"/>
+    <text x="45" y="174" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+    <text x="80" y="175" font-size="12.5" font-weight="bold" fill="#bae6fd">fk_UserID</text>
+    <text x="240" y="175" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="175" font-size="11.5" fill="#94a3b8">修改人账号 -&gt; WMPSES_用户人员.pk_UserID</text>
+    <!-- 行 4: OperatorName -->
+    <rect x="12" y="185" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="189" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="201" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 姓名</text>
+    <text x="80" y="202" font-size="12.5" font-weight="bold" fill="#f1f5f9">OperatorName</text>
+    <text x="240" y="202" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="202" font-size="11.5" fill="#94a3b8">操作人姓名 (如 王老师、刘教授)</text>
+    <!-- 行 5: ActionType -->
+    <rect x="12" y="212" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="216" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="228" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 动作</text>
+    <text x="80" y="229" font-size="12.5" font-weight="bold" fill="#f1f5f9">ActionType</text>
+    <text x="240" y="229" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="229" font-size="11.5" fill="#94a3b8">变更动作类型 (更换底图/拖拽标点/修改习题/恢复出厂)</text>
+    <!-- 行 6: VersionAfter -->
+    <rect x="12" y="239" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="243" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="255" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 版本</text>
+    <text x="80" y="256" font-size="12.5" font-weight="bold" fill="#f1f5f9">VersionAfter</text>
+    <text x="240" y="256" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="256" font-size="11.5" fill="#94a3b8">变更后题包版本号 (如 1.0.0)</text>
+    <!-- 行 7: HotspotCount -->
+    <rect x="12" y="266" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="270" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="282" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 热点数</text>
+    <text x="80" y="283" font-size="12.5" font-weight="bold" fill="#f1f5f9">HotspotCount</text>
+    <text x="240" y="283" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="283" font-size="11.5" fill="#94a3b8">变更后有效设备热点总数 (8)</text>
+    <!-- 行 8: QuestionCount -->
+    <rect x="12" y="293" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="297" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="309" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 习题数</text>
+    <text x="80" y="310" font-size="12.5" font-weight="bold" fill="#f1f5f9">QuestionCount</text>
+    <text x="240" y="310" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="310" font-size="11.5" fill="#94a3b8">变更后有效习题总数 (15)</text>
+    <!-- 行 9: TotalScore -->
+    <rect x="12" y="320" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="324" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="336" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 总分</text>
+    <text x="80" y="337" font-size="12.5" font-weight="bold" fill="#f1f5f9">TotalScore</text>
+    <text x="240" y="337" font-size="11.5" fill="#cbd5e1">INTEGER</text>
+    <text x="440" y="337" font-size="11.5" fill="#94a3b8">变更后卷面累计总分 (50)</text>
+    <!-- 行 10: ChangeSummary -->
+    <rect x="12" y="347" width="766" height="25" rx="3" fill="#141d2e"/>
+    <rect x="20" y="351" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="363" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 摘要</text>
+    <text x="80" y="364" font-size="12.5" font-weight="bold" fill="#f1f5f9">ChangeSummary</text>
+    <text x="240" y="364" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="364" font-size="11.5" fill="#94a3b8">变更详情自然语言审计摘要说明</text>
+    <!-- 行 11: ChangedAt -->
+    <rect x="12" y="374" width="766" height="25" rx="3" fill="#0f172a"/>
+    <rect x="20" y="378" width="50" height="17" rx="3" fill="#64748b" fill-opacity="0.18" stroke="#475569" stroke-width="0.8"/>
+    <text x="45" y="390" text-anchor="middle" font-size="9.5" fill="#94a3b8">▪ 时间</text>
+    <text x="80" y="391" font-size="12.5" font-weight="bold" fill="#f1f5f9">ChangedAt</text>
+    <text x="240" y="391" font-size="11.5" fill="#cbd5e1">TEXT</text>
+    <text x="440" y="391" font-size="11.5" fill="#94a3b8">变更操作时间戳 (YYYY-MM-DD HH:MM:SS)</text>
+  </g>
+
+  <!-- 架构核心特性与约束说明卡片 -->
+  <g transform="translate(2550, 1120)">
+    <rect width="790" height="420" rx="12" fill="#0f172a" fill-opacity="0.94" stroke="#a855f7" stroke-width="1.5" filter="url(#cardShadow)"/>
+    <path d="M 0 12 C 0 5.37 5.37 0 12 0 L 778 0 C 784.63 0 790 5.37 790 12 L 790 60 L 0 60 Z" fill="#1e293b" fill-opacity="0.9"/>
+    <line x1="0" y1="60" x2="790" y2="60" stroke="#a855f7" stroke-width="1.5"/>
+
+    <rect x="18" y="14" width="6" height="34" rx="3" fill="#a855f7"/>
+    <text x="34" y="32" font-size="12" font-weight="bold" fill="#c084fc">架构核心规范 · 完整性与跨平台映射</text>
+    <text x="34" y="50" font-size="17" font-weight="bold" fill="#f1f5f9">WMPSES 双轨数据库持久化与安全机制</text>
+
+    <g transform="translate(24, 76)">
+      <!-- 规则 1 -->
+      <circle cx="8" cy="8" r="4" fill="#38bdf8"/>
+      <text x="24" y="13" font-size="12.5" font-weight="bold" fill="#38bdf8">1. 级联完整性保证 (CASCADE CONSTRAINTS)</text>
+      <text x="24" y="32" font-size="11.5" fill="#94a3b8">外键 fk_ExamID 统一绑定试卷主记录，删除或重置试卷时热点、习题、规则与文档自动级联清理，杜绝孤立脏数据。</text>
+
+      <!-- 规则 2 -->
+      <circle cx="8" cy="64" r="4" fill="#2dd4bf"/>
+      <text x="24" y="69" font-size="12.5" font-weight="bold" fill="#2dd4bf">2. 2D / 3D 双轨底图独立持久化 (ExamPicture &amp; ExamPicture3D)</text>
+      <text x="24" y="88" font-size="11.5" fill="#94a3b8">试卷场景同时支持 2D 平面图与 3D/漫游等距天球全景图 Base64 编码直接入库，命题管理员可在线热替换并离线随身带。</text>
+
+      <!-- 规则 3 -->
+      <circle cx="8" cy="120" r="4" fill="#fbbf24"/>
+      <text x="24" y="125" font-size="12.5" font-weight="bold" fill="#fbbf24">3. 表驱动否定项仲裁引擎 (TABLE-DRIVEN VETO ARBITRATION)</text>
+      <text x="24" y="144" font-size="11.5" fill="#94a3b8">N1 超时、N2-A 总结论答错、N2-B 重大隐患漏判超标与 N3 安全红线均由表内阈值驱动，业务规则调整免改代码。</text>
+
+      <!-- 规则 4 -->
+      <circle cx="8" cy="176" r="4" fill="#4ade80"/>
+      <text x="24" y="181" font-size="12.5" font-weight="bold" fill="#4ade80">4. 成绩单双层持久化与逐题审计 (Result &amp; Detail SNAPSHOT)</text>
+      <text x="24" y="200" font-size="11.5" fill="#94a3b8">正式交卷将总成绩写入主表，15 道小题选项逐行写入明细子表，同时将全量交互快照备份于 ResultDetailJSON。</text>
+
+      <!-- 规则 5 -->
+      <circle cx="8" cy="232" r="4" fill="#e879f9"/>
+      <text x="24" y="237" font-size="12.5" font-weight="bold" fill="#e879f9">5. 与 FileMaker 容器与表结构 1:1 双向映射 (FileMaker Parity)</text>
+      <text x="24" y="256" font-size="11.5" fill="#94a3b8">SQLite 字段与 FileMaker 关系表、容器字段完美对应，提供标准 XML 脚本与 CSV 种子，导入即用。</text>
+    </g>
+  </g>
+
+  <!-- 底部图例栏 Footer -->
+  <g transform="translate(60, 1950)">
+    <rect width="3280" height="46" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+    <g transform="translate(30, 28)">
+      <rect x="0" y="-12" width="46" height="18" rx="3" fill="#eab308" fill-opacity="0.2" stroke="#eab308" stroke-width="0.8"/>
+      <text x="23" y="1" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#eab308">PK</text>
+      <text x="54" y="1" font-size="11.5" fill="#94a3b8">主键唯一标识 (PRIMARY KEY)</text>
+
+      <rect x="250" y="-12" width="46" height="18" rx="3" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.8"/>
+      <text x="273" y="1" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#38bdf8">FK</text>
+      <text x="304" y="1" font-size="11.5" fill="#94a3b8">外键关联 (FOREIGN KEY CASCADE)</text>
+
+      <rect x="530" y="-12" width="56" height="18" rx="3" fill="#2dd4bf" fill-opacity="0.2" stroke="#2dd4bf" stroke-width="0.8"/>
+      <text x="558" y="1" text-anchor="middle" font-size="13" font-weight="bold" fill="#2dd4bf">JSON</text>
+      <text x="594" y="1" font-size="11.5" fill="#94a3b8">动态参数扩展列 (JSON DICT)</text>
+
+      <rect x="800" y="-12" width="60" height="18" rx="3" fill="#a855f7" fill-opacity="0.2" stroke="#a855f7" stroke-width="0.8"/>
+      <text x="830" y="1" text-anchor="middle" font-size="13" font-weight="bold" fill="#c084fc">Base64</text>
+      <text x="868" y="1" font-size="11.5" fill="#94a3b8">全景场景图像 DataURI 编码列</text>
+
+      <text x="2860" y="1" font-size="11.5" fill="#64748b">工业废气治理工（二级/技师）实操考评系统 · WMPSES 数据库设计规范 V1.1.1</text>
+    </g>
+  </g>
+</svg>

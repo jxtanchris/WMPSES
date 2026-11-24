@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "WMPSES_试卷场景" (
     "Status"          TEXT NOT NULL DEFAULT '已启用',
     "Version"         TEXT NOT NULL DEFAULT '1.0.0',
     "UpdatedAt"       TEXT NOT NULL DEFAULT (date('now', 'localtime')),
-    "ExamPicture"     TEXT NOT NULL DEFAULT ''
+    "ExamPicture"     TEXT NOT NULL DEFAULT '',
+    "ExamPicture3D"   TEXT NOT NULL DEFAULT '',
+    "Scene3DModelName" TEXT NOT NULL DEFAULT '',
+    "Scene3DModelBLOB" BLOB
 );
 
 -- 2. 全景图设备热点部位表
@@ -40,10 +43,10 @@ CREATE TABLE IF NOT EXISTS "WMPSES_设备热点" (
 CREATE INDEX IF NOT EXISTS "idx_hotspots_exam_order"
     ON "WMPSES_设备热点" ("fk_ExamID", "SortOrder");
 
--- 3. 设备热点关联习题库表
+-- 3. 设备热点关联习题库表（fk_HotspotID 允许为空，支持先在独立题库池设计再关联热点）
 CREATE TABLE IF NOT EXISTS "WMPSES_习题库" (
     "pk_QuestionID"        TEXT PRIMARY KEY NOT NULL,
-    "fk_HotspotID"         TEXT NOT NULL,
+    "fk_HotspotID"         TEXT DEFAULT NULL,
     "fk_ExamID"            TEXT NOT NULL,
     "SortOrder"            INTEGER NOT NULL DEFAULT 1,
     "DefectCode"           TEXT NOT NULL DEFAULT '',
@@ -61,7 +64,7 @@ CREATE TABLE IF NOT EXISTS "WMPSES_习题库" (
     "AnswerKeys"           TEXT NOT NULL DEFAULT 'A',
     "ReferenceStandard"    TEXT NOT NULL DEFAULT '',
     "Explanation"          TEXT NOT NULL DEFAULT '',
-    FOREIGN KEY ("fk_HotspotID") REFERENCES "WMPSES_设备热点"("pk_HotspotID") ON DELETE CASCADE,
+    FOREIGN KEY ("fk_HotspotID") REFERENCES "WMPSES_设备热点"("pk_HotspotID") ON DELETE SET NULL,
     FOREIGN KEY ("fk_ExamID") REFERENCES "WMPSES_试卷场景"("pk_ExamID") ON DELETE CASCADE
 );
 
@@ -80,9 +83,15 @@ CREATE TABLE IF NOT EXISTS "WMPSES_考试记录" (
     "ExamineeID"       TEXT NOT NULL DEFAULT '',
     "ExamMode"         TEXT NOT NULL DEFAULT 'exam',
     "Score"            INTEGER NOT NULL DEFAULT 0,
+    "ObjectiveScore"   INTEGER NOT NULL DEFAULT 0,
+    "SubjectiveScore"  INTEGER NOT NULL DEFAULT 0,
     "TotalScore"       INTEGER NOT NULL DEFAULT 50,
     "Accuracy"         INTEGER NOT NULL DEFAULT 0,
     "PassStatus"       TEXT NOT NULL DEFAULT '不合格',
+    "ReviewStatus"     TEXT NOT NULL DEFAULT '自动已评',
+    "ReviewerID"       TEXT NOT NULL DEFAULT '',
+    "ReviewerName"     TEXT NOT NULL DEFAULT '',
+    "ReviewedAt"       TEXT NOT NULL DEFAULT '',
     "VetoTriggered"    INTEGER NOT NULL DEFAULT 0,
     "VetoReason"       TEXT NOT NULL DEFAULT '',
     "DurationSeconds"  INTEGER NOT NULL DEFAULT 0,
@@ -99,12 +108,15 @@ CREATE TABLE IF NOT EXISTS "WMPSES_作答明细" (
     "pk_DetailID"   TEXT PRIMARY KEY NOT NULL,
     "fk_ResultID"   TEXT NOT NULL,
     "fk_QuestionID" TEXT NOT NULL,
+    "QuestionType"  TEXT NOT NULL DEFAULT 'single',
+    "MaxScore"      INTEGER NOT NULL DEFAULT 0,
     "HotspotCode"   TEXT NOT NULL DEFAULT '',
     "DefectCode"    TEXT NOT NULL DEFAULT '',
     "UserAnswer"    TEXT NOT NULL DEFAULT '',
     "CorrectAnswer" TEXT NOT NULL DEFAULT '',
     "IsCorrect"     INTEGER NOT NULL DEFAULT 0,
     "EarnedScore"   INTEGER NOT NULL DEFAULT 0,
+    "ReviewComment" TEXT NOT NULL DEFAULT '',
     FOREIGN KEY ("fk_ResultID") REFERENCES "WMPSES_考试记录"("pk_ResultID") ON DELETE CASCADE
 );
 

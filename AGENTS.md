@@ -1,0 +1,1 @@
+**Browser Support:** 需兼容 FileMaker WebViewer（macOS Safari / Windows WebView2），允许使用 Baseline Widely available 特性；较新特性仅允许不超过 20 行的轻量级原生降级，不引入外部 polyfill 依赖。
