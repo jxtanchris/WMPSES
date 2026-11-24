@@ -25,9 +25,9 @@
    - 在 `WMPSES_用户人员` 单表中以 `RoleType` 区分 **考生、命题教师、审题专家、考评员、监考员、系统管理员**，`Password` 列采用 **SHA-256 哈希加密存储**（预设初始密码统一为 `123456`），服务端响应统一脱敏不暴露密文。
    - 后端 `server.py` 启用 **Bearer Token 滚动会话（12h）与接口级 RBAC 角色强校验**，防止跳过前端 UI 直接调用 API 越权或提权（非系统管理员禁止创建/修改/删除系统管理员账号，改密与考生交卷强制绑定当前登录会话本人）。
    - 退出登录或刷新页面触发 `[未登录]` 安全门禁：仅保留登录入口并锁定主舞台，必须重新认证后方可操作。
-5. **SQLite 11 表关系型数据库 + 台账方案库 + 表驱动否定项引擎**：
-   - 与 FileMaker 11 表结构 **1:1 严格对齐**，支持直接在界面 **「⚙️ 数据库 / 题库 -> 🗄️ SQLite 数据库表预览」** 查看全部 11 张表实时记录（密码列自动脱敏）。
-   - **「📋 台账与验收方案」** 收录 4 份现场工况电子台账、6 方面 24 项验收确认单规范（支持一键跳转至图上对应设备）、14 部附录 C 引用国标及否定项规则查看。
+5. **MySQL 8.0 / SQLite 双引擎关系型数据库 + 可在线维护台账方案库 + 表驱动否定项引擎**：
+   - 前端自动识别当前连接的数据库引擎（**MySQL 8.0** 或 **SQLite**），支持直接在界面 **「⚙️ 数据库 / 题库 -> 🗄️ 数据库表预览」** 查看实时记录（密码列自动脱敏）。
+   - **「📋 台账与验收方案」** 收录现场工况电子台账、验收规范确认单（支持一键跳转至图上对应设备）、附录 C 引用国标及否定项规则；**考生/考评员只读查阅，命题教师/审题专家/系统管理员支持直接在弹窗内在线新增、编辑、删除并实时落库**。
    - **「⚖️ 否定项规则表配置」** 支持直接启停 N1/N2-A/N2-B/N3、调整阈值和惩罚动作并落库，交卷判分实时按规则表执行。
 
 ---
@@ -52,7 +52,7 @@
 ### 方式 2：70~200 人高并发考场生产部署（Docker Compose + MySQL 8.0 + Nginx + FastAPI）
 适用于多机同时开考与集中交卷场景（InnoDB 行级锁、连接池、Nginx 静态缓存 + Gzip、4 Worker FastAPI、无状态签名 Token、交卷幂等重试、错峰提交与 15 秒自动答题草稿防丢）：
 ```bash
-# 1. 复制环境变量模板并修改密码与签名密钥（可选）
+# 1. 复制环境变量模板并修改密码与签名密钥（.env 已加入 .gitignore，不会上传至 GitHub）
 cp .env.example .env
 
 # 2. 一键启动 MySQL 8.0 + FastAPI (4 Workers) + Nginx（自动迁移现有 wmpses.db 至 MySQL）
@@ -61,10 +61,22 @@ docker-compose up -d --build
 # 3. 考场浏览器统一访问（默认端口 8080）
 #    http://<服务器局域网IP>:8080
 ```
+- **数据持久化与备份 / 跨机迁移**：
+  - MySQL 数据已持久化至 Docker 命名卷 `wmpses_mysql_data`（对应容器内 `/var/lib/mysql`），`docker-compose down` / 重启不会丢数据（**切勿随意执行 `down -v`**）。
+  - 备份与跨机恢复命令：
+    ```bash
+    # 导出备份
+    docker exec wmpses-mysql mysqldump -u root -p<root密码> wmpses > wmpses_backup.sql
+    # 在新机器恢复
+    docker exec -i wmpses-mysql mysql -u root -p<root密码> wmpses < wmpses_backup.sql
+    ```
+  - **纯内网离线部署**：在有网机器执行 `docker save -o wmpses-images.tar mysql:8.0 nginx:1.27-alpine wmpses_app:latest`，拷贝至内网机器执行 `docker load -i wmpses-images.tar && docker-compose up -d --no-build`。
+- **Navicat / DBeaver 连接 MySQL**：主机 `127.0.0.1`（或服务器局域网 IP）、端口 `3306`、库名 `wmpses`、用户 `wmpses`（或 `root`）、密码见 `.env`。
 - **手动全量重导 SQLite 数据到 MySQL**：
   ```bash
   docker exec -it wmpses-app python3 -m db.migrate_sqlite_to_mysql --force
   ```
+- **切回 SQLite 单机模式**：运行 `docker-compose down` 停止容器，再双击 `启动SQLite后台服务.command` 或运行 `python3 server.py`（访问 `http://127.0.0.1:8765`）即可。
 - **连接外部已有 MySQL**：设置环境变量 `WMPSES_DB_BACKEND=mysql` 及 `WMPSES_MYSQL_HOST/PORT/USER/PASSWORD/DATABASE` 后直接运行 `uvicorn app_server:app --host 0.0.0.0 --port 8765 --workers 4`。
 
 ### 方式 3：纯离线静态演示
@@ -221,11 +233,22 @@ WMPSES/
 ├── index.html                                        # 主考试系统入口（连接 SQLite 服务 / 离线即用）
 ├── gantt-roadmap.html                                # 独立的项目周期甘特图静态参考页（主界面已屏蔽入口）
 ├── server.py                                         # 零依赖本地 SQLite REST API 与静态 Web 服务器
+├── app_server.py                                     # 生产级高并发 FastAPI + Uvicorn 后台服务（MySQL/SQLite 双引擎）
+├── docker-compose.yml                                # MySQL 8.0 + FastAPI (4 Workers) + Nginx 一键编排
+├── Dockerfile                                        # Python 3.12 应用容器构建文件
+├── requirements.txt                                  # FastAPI / Uvicorn / PyMySQL 生产依赖
+├── .env.example                                      # 环境变量配置模板（真实 .env 已忽略不上传）
+├── deploy/
+│   └── nginx.conf                                    # Nginx 静态缓存、Gzip 压缩与 API 反向代理配置
 ├── 启动SQLite后台服务.command                         # macOS 一键双击启动脚本
 ├── db/
 │   ├── schema.sql                                    # SQLite 11 表关系结构 DDL
-│   ├── db_manager.py                                 # SQLite 建库、CRUD、鉴权、CSV 同步与重置工具
-│   └── wmpses.db                                     # SQLite 数据库文件（含全套示范数据）
+│   ├── schema_mysql.sql                              # MySQL 8.0 12 表 InnoDB 关系结构 DDL（含答题草稿表与幂等键）
+│   ├── db_manager.py                                 # SQLite WAL 模式 CRUD、鉴权与 CSV 同步
+│   ├── mysql_manager.py                              # MySQL 8.0 连接池、行级锁阅卷、幂等交卷与草稿管理
+│   ├── backend.py                                    # MySQL / SQLite 双引擎统一路由门面
+│   ├── migrate_sqlite_to_mysql.py                    # 一键将 wmpses.db 全量无损迁入 MySQL 8.0 脚本
+│   └── wmpses.db                                     # SQLite 数据库文件（含 V1/V2 全套示范数据）
 ├── assets/
 │   └── plant-panorama.jpg                            # 碱洗预处理+三室RTO联合装置全景图
 ├── css/
